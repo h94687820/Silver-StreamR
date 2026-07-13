@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { useCheckUsername, useCompleteOnboarding } from "@workspace/api-client-react";
+import { useCheckUsername, useCompleteOnboarding, getGetMeQueryKey } from "@workspace/api-client-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -19,6 +20,7 @@ export default function Onboarding() {
     { query: { enabled: debouncedUsername.length > 2, queryKey: ["checkUsername", debouncedUsername] } }
   );
 
+  const queryClient = useQueryClient();
   const completeMutation = useCompleteOnboarding();
 
   const isAvailable = checkResult?.available;
@@ -31,7 +33,8 @@ export default function Onboarding() {
     completeMutation.mutate(
       { data: { username, displayName, acceptedTerms } },
       {
-        onSuccess: () => {
+        onSuccess: async () => {
+          await queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() });
           setLocation("/feed");
         }
       }
