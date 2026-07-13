@@ -1,0 +1,69 @@
+import { db } from "@workspace/db";
+import { usersTable, followsTable, reactionsTable, savedPostsTable, postsTable } from "@workspace/db";
+import { eq, and } from "drizzle-orm";
+
+export async function getUserProfile(targetId: string, viewerId?: string) {
+  const users = await db.select().from(usersTable).where(eq(usersTable.id, targetId)).limit(1);
+  if (!users[0]) return null;
+  const user = users[0];
+
+  let isFollowing = false;
+  if (viewerId && viewerId !== targetId) {
+    const follow = await db.select().from(followsTable).where(
+      and(eq(followsTable.followerId, viewerId), eq(followsTable.followingId, targetId))
+    ).limit(1);
+    isFollowing = follow.length > 0;
+  }
+
+  return {
+    id: user.id,
+    clerkId: user.id,
+    username: user.username,
+    displayName: user.displayName ?? null,
+    bio: user.bio ?? null,
+    avatarUrl: user.avatarUrl ?? null,
+    followersCount: user.followersCount,
+    followingCount: user.followingCount,
+    postsCount: user.postsCount,
+    isFollowing,
+    isMe: viewerId === targetId,
+    onboardingComplete: user.onboardingComplete,
+    createdAt: user.createdAt.toISOString(),
+  };
+}
+
+export async function enrichPost(post: typeof postsTable.$inferSelect, viewerId?: string) {
+  const author = await getUserProfile(post.authorId, viewerId);
+  
+  let myReaction: string | null = null;
+  let isSaved = false;
+
+  if (viewerId) {
+    const reaction = await db.select().from(reactionsTable).where(
+      and(eq(reactionsTable.userId, viewerId), eq(reactionsTable.postId, post.id))
+    ).limit(1);
+    myReaction = reaction[0]?.type ?? null;
+
+    const saved = await db.select().from(savedPostsTable).where(
+      and(eq(savedPostsTable.userId, viewerId), eq(savedPostsTable.postId, post.id))
+    ).limit(1);
+    isSaved = saved.length > 0;
+  }
+
+  return {
+    id: post.id,
+    authorId: post.authorId,
+    author: author!,
+    content: post.content ?? null,
+    mediaUrls: post.mediaUrls ?? [],
+    mediaType: post.mediaType ?? null,
+    isPrivate: post.isPrivate,
+    likesCount: post.likesCount,
+    dislikesCount: post.dislikesCount,
+    commentsCount: post.commentsCount,
+    myReaction,
+    isSaved,
+    createdAt: post.createdAt.toISOString(),
+    updatedAt: post.updatedAt.toISOString(),
+  };
+}

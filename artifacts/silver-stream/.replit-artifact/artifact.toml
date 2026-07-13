@@ -1,0 +1,27 @@
+kind = "web"
+previewPath = "/"
+title = "Silver Stream"
+version = "1.0.0"
+id = "artifacts/silver-stream"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 19651
+
+[services.development]
+run = "pnpm --filter @workspace/silver-stream run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/silver-stream", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/silver-stream/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "19651"
+BASE_PATH = "/"

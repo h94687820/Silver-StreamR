@@ -1,0 +1,159 @@
+import { useRoute } from "wouter";
+import { useGetUserByUsername, useGetUserPosts, useFollowUser, useUnfollowUser, useGetMe, getGetUserByUsernameQueryKey, getGetUserPostsQueryKey } from "@workspace/api-client-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { PostCard } from "@/components/post-card";
+import { Grid, Video, Bookmark, Settings, Edit3 } from "lucide-react";
+import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+
+export default function Profile() {
+  const [match, params] = useRoute("/profile/:username");
+  const username = params?.username;
+  const { data: me } = useGetMe();
+  
+  const isMe = username === "me" || username === me?.username;
+  const targetUsername = isMe ? (me?.username || "") : (username || "");
+
+  const { data: profile, isLoading } = useGetUserByUsername(targetUsername, {
+    query: { enabled: !!targetUsername, queryKey: getGetUserByUsernameQueryKey(targetUsername) }
+  });
+
+  const { data: postsPage } = useGetUserPosts(targetUsername, undefined, {
+    query: { enabled: !!targetUsername, queryKey: getGetUserPostsQueryKey(targetUsername) }
+  });
+
+  const [tab, setTab] = useState<"posts" | "reels" | "saved">("posts");
+  const queryClient = useQueryClient();
+  const followMutation = useFollowUser();
+  const unfollowMutation = useUnfollowUser();
+
+  const handleFollowToggle = () => {
+    if (!profile) return;
+    if (profile.isFollowing) {
+      unfollowMutation.mutate({ userId: profile.id }, {
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: [`/api/users/${targetUsername}`] })
+      });
+    } else {
+      followMutation.mutate({ userId: profile.id }, {
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: [`/api/users/${targetUsername}`] })
+      });
+    }
+  };
+
+  if (isLoading) return <div className="p-8 text-center">Loading profile...</div>;
+  if (!profile) return <div className="p-8 text-center text-destructive">Profile not found</div>;
+
+  return (
+    <div className="w-full bg-background min-h-screen">
+      {/* Cover / Top */}
+      <div className="h-32 sm:h-48 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-800 dark:via-gray-700 dark:to-gray-800 w-full relative silver-shimmer">
+      </div>
+
+      <div className="px-4 pb-4">
+        {/* Avatar & Actions Row */}
+        <div className="flex justify-between items-end -mt-12 mb-4 relative z-10">
+          <Avatar className="w-24 h-24 border-4 border-background shadow-xl">
+            <AvatarImage src={profile.avatarUrl || undefined} className="object-cover" />
+            <AvatarFallback className="text-2xl">{profile.displayName?.[0] || profile.username[0]}</AvatarFallback>
+          </Avatar>
+          
+          <div className="mb-2">
+            {isMe ? (
+              <Button variant="outline" size="sm" className="rounded-full font-semibold border-border bg-background/50 backdrop-blur-md">
+                <Edit3 className="w-4 h-4 mr-2" />
+                Edit Profile
+              </Button>
+            ) : (
+              <Button 
+                onClick={handleFollowToggle}
+                className={`rounded-full font-semibold px-6 shadow-md ${profile.isFollowing ? 'bg-secondary text-foreground hover:bg-destructive/10 hover:text-destructive hover:border-destructive border' : 'bg-primary text-primary-foreground silver-shimmer'}`}
+              >
+                {profile.isFollowing ? "Following" : "Follow"}
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {/* Info */}
+        <div className="space-y-1 mb-6">
+          <h1 className="text-2xl font-bold text-foreground leading-tight">{profile.displayName || profile.username}</h1>
+          <p className="text-muted-foreground text-sm">@{profile.username}</p>
+          {profile.bio && (
+             <p className="text-sm mt-2 text-foreground/90 whitespace-pre-wrap">{profile.bio}</p>
+          )}
+        </div>
+
+        {/* Stats */}
+        <div className="flex gap-6 mb-8 border-y border-border/50 py-3">
+          <div className="flex flex-col">
+            <span className="font-bold text-foreground text-lg">{profile.postsCount}</span>
+            <span className="text-xs text-muted-foreground">Posts</span>
+          </div>
+          <div className="flex flex-col">
+            <span className="font-bold text-foreground text-lg">{profile.followersCount}</span>
+            <span className="text-xs text-muted-foreground">Followers</span>
+          </div>
+          <div className="flex flex-col">
+            <span className="font-bold text-foreground text-lg">{profile.followingCount}</span>
+            <span className="text-xs text-muted-foreground">Following</span>
+          </div>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex border-b border-border/50">
+          <button 
+            onClick={() => setTab("posts")}
+            className={`flex-1 flex items-center justify-center gap-2 py-3 border-b-2 transition-colors ${tab === "posts" ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+          >
+            <Grid className="w-4 h-4" />
+            <span className="text-sm font-semibold uppercase tracking-wider hidden sm:inline">Posts</span>
+          </button>
+          <button 
+            onClick={() => setTab("reels")}
+            className={`flex-1 flex items-center justify-center gap-2 py-3 border-b-2 transition-colors ${tab === "reels" ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+          >
+            <Video className="w-4 h-4" />
+            <span className="text-sm font-semibold uppercase tracking-wider hidden sm:inline">Reels</span>
+          </button>
+          {isMe && (
+            <button 
+              onClick={() => setTab("saved")}
+              className={`flex-1 flex items-center justify-center gap-2 py-3 border-b-2 transition-colors ${tab === "saved" ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+            >
+              <Bookmark className="w-4 h-4" />
+              <span className="text-sm font-semibold uppercase tracking-wider hidden sm:inline">Saved</span>
+            </button>
+          )}
+        </div>
+
+        {/* Content */}
+        <div className="mt-4">
+          {tab === "posts" && (
+            <div className="space-y-0">
+              {postsPage?.items.length === 0 ? (
+                <div className="py-12 text-center text-muted-foreground bg-secondary/20 rounded-2xl border border-border/50">
+                  No posts yet.
+                </div>
+              ) : (
+                postsPage?.items.map(post => (
+                  <PostCard key={post.id} post={post} currentUserId={me?.id} />
+                ))
+              )}
+            </div>
+          )}
+          {tab === "reels" && (
+            <div className="py-12 text-center text-muted-foreground bg-secondary/20 rounded-2xl border border-border/50">
+              Reels coming soon.
+            </div>
+          )}
+          {tab === "saved" && isMe && (
+            <div className="py-12 text-center text-muted-foreground bg-secondary/20 rounded-2xl border border-border/50">
+              Saved items will appear here.
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
