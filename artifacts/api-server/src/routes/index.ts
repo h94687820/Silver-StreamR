@@ -11,6 +11,7 @@ import chatRouter from "./chat";
 import searchRouter from "./search";
 import settingsRouter from "./settings";
 import storageRouter from "./storage";
+import groupsRouter from "./groups";
 
 const router: IRouter = Router();
 
@@ -26,5 +27,6 @@ router.use(chatRouter);
 router.use(searchRouter);
 router.use(settingsRouter);
 router.use(storageRouter);
+router.use(groupsRouter);
 
 export default router;

@@ -1153,6 +1153,233 @@ export const DeleteAccountResponse = zod.object({
 
 
 /**
+ * @summary Discover public groups
+ */
+export const getGroupsQueryLimitDefault = 20;
+
+export const GetGroupsQueryParams = zod.object({
+  "q": zod.coerce.string().optional(),
+  "cursor": zod.coerce.string().optional(),
+  "limit": zod.coerce.number().default(getGroupsQueryLimitDefault)
+})
+
+export const GetGroupsResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "description": zod.string().nullish(),
+  "avatarUrl": zod.string().nullish(),
+  "ownerId": zod.string(),
+  "owner": zod.object({
+  "id": zod.string(),
+  "clerkId": zod.string(),
+  "username": zod.string(),
+  "displayName": zod.string().nullish(),
+  "bio": zod.string().nullish(),
+  "avatarUrl": zod.string().nullish(),
+  "followersCount": zod.number(),
+  "followingCount": zod.number(),
+  "postsCount": zod.number(),
+  "isFollowing": zod.boolean(),
+  "isMe": zod.boolean(),
+  "onboardingComplete": zod.boolean(),
+  "createdAt": zod.string()
+}),
+  "membersCount": zod.number(),
+  "isMember": zod.boolean(),
+  "isOwner": zod.boolean(),
+  "createdAt": zod.string()
+})),
+  "nextCursor": zod.string().nullish()
+})
+
+
+/**
+ * @summary Create a new public group
+ */
+export const CreateGroupBody = zod.object({
+  "name": zod.string(),
+  "description": zod.string().optional(),
+  "avatarUrl": zod.string().optional()
+})
+
+export const CreateGroupResponse = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "description": zod.string().nullish(),
+  "avatarUrl": zod.string().nullish(),
+  "ownerId": zod.string(),
+  "owner": zod.object({
+  "id": zod.string(),
+  "clerkId": zod.string(),
+  "username": zod.string(),
+  "displayName": zod.string().nullish(),
+  "bio": zod.string().nullish(),
+  "avatarUrl": zod.string().nullish(),
+  "followersCount": zod.number(),
+  "followingCount": zod.number(),
+  "postsCount": zod.number(),
+  "isFollowing": zod.boolean(),
+  "isMe": zod.boolean(),
+  "onboardingComplete": zod.boolean(),
+  "createdAt": zod.string()
+}),
+  "membersCount": zod.number(),
+  "isMember": zod.boolean(),
+  "isOwner": zod.boolean(),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary Get groups the current user is a member of
+ */
+export const getMyGroupsQueryLimitDefault = 20;
+
+export const GetMyGroupsQueryParams = zod.object({
+  "cursor": zod.coerce.string().optional(),
+  "limit": zod.coerce.number().default(getMyGroupsQueryLimitDefault)
+})
+
+export const GetMyGroupsResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "description": zod.string().nullish(),
+  "avatarUrl": zod.string().nullish(),
+  "ownerId": zod.string(),
+  "owner": zod.object({
+  "id": zod.string(),
+  "clerkId": zod.string(),
+  "username": zod.string(),
+  "displayName": zod.string().nullish(),
+  "bio": zod.string().nullish(),
+  "avatarUrl": zod.string().nullish(),
+  "followersCount": zod.number(),
+  "followingCount": zod.number(),
+  "postsCount": zod.number(),
+  "isFollowing": zod.boolean(),
+  "isMe": zod.boolean(),
+  "onboardingComplete": zod.boolean(),
+  "createdAt": zod.string()
+}),
+  "membersCount": zod.number(),
+  "isMember": zod.boolean(),
+  "isOwner": zod.boolean(),
+  "createdAt": zod.string()
+})),
+  "nextCursor": zod.string().nullish()
+})
+
+
+/**
+ * @summary Get a single group
+ */
+export const GetGroupParams = zod.object({
+  "groupId": zod.coerce.string()
+})
+
+export const GetGroupResponse = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "description": zod.string().nullish(),
+  "avatarUrl": zod.string().nullish(),
+  "ownerId": zod.string(),
+  "owner": zod.object({
+  "id": zod.string(),
+  "clerkId": zod.string(),
+  "username": zod.string(),
+  "displayName": zod.string().nullish(),
+  "bio": zod.string().nullish(),
+  "avatarUrl": zod.string().nullish(),
+  "followersCount": zod.number(),
+  "followingCount": zod.number(),
+  "postsCount": zod.number(),
+  "isFollowing": zod.boolean(),
+  "isMe": zod.boolean(),
+  "onboardingComplete": zod.boolean(),
+  "createdAt": zod.string()
+}),
+  "membersCount": zod.number(),
+  "isMember": zod.boolean(),
+  "isOwner": zod.boolean(),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary Delete a group (owner only)
+ */
+export const DeleteGroupParams = zod.object({
+  "groupId": zod.coerce.string()
+})
+
+export const DeleteGroupResponse = zod.object({
+  "success": zod.boolean()
+})
+
+
+/**
+ * @summary Join a public group
+ */
+export const JoinGroupParams = zod.object({
+  "groupId": zod.coerce.string()
+})
+
+export const JoinGroupResponse = zod.object({
+  "isMember": zod.boolean(),
+  "membersCount": zod.number()
+})
+
+
+/**
+ * @summary Leave a group
+ */
+export const LeaveGroupParams = zod.object({
+  "groupId": zod.coerce.string()
+})
+
+export const LeaveGroupResponse = zod.object({
+  "isMember": zod.boolean(),
+  "membersCount": zod.number()
+})
+
+
+/**
+ * @summary Get members of a group
+ */
+export const GetGroupMembersParams = zod.object({
+  "groupId": zod.coerce.string()
+})
+
+export const getGroupMembersQueryLimitDefault = 30;
+
+export const GetGroupMembersQueryParams = zod.object({
+  "cursor": zod.coerce.string().optional(),
+  "limit": zod.coerce.number().default(getGroupMembersQueryLimitDefault)
+})
+
+export const GetGroupMembersResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.string(),
+  "clerkId": zod.string(),
+  "username": zod.string(),
+  "displayName": zod.string().nullish(),
+  "bio": zod.string().nullish(),
+  "avatarUrl": zod.string().nullish(),
+  "followersCount": zod.number(),
+  "followingCount": zod.number(),
+  "postsCount": zod.number(),
+  "isFollowing": zod.boolean(),
+  "isMe": zod.boolean(),
+  "onboardingComplete": zod.boolean(),
+  "createdAt": zod.string()
+})),
+  "nextCursor": zod.string().nullish()
+})
+
+
+/**
  * @summary Request a presigned upload URL
  */
 export const RequestUploadUrlBody = zod.object({

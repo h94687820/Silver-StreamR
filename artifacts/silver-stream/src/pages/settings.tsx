@@ -1,9 +1,10 @@
 import { useGetSettings, useUpdateSettings, useGetMe, useDeleteAccount } from "@workspace/api-client-react";
 import { useClerk } from "@clerk/react";
+import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useTheme } from "@/components/theme-provider";
-import { LogOut, Trash2, Moon, Sun, Monitor, Palette, Globe, ChevronRight } from "lucide-react";
+import { LogOut, Trash2, Moon, Sun, Monitor, Palette, Globe, ChevronRight, Lock, ShieldCheck, Users } from "lucide-react";
 
 export default function Settings() {
   const { signOut } = useClerk();
@@ -97,14 +98,41 @@ export default function Settings() {
         <section>
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 px-2">Account</h2>
           <div className="bg-card border border-border/50 rounded-2xl overflow-hidden divide-y divide-border/50">
-            <button className="w-full p-4 flex items-center justify-between hover:bg-secondary/50 transition-colors">
+            <Link href={me?.username ? `/profile/${me.username}` : "/profile/me"} className="w-full p-4 flex items-center justify-between hover:bg-secondary/50 transition-colors">
               <span className="font-medium">Edit Profile</span>
               <ChevronRight className="w-4 h-4 text-muted-foreground" />
-            </button>
-            <button className="w-full p-4 flex items-center justify-between hover:bg-secondary/50 transition-colors">
-              <span className="font-medium">Privacy Settings</span>
+            </Link>
+            <Link href="/groups" className="w-full p-4 flex items-center justify-between hover:bg-secondary/50 transition-colors">
+              <div className="flex items-center gap-3">
+                <Users className="w-5 h-5 text-muted-foreground" />
+                <span className="font-medium">Groups</span>
+              </div>
               <ChevronRight className="w-4 h-4 text-muted-foreground" />
-            </button>
+            </Link>
+          </div>
+        </section>
+
+        {/* Privacy Section */}
+        <section>
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 px-2">Privacy & Security</h2>
+          <div className="bg-card border border-border/50 rounded-2xl overflow-hidden divide-y divide-border/50">
+            <Link href="/settings/private-posts" className="w-full p-4 flex items-center justify-between hover:bg-secondary/50 transition-colors">
+              <div className="flex items-center gap-3">
+                <Lock className="w-5 h-5 text-muted-foreground" />
+                <span className="font-medium">Private Posts</span>
+              </div>
+              <ChevronRight className="w-4 h-4 text-muted-foreground" />
+            </Link>
+            <div className="p-4 flex items-center justify-between opacity-60">
+              <div className="flex items-center gap-3">
+                <ShieldCheck className="w-5 h-5 text-muted-foreground" />
+                <div>
+                  <p className="font-medium">Two-Factor Authentication</p>
+                  <p className="text-xs text-muted-foreground">Coming soon</p>
+                </div>
+              </div>
+              <Switch checked={false} disabled />
+            </div>
           </div>
         </section>
 

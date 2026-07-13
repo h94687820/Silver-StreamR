@@ -32,6 +32,8 @@ tags:
     description: User settings
   - name: storage
     description: File storage
+  - name: groups
+    description: Public group operations
 
 paths:
   /healthz:
@@ -889,6 +891,176 @@ paths:
               schema:
                 $ref: "#/components/schemas/DeleteResult"
 
+  # ── GROUPS ──────────────────────────────────────────────
+  /groups:
+    get:
+      operationId: getGroups
+      tags: [groups]
+      summary: Discover public groups
+      parameters:
+        - name: q
+          in: query
+          schema:
+            type: string
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Public groups
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GroupPage"
+    post:
+      operationId: createGroup
+      tags: [groups]
+      summary: Create a new public group
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GroupInput"
+      responses:
+        "201":
+          description: Created group
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Group"
+
+  /groups/mine:
+    get:
+      operationId: getMyGroups
+      tags: [groups]
+      summary: Get groups the current user is a member of
+      parameters:
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Joined groups
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GroupPage"
+
+  /groups/{groupId}:
+    get:
+      operationId: getGroup
+      tags: [groups]
+      summary: Get a single group
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Group
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Group"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteGroup
+      tags: [groups]
+      summary: Delete a group (owner only)
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeleteResult"
+
+  /groups/{groupId}/join:
+    post:
+      operationId: joinGroup
+      tags: [groups]
+      summary: Join a public group
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Joined
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GroupJoinResult"
+    delete:
+      operationId: leaveGroup
+      tags: [groups]
+      summary: Leave a group
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Left
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GroupJoinResult"
+
+  /groups/{groupId}/members:
+    get:
+      operationId: getGroupMembers
+      tags: [groups]
+      summary: Get members of a group
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 30
+      responses:
+        "200":
+          description: Members
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserPage"
+
   # ── STORAGE ──────────────────────────────────────────
   /storage/uploads/request-url:
     post:
@@ -1351,3 +1523,59 @@ components:
         objectPath:
           type: string
       required: [uploadURL, objectPath]
+
+    Group:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        avatarUrl:
+          type: ["string", "null"]
+        ownerId:
+          type: string
+        owner:
+          $ref: "#/components/schemas/UserProfile"
+        membersCount:
+          type: integer
+        isMember:
+          type: boolean
+        isOwner:
+          type: boolean
+        createdAt:
+          type: string
+      required: [id, name, ownerId, owner, membersCount, isMember, isOwner, createdAt]
+
+    GroupInput:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        avatarUrl:
+          type: string
+      required: [name]
+
+    GroupPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Group"
+        nextCursor:
+          type: ["string", "null"]
+      required: [items]
+
+    GroupJoinResult:
+      type: object
+      properties:
+        isMember:
+          type: boolean
+        membersCount:
+          type: integer
+      required: [isMember, membersCount]

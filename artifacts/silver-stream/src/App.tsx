@@ -25,6 +25,9 @@ import Videos from "@/pages/videos";
 import Saved from "@/pages/saved";
 import ChatList from "@/pages/chat";
 import ChatDetail from "@/pages/chat-detail";
+import Groups from "@/pages/groups";
+import GroupDetail from "@/pages/group-detail";
+import PrivatePosts from "@/pages/private-posts";
 
 const clerkPubKey = publishableKeyFromHost(window.location.hostname, import.meta.env.VITE_CLERK_PUBLISHABLE_KEY);
 const clerkProxyUrl = import.meta.env.VITE_CLERK_PROXY_URL;
@@ -153,6 +156,9 @@ function App() {
             <Route path="/saved" component={() => <ProtectedRoute component={Saved} />} />
             <Route path="/chat" component={() => <ProtectedRoute component={ChatList} />} />
             <Route path="/chat/:id" component={() => <ProtectedRoute component={ChatDetail} />} />
+            <Route path="/groups" component={() => <ProtectedRoute component={Groups} />} />
+            <Route path="/groups/:groupId" component={() => <ProtectedRoute component={GroupDetail} />} />
+            <Route path="/settings/private-posts" component={() => <ProtectedRoute component={PrivatePosts} />} />
             
             <Route>
               <div className="flex min-h-[100dvh] items-center justify-center text-muted-foreground">

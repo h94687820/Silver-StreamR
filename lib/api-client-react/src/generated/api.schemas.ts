@@ -383,6 +383,38 @@ export interface UploadResponse {
   objectPath: string;
 }
 
+export interface Group {
+  id: string;
+  name: string;
+  /** @nullable */
+  description?: string | null;
+  /** @nullable */
+  avatarUrl?: string | null;
+  ownerId: string;
+  owner: UserProfile;
+  membersCount: number;
+  isMember: boolean;
+  isOwner: boolean;
+  createdAt: string;
+}
+
+export interface GroupInput {
+  name: string;
+  description?: string;
+  avatarUrl?: string;
+}
+
+export interface GroupPage {
+  items: Group[];
+  /** @nullable */
+  nextCursor?: string | null;
+}
+
+export interface GroupJoinResult {
+  isMember: boolean;
+  membersCount: number;
+}
+
 export type GetUserPostsParams = {
 cursor?: string;
 limit?: number;
@@ -444,6 +476,22 @@ limit?: number;
 
 export type SearchPostsParams = {
 q: string;
+cursor?: string;
+limit?: number;
+};
+
+export type GetGroupsParams = {
+q?: string;
+cursor?: string;
+limit?: number;
+};
+
+export type GetMyGroupsParams = {
+cursor?: string;
+limit?: number;
+};
+
+export type GetGroupMembersParams = {
 cursor?: string;
 limit?: number;
 };
