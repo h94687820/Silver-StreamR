@@ -173,7 +173,7 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
           </Button>
           
           {showMenu && (
-            <div className="absolute right-0 top-full mt-1 w-48 bg-popover border border-popover-border shadow-lg rounded-xl overflow-hidden z-10 animate-in fade-in zoom-in-95">
+            <div className="absolute end-0 top-full mt-1 w-48 max-w-[calc(100vw-2rem)] bg-popover border border-popover-border shadow-lg rounded-xl overflow-hidden z-10 animate-in fade-in zoom-in-95">
               {isOwner && (
                 <>
                   <button onClick={() => { setShowMenu(false); togglePrivacy(); }} className="w-full flex items-center gap-3 px-4 py-3 text-sm hover:bg-secondary transition-colors">
