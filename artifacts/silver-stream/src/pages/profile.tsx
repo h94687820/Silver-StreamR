@@ -6,6 +6,7 @@ import { PostCard } from "@/components/post-card";
 import { Grid, Video, Bookmark, Settings, Edit3 } from "lucide-react";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { EditProfileDialog } from "@/components/edit-profile-dialog";
 
 export default function Profile() {
   const [match, params] = useRoute("/profile/:username");
@@ -24,6 +25,7 @@ export default function Profile() {
   });
 
   const [tab, setTab] = useState<"posts" | "reels" | "saved">("posts");
+  const [editOpen, setEditOpen] = useState(false);
   const queryClient = useQueryClient();
   const followMutation = useFollowUser();
   const unfollowMutation = useUnfollowUser();
@@ -60,7 +62,12 @@ export default function Profile() {
           
           <div className="mb-2">
             {isMe ? (
-              <Button variant="outline" size="sm" className="rounded-full font-semibold border-border bg-background/50 backdrop-blur-md">
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-full font-semibold border-border bg-background/50 backdrop-blur-md"
+                onClick={() => setEditOpen(true)}
+              >
                 <Edit3 className="w-4 h-4 mr-2" />
                 Edit Profile
               </Button>
@@ -154,6 +161,10 @@ export default function Profile() {
           )}
         </div>
       </div>
+
+      {isMe && (
+        <EditProfileDialog open={editOpen} onOpenChange={setEditOpen} profile={profile} />
+      )}
     </div>
   );
 }

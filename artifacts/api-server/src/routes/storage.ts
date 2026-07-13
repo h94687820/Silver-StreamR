@@ -5,6 +5,7 @@ import {
 } from '@workspace/api-zod';
 import { Router, type IRouter, type Request, type Response } from 'express';
 
+import { requireAuth } from '../lib/auth';
 import { ObjectPermission } from '../lib/objectAcl';
 import {
   ObjectNotFoundError,
@@ -13,19 +14,6 @@ import {
 
 const router: IRouter = Router();
 const objectStorageService = new ObjectStorageService();
-
-function hasAuthenticatedSession(
-  req: Request,
-): req is Request & { isAuthenticated: () => boolean } {
-  if (
-    !('isAuthenticated' in req) ||
-    typeof req.isAuthenticated !== 'function'
-  ) {
-    return false;
-  }
-
-  return req.isAuthenticated();
-}
 
 /**
  * POST /storage/uploads/request-url
@@ -37,13 +25,8 @@ function hasAuthenticatedSession(
  */
 router.post(
   '/storage/uploads/request-url',
+  requireAuth,
   async (req: Request, res: Response) => {
-    if (!hasAuthenticatedSession(req)) {
-      res.status(401).json({ error: 'Unauthorized' });
-
-      return;
-    }
-
     const parsed = RequestUploadUrlBody.safeParse(req.body);
     if (!parsed.success) {
       res.status(400).json({ error: 'Missing or invalid required fields' });

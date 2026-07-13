@@ -40,6 +40,7 @@ export const GetMeResponse = zod.object({
  * @summary Update current user profile
  */
 export const UpdateMeBody = zod.object({
+  "username": zod.string().optional(),
   "displayName": zod.string().optional(),
   "bio": zod.string().optional(),
   "avatarUrl": zod.string().optional()

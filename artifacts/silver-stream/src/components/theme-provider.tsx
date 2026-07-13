@@ -42,13 +42,25 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     root.setAttribute("dir", language === "ar" ? "rtl" : "ltr");
     root.setAttribute("data-accent", accent);
 
-    root.classList.remove("light", "dark");
+    const applyMode = () => {
+      root.classList.remove("light", "dark");
+      if (mode === "auto") {
+        const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        root.classList.add(systemTheme);
+      } else {
+        root.classList.add(mode);
+      }
+    };
+
+    applyMode();
+
     if (mode === "auto") {
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-      root.classList.add(systemTheme);
-    } else {
-      root.classList.add(mode);
+      const media = window.matchMedia("(prefers-color-scheme: dark)");
+      media.addEventListener("change", applyMode);
+      return () => media.removeEventListener("change", applyMode);
     }
+
+    return undefined;
   }, [mode, accent, language]);
 
   const setMode = (newMode: ThemeMode) => {

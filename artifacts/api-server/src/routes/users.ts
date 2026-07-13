@@ -25,8 +25,24 @@ router.get("/users/me", requireAuth, async (req, res) => {
 router.patch("/users/me", requireAuth, async (req, res) => {
   try {
     const clerkId = (req as any).clerkId;
-    const { displayName, bio, avatarUrl } = req.body;
+    const { username, displayName, bio, avatarUrl } = req.body;
+
+    if (username !== undefined) {
+      const normalized = String(username).toLowerCase().trim();
+      if (!/^[a-z0-9_]{3,30}$/.test(normalized)) {
+        res.status(400).json({ error: "Username must be 3-30 characters (letters, numbers, underscores only)" });
+        return;
+      }
+      const existing = await db.select().from(usersTable)
+        .where(eq(usersTable.username, normalized)).limit(1);
+      if (existing.length > 0 && existing[0].id !== clerkId) {
+        res.status(400).json({ error: "Username already taken" });
+        return;
+      }
+    }
+
     await db.update(usersTable).set({
+      ...(username !== undefined ? { username: String(username).toLowerCase().trim() } : {}),
       ...(displayName !== undefined ? { displayName } : {}),
       ...(bio !== undefined ? { bio } : {}),
       ...(avatarUrl !== undefined ? { avatarUrl } : {}),
