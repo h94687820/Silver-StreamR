@@ -1,4 +1,4 @@
-import { Switch, Route, Redirect } from "wouter";
+import { Switch, Route, Redirect, useLocation } from "wouter";
 import { ClerkProvider, SignIn, SignUp, Show, useClerk, useUser } from "@clerk/react";
 import { publishableKeyFromHost } from "@clerk/react/internal";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -96,6 +96,7 @@ function HomeRedirect() {
 }
 
 function App() {
+  const [, setLocation] = useLocation();
   const clerkAppearance = {
     variables: {
       colorPrimary: "#1A1A1A",
@@ -125,8 +126,8 @@ function App() {
       appearance={clerkAppearance}
       signInUrl={`${basePath}/sign-in`}
       signUpUrl={`${basePath}/sign-up`}
-      routerPush={(to) => window.history.pushState(null, "", stripBase(to))}
-      routerReplace={(to) => window.history.replaceState(null, "", stripBase(to))}
+      routerPush={(to) => setLocation(stripBase(to))}
+      routerReplace={(to) => setLocation(stripBase(to), { replace: true })}
     >
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
