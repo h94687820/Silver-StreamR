@@ -10,6 +10,7 @@ import { useGetMe, getGetMeQueryKey } from "@workspace/api-client-react";
 // Layouts
 import { BottomNav } from "@/components/bottom-nav";
 import { TopBar } from "@/components/top-bar";
+import { SideNav } from "@/components/side-nav";
 import { PageTransition } from "@/components/page-transition";
 
 // Pages
@@ -28,6 +29,7 @@ import ChatDetail from "@/pages/chat-detail";
 import Groups from "@/pages/groups";
 import GroupDetail from "@/pages/group-detail";
 import PrivatePosts from "@/pages/private-posts";
+import PostDetail from "@/pages/post-detail";
 
 const clerkPubKey = publishableKeyFromHost(window.location.hostname, import.meta.env.VITE_CLERK_PUBLISHABLE_KEY);
 const clerkProxyUrl = import.meta.env.VITE_CLERK_PROXY_URL;
@@ -44,12 +46,15 @@ if (!clerkPubKey) {
 function MainLayout({ children }: { children: React.ReactNode }) {
   const { data: me } = useGetMe();
   return (
-    <div className="min-h-[100dvh] w-full max-w-md mx-auto bg-background relative flex flex-col sm:border-x sm:border-border sm:shadow-2xl">
-      <TopBar />
-      <main className="flex-1 pb-20 w-full overflow-x-hidden">
-        {children}
-      </main>
-      <BottomNav username={me?.username} />
+    <div className="min-h-[100dvh] w-full bg-background lg:flex lg:justify-center">
+      <SideNav username={me?.username} />
+      <div className="min-h-[100dvh] w-full max-w-md mx-auto lg:mx-0 lg:max-w-2xl bg-background relative flex flex-col sm:border-x sm:border-border sm:shadow-2xl lg:shadow-none lg:border-x lg:border-border/50">
+        <TopBar />
+        <main className="flex-1 pb-20 lg:pb-8 w-full overflow-x-hidden">
+          {children}
+        </main>
+        <BottomNav username={me?.username} />
+      </div>
     </div>
   );
 }
@@ -160,6 +165,7 @@ function App() {
             <Route path="/groups" component={() => <ProtectedRoute component={Groups} />} />
             <Route path="/groups/:groupId" component={() => <ProtectedRoute component={GroupDetail} />} />
             <Route path="/settings/private-posts" component={() => <ProtectedRoute component={PrivatePosts} />} />
+            <Route path="/post/:id" component={() => <ProtectedRoute component={PostDetail} />} />
             
             <Route>
               <div className="flex min-h-[100dvh] items-center justify-center text-muted-foreground">

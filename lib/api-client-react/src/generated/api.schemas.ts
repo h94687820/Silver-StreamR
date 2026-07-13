@@ -89,6 +89,8 @@ export interface Post {
   /** @nullable */
   mediaType?: PostMediaType;
   isPrivate: boolean;
+  /** @nullable */
+  groupId?: string | null;
   likesCount: number;
   dislikesCount: number;
   commentsCount: number;
@@ -112,6 +114,7 @@ export interface PostInput {
   mediaUrls?: string[];
   mediaType?: PostInputMediaType;
   isPrivate?: boolean;
+  groupId?: string;
 }
 
 export interface PostUpdate {
@@ -166,9 +169,15 @@ export interface Comment {
   author: UserProfile;
   content: string;
   createdAt: string;
+  /** @nullable */
+  updatedAt?: string | null;
 }
 
 export interface CommentInput {
+  content: string;
+}
+
+export interface CommentUpdate {
   content: string;
 }
 
@@ -405,6 +414,12 @@ export interface GroupInput {
   avatarUrl?: string;
 }
 
+export interface GroupUpdate {
+  name?: string;
+  description?: string;
+  avatarUrl?: string;
+}
+
 export interface GroupPage {
   items: Group[];
   /** @nullable */
@@ -488,6 +503,11 @@ limit?: number;
 };
 
 export type GetMyGroupsParams = {
+cursor?: string;
+limit?: number;
+};
+
+export type GetGroupPostsParams = {
 cursor?: string;
 limit?: number;
 };

@@ -15,6 +15,7 @@ import {
 import { Link } from "wouter";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { MentionText } from "@/components/mention-text";
 import { cn } from "@/lib/utils";
 import type { Post } from "@workspace/api-client-react";
 import { 
@@ -196,7 +197,7 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
       {/* Content */}
       <div className="mb-3">
         {post.content && (
-          <p className="text-sm whitespace-pre-wrap break-words">{post.content}</p>
+          <MentionText content={post.content} className="text-sm whitespace-pre-wrap break-words" />
         )}
       </div>
 

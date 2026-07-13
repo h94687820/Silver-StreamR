@@ -1,6 +1,41 @@
 import { db } from "@workspace/db";
-import { usersTable, followsTable, reactionsTable, savedPostsTable, postsTable } from "@workspace/db";
-import { eq, and } from "drizzle-orm";
+import { usersTable, followsTable, reactionsTable, savedPostsTable, postsTable, notificationsTable } from "@workspace/db";
+import { eq, and, inArray } from "drizzle-orm";
+import { randomUUID } from "crypto";
+
+const MENTION_REGEX = /@([a-zA-Z0-9_]{2,30})/g;
+
+/**
+ * Parses @username mentions out of content, resolves them to real users,
+ * and creates "mention" notifications for anyone mentioned (excluding the author themselves).
+ */
+export async function notifyMentions(opts: {
+  content: string | null | undefined;
+  actorId: string;
+  postId?: string;
+  commentId?: string;
+}) {
+  const { content, actorId, postId, commentId } = opts;
+  if (!content) return;
+
+  const usernames = Array.from(new Set(
+    Array.from(content.matchAll(MENTION_REGEX)).map(m => m[1].toLowerCase())
+  ));
+  if (usernames.length === 0) return;
+
+  const mentioned = await db.select().from(usersTable).where(inArray(usersTable.username, usernames));
+  const targets = mentioned.filter(u => u.id !== actorId);
+  if (targets.length === 0) return;
+
+  await db.insert(notificationsTable).values(targets.map(u => ({
+    id: randomUUID(),
+    recipientId: u.id,
+    actorId,
+    type: "mention",
+    postId: postId ?? null,
+    commentId: commentId ?? null,
+  })));
+}
 
 export async function getUserProfile(targetId: string, viewerId?: string) {
   const users = await db.select().from(usersTable).where(eq(usersTable.id, targetId)).limit(1);
@@ -58,6 +93,7 @@ export async function enrichPost(post: typeof postsTable.$inferSelect, viewerId?
     mediaUrls: post.mediaUrls ?? [],
     mediaType: post.mediaType ?? null,
     isPrivate: post.isPrivate,
+    groupId: post.groupId ?? null,
     likesCount: post.likesCount,
     dislikesCount: post.dislikesCount,
     commentsCount: post.commentsCount,

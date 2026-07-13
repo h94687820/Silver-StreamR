@@ -1,16 +1,26 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { useCreatePost, useCreateStory, useRequestUploadUrl, getGetFeedQueryKey, getGetStoriesQueryKey } from "@workspace/api-client-react";
+import {
+  useCreatePost, useCreateStory, useRequestUploadUrl,
+  getGetFeedQueryKey, getGetStoriesQueryKey,
+  useGetGroup, getGetGroupQueryKey, getGetGroupPostsQueryKey,
+} from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch"; // Will create this
-import { ImagePlus, Video, X } from "lucide-react";
+import { MentionTextarea } from "@/components/mention-textarea";
+import { ImagePlus, Video, X, Users } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 
 export default function Create() {
   const [location, setLocation] = useLocation();
-  const isStoryMode = new URLSearchParams(window.location.search).get("type") === "story";
-  
+  const searchParams = new URLSearchParams(window.location.search);
+  const isStoryMode = searchParams.get("type") === "story";
+  const groupId = searchParams.get("groupId") || undefined;
+
+  const { data: group } = useGetGroup(groupId || "", {
+    query: { enabled: !!groupId, queryKey: getGetGroupQueryKey(groupId || "") }
+  });
+
   const [mode, setMode] = useState<"post" | "story">(isStoryMode ? "story" : "post");
   const [content, setContent] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -66,13 +76,19 @@ export default function Create() {
         await createPostMutation.mutateAsync({
           data: {
             content,
-            isPrivate,
+            isPrivate: groupId ? false : isPrivate,
+            groupId,
             mediaUrls: objectPath ? [objectPath] : undefined,
             mediaType: objectPath ? mediaType : undefined
           }
         });
         queryClient.invalidateQueries({ queryKey: getGetFeedQueryKey() });
-        setLocation("/feed");
+        if (groupId) {
+          queryClient.invalidateQueries({ queryKey: getGetGroupPostsQueryKey(groupId) });
+          setLocation(`/groups/${groupId}`);
+        } else {
+          setLocation("/feed");
+        }
       } else {
         await createStoryMutation.mutateAsync({
           data: {
@@ -93,28 +109,37 @@ export default function Create() {
 
   return (
     <div className="p-4 w-full">
-      <div className="flex bg-secondary p-1 rounded-xl mb-6">
-        <button 
-          className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${mode === "post" ? "bg-background shadow text-foreground" : "text-muted-foreground"}`}
-          onClick={() => setMode("post")}
-        >
-          Post
-        </button>
-        <button 
-          className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${mode === "story" ? "bg-background shadow text-foreground" : "text-muted-foreground"}`}
-          onClick={() => setMode("story")}
-        >
-          Story
-        </button>
-      </div>
+      {groupId && group && (
+        <div className="flex items-center gap-2 mb-4 px-3 py-2 rounded-xl bg-secondary/50 text-sm">
+          <Users className="w-4 h-4 text-accent" />
+          Posting in <span className="font-semibold">{group.name}</span>
+        </div>
+      )}
+
+      {!groupId && (
+        <div className="flex bg-secondary p-1 rounded-xl mb-6">
+          <button 
+            className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${mode === "post" ? "bg-background shadow text-foreground" : "text-muted-foreground"}`}
+            onClick={() => setMode("post")}
+          >
+            Post
+          </button>
+          <button 
+            className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${mode === "story" ? "bg-background shadow text-foreground" : "text-muted-foreground"}`}
+            onClick={() => setMode("story")}
+          >
+            Story
+          </button>
+        </div>
+      )}
 
       <div className="space-y-4">
         {mode === "post" && (
-          <Textarea 
-            placeholder="What's on your mind?" 
+          <MentionTextarea
+            placeholder="What's on your mind? use @ to mention someone"
             className="min-h-[120px] text-base resize-none border-none bg-secondary/30 rounded-2xl p-4 focus-visible:ring-0 focus-visible:bg-secondary/50 transition-colors"
             value={content}
-            onChange={(e) => setContent(e.target.value)}
+            onChange={setContent}
           />
         )}
 
@@ -144,7 +169,7 @@ export default function Create() {
           </div>
         )}
 
-        {mode === "post" && (
+        {mode === "post" && !groupId && (
           <div className="flex items-center justify-between p-4 bg-secondary/30 rounded-xl">
             <div>
               <p className="font-medium text-sm">Private Post</p>

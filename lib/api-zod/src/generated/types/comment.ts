@@ -14,4 +14,6 @@ export interface Comment {
   author: UserProfile;
   content: string;
   createdAt: string;
+  /** @nullable */
+  updatedAt?: string | null;
 }

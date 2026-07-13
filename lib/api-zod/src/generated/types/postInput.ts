@@ -12,4 +12,5 @@ export interface PostInput {
   mediaUrls?: string[];
   mediaType?: PostInputMediaType;
   isPrivate?: boolean;
+  groupId?: string;
 }

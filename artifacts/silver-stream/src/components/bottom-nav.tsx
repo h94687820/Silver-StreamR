@@ -27,7 +27,7 @@ export function BottomNav({ username }: { username?: string }) {
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-safe pt-2 bg-background/70 backdrop-blur-xl border-t border-border/50 shadow-[0_-8px_30px_rgba(0,0,0,0.05)]">
+    <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 px-4 pb-safe pt-2 bg-background/70 backdrop-blur-xl border-t border-border/50 shadow-[0_-8px_30px_rgba(0,0,0,0.05)]">
       <div className="max-w-md mx-auto flex items-center justify-between h-14">
         {navItems.map((item) => {
           const active = isActive(item.path);

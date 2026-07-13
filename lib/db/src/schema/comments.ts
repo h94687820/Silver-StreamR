@@ -10,6 +10,7 @@ export const commentsTable = pgTable("comments", {
   authorId: text("author_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
   content: text("content").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at"),
 });
 
 export const insertCommentSchema = createInsertSchema(commentsTable).omit({ createdAt: true });

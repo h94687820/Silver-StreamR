@@ -150,6 +150,7 @@ export const GetUserPostsResponse = zod.object({
   "mediaUrls": zod.array(zod.string()).optional(),
   "mediaType": zod.union([zod.literal('image'),zod.literal('video'),zod.literal(null)]).nullish(),
   "isPrivate": zod.boolean(),
+  "groupId": zod.string().nullish(),
   "likesCount": zod.number(),
   "dislikesCount": zod.number(),
   "commentsCount": zod.number(),
@@ -302,6 +303,7 @@ export const GetFeedResponse = zod.object({
   "mediaUrls": zod.array(zod.string()).optional(),
   "mediaType": zod.union([zod.literal('image'),zod.literal('video'),zod.literal(null)]).nullish(),
   "isPrivate": zod.boolean(),
+  "groupId": zod.string().nullish(),
   "likesCount": zod.number(),
   "dislikesCount": zod.number(),
   "commentsCount": zod.number(),
@@ -323,7 +325,8 @@ export const CreatePostBody = zod.object({
   "content": zod.string().optional(),
   "mediaUrls": zod.array(zod.string()).optional(),
   "mediaType": zod.enum(['image', 'video']).optional(),
-  "isPrivate": zod.boolean().default(createPostBodyIsPrivateDefault)
+  "isPrivate": zod.boolean().default(createPostBodyIsPrivateDefault),
+  "groupId": zod.string().optional()
 })
 
 export const CreatePostResponse = zod.object({
@@ -348,6 +351,7 @@ export const CreatePostResponse = zod.object({
   "mediaUrls": zod.array(zod.string()).optional(),
   "mediaType": zod.union([zod.literal('image'),zod.literal('video'),zod.literal(null)]).nullish(),
   "isPrivate": zod.boolean(),
+  "groupId": zod.string().nullish(),
   "likesCount": zod.number(),
   "dislikesCount": zod.number(),
   "commentsCount": zod.number(),
@@ -391,6 +395,7 @@ export const GetVideoFeedResponse = zod.object({
   "mediaUrls": zod.array(zod.string()).optional(),
   "mediaType": zod.union([zod.literal('image'),zod.literal('video'),zod.literal(null)]).nullish(),
   "isPrivate": zod.boolean(),
+  "groupId": zod.string().nullish(),
   "likesCount": zod.number(),
   "dislikesCount": zod.number(),
   "commentsCount": zod.number(),
@@ -436,6 +441,7 @@ export const GetSavedPostsResponse = zod.object({
   "mediaUrls": zod.array(zod.string()).optional(),
   "mediaType": zod.union([zod.literal('image'),zod.literal('video'),zod.literal(null)]).nullish(),
   "isPrivate": zod.boolean(),
+  "groupId": zod.string().nullish(),
   "likesCount": zod.number(),
   "dislikesCount": zod.number(),
   "commentsCount": zod.number(),
@@ -481,6 +487,7 @@ export const GetPrivatePostsResponse = zod.object({
   "mediaUrls": zod.array(zod.string()).optional(),
   "mediaType": zod.union([zod.literal('image'),zod.literal('video'),zod.literal(null)]).nullish(),
   "isPrivate": zod.boolean(),
+  "groupId": zod.string().nullish(),
   "likesCount": zod.number(),
   "dislikesCount": zod.number(),
   "commentsCount": zod.number(),
@@ -522,6 +529,7 @@ export const GetPostResponse = zod.object({
   "mediaUrls": zod.array(zod.string()).optional(),
   "mediaType": zod.union([zod.literal('image'),zod.literal('video'),zod.literal(null)]).nullish(),
   "isPrivate": zod.boolean(),
+  "groupId": zod.string().nullish(),
   "likesCount": zod.number(),
   "dislikesCount": zod.number(),
   "commentsCount": zod.number(),
@@ -566,6 +574,7 @@ export const UpdatePostResponse = zod.object({
   "mediaUrls": zod.array(zod.string()).optional(),
   "mediaType": zod.union([zod.literal('image'),zod.literal('video'),zod.literal(null)]).nullish(),
   "isPrivate": zod.boolean(),
+  "groupId": zod.string().nullish(),
   "likesCount": zod.number(),
   "dislikesCount": zod.number(),
   "commentsCount": zod.number(),
@@ -679,7 +688,8 @@ export const GetCommentsResponse = zod.object({
   "createdAt": zod.string()
 }),
   "content": zod.string(),
-  "createdAt": zod.string()
+  "createdAt": zod.string(),
+  "updatedAt": zod.string().nullish()
 })),
   "nextCursor": zod.string().nullish()
 })
@@ -716,7 +726,44 @@ export const CreateCommentResponse = zod.object({
   "createdAt": zod.string()
 }),
   "content": zod.string(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string().nullish()
+})
+
+
+/**
+ * @summary Edit a comment
+ */
+export const UpdateCommentParams = zod.object({
+  "commentId": zod.coerce.string()
+})
+
+export const UpdateCommentBody = zod.object({
+  "content": zod.string()
+})
+
+export const UpdateCommentResponse = zod.object({
+  "id": zod.string(),
+  "postId": zod.string(),
+  "authorId": zod.string(),
+  "author": zod.object({
+  "id": zod.string(),
+  "clerkId": zod.string(),
+  "username": zod.string(),
+  "displayName": zod.string().nullish(),
+  "bio": zod.string().nullish(),
+  "avatarUrl": zod.string().nullish(),
+  "followersCount": zod.number(),
+  "followingCount": zod.number(),
+  "postsCount": zod.number(),
+  "isFollowing": zod.boolean(),
+  "isMe": zod.boolean(),
+  "onboardingComplete": zod.boolean(),
   "createdAt": zod.string()
+}),
+  "content": zod.string(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string().nullish()
 })
 
 
@@ -1103,6 +1150,7 @@ export const SearchPostsResponse = zod.object({
   "mediaUrls": zod.array(zod.string()).optional(),
   "mediaType": zod.union([zod.literal('image'),zod.literal('video'),zod.literal(null)]).nullish(),
   "isPrivate": zod.boolean(),
+  "groupId": zod.string().nullish(),
   "likesCount": zod.number(),
   "dislikesCount": zod.number(),
   "commentsCount": zod.number(),
@@ -1309,6 +1357,47 @@ export const GetGroupResponse = zod.object({
 
 
 /**
+ * @summary Update a group's name, description, or photo (owner only)
+ */
+export const UpdateGroupParams = zod.object({
+  "groupId": zod.coerce.string()
+})
+
+export const UpdateGroupBody = zod.object({
+  "name": zod.string().optional(),
+  "description": zod.string().optional(),
+  "avatarUrl": zod.string().optional()
+})
+
+export const UpdateGroupResponse = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "description": zod.string().nullish(),
+  "avatarUrl": zod.string().nullish(),
+  "ownerId": zod.string(),
+  "owner": zod.object({
+  "id": zod.string(),
+  "clerkId": zod.string(),
+  "username": zod.string(),
+  "displayName": zod.string().nullish(),
+  "bio": zod.string().nullish(),
+  "avatarUrl": zod.string().nullish(),
+  "followersCount": zod.number(),
+  "followingCount": zod.number(),
+  "postsCount": zod.number(),
+  "isFollowing": zod.boolean(),
+  "isMe": zod.boolean(),
+  "onboardingComplete": zod.boolean(),
+  "createdAt": zod.string()
+}),
+  "membersCount": zod.number(),
+  "isMember": zod.boolean(),
+  "isOwner": zod.boolean(),
+  "createdAt": zod.string()
+})
+
+
+/**
  * @summary Delete a group (owner only)
  */
 export const DeleteGroupParams = zod.object({
@@ -1343,6 +1432,106 @@ export const LeaveGroupParams = zod.object({
 export const LeaveGroupResponse = zod.object({
   "isMember": zod.boolean(),
   "membersCount": zod.number()
+})
+
+
+/**
+ * @summary Get posts published inside a group
+ */
+export const GetGroupPostsParams = zod.object({
+  "groupId": zod.coerce.string()
+})
+
+export const getGroupPostsQueryLimitDefault = 20;
+
+export const GetGroupPostsQueryParams = zod.object({
+  "cursor": zod.coerce.string().optional(),
+  "limit": zod.coerce.number().default(getGroupPostsQueryLimitDefault)
+})
+
+export const GetGroupPostsResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.string(),
+  "authorId": zod.string(),
+  "author": zod.object({
+  "id": zod.string(),
+  "clerkId": zod.string(),
+  "username": zod.string(),
+  "displayName": zod.string().nullish(),
+  "bio": zod.string().nullish(),
+  "avatarUrl": zod.string().nullish(),
+  "followersCount": zod.number(),
+  "followingCount": zod.number(),
+  "postsCount": zod.number(),
+  "isFollowing": zod.boolean(),
+  "isMe": zod.boolean(),
+  "onboardingComplete": zod.boolean(),
+  "createdAt": zod.string()
+}),
+  "content": zod.string().nullish(),
+  "mediaUrls": zod.array(zod.string()).optional(),
+  "mediaType": zod.union([zod.literal('image'),zod.literal('video'),zod.literal(null)]).nullish(),
+  "isPrivate": zod.boolean(),
+  "groupId": zod.string().nullish(),
+  "likesCount": zod.number(),
+  "dislikesCount": zod.number(),
+  "commentsCount": zod.number(),
+  "myReaction": zod.union([zod.literal('like'),zod.literal('dislike'),zod.literal(null)]).nullish(),
+  "isSaved": zod.boolean(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})),
+  "nextCursor": zod.string().nullish()
+})
+
+
+/**
+ * @summary Create a post inside a group (members only)
+ */
+export const CreateGroupPostParams = zod.object({
+  "groupId": zod.coerce.string()
+})
+
+export const createGroupPostBodyIsPrivateDefault = false;
+
+export const CreateGroupPostBody = zod.object({
+  "content": zod.string().optional(),
+  "mediaUrls": zod.array(zod.string()).optional(),
+  "mediaType": zod.enum(['image', 'video']).optional(),
+  "isPrivate": zod.boolean().default(createGroupPostBodyIsPrivateDefault),
+  "groupId": zod.string().optional()
+})
+
+export const CreateGroupPostResponse = zod.object({
+  "id": zod.string(),
+  "authorId": zod.string(),
+  "author": zod.object({
+  "id": zod.string(),
+  "clerkId": zod.string(),
+  "username": zod.string(),
+  "displayName": zod.string().nullish(),
+  "bio": zod.string().nullish(),
+  "avatarUrl": zod.string().nullish(),
+  "followersCount": zod.number(),
+  "followingCount": zod.number(),
+  "postsCount": zod.number(),
+  "isFollowing": zod.boolean(),
+  "isMe": zod.boolean(),
+  "onboardingComplete": zod.boolean(),
+  "createdAt": zod.string()
+}),
+  "content": zod.string().nullish(),
+  "mediaUrls": zod.array(zod.string()).optional(),
+  "mediaType": zod.union([zod.literal('image'),zod.literal('video'),zod.literal(null)]).nullish(),
+  "isPrivate": zod.boolean(),
+  "groupId": zod.string().nullish(),
+  "likesCount": zod.number(),
+  "dislikesCount": zod.number(),
+  "commentsCount": zod.number(),
+  "myReaction": zod.union([zod.literal('like'),zod.literal('dislike'),zod.literal(null)]).nullish(),
+  "isSaved": zod.boolean(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
 })
 
 

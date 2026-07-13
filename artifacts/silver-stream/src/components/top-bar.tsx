@@ -11,13 +11,13 @@ export function TopBar() {
   });
 
   return (
-    <div className="sticky top-0 z-40 w-full bg-background/80 backdrop-blur-xl border-b border-border/50 h-14 px-4 flex items-center justify-between max-w-md mx-auto">
-      <Link href="/search" className="flex-1 flex items-center gap-2 bg-secondary/50 hover:bg-secondary transition-colors h-9 px-3 rounded-full text-muted-foreground border border-border/50">
+    <div className="sticky top-0 z-40 w-full bg-background/80 backdrop-blur-xl border-b border-border/50 h-14 px-4 flex items-center justify-between">
+      <Link href="/search" className="flex-1 flex items-center gap-2 bg-secondary/50 hover:bg-secondary transition-colors h-9 px-3 rounded-full text-muted-foreground border border-border/50 lg:max-w-xs">
         <Search className="w-4 h-4" />
         <span className="text-sm">Search...</span>
       </Link>
       
-      <div className="flex items-center gap-1 ml-4 rtl:ml-0 rtl:mr-4">
+      <div className="flex items-center gap-1 ml-4 rtl:ml-0 rtl:mr-4 lg:hidden">
         <Link href="/chat" className="p-2 text-foreground/80 hover:text-foreground hover:bg-secondary/50 rounded-full transition-colors relative">
           <MessageSquare className="w-5 h-5" />
         </Link>

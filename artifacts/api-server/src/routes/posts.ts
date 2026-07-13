@@ -1,10 +1,10 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
-import { postsTable, usersTable, savedPostsTable, followsTable, reactionsTable } from "@workspace/db";
+import { postsTable, usersTable, savedPostsTable, followsTable, reactionsTable, groupMembersTable } from "@workspace/db";
 import { eq, and, desc, lt, inArray, or, sql } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { requireAuth, requireOnboarding } from "../lib/auth";
-import { enrichPost } from "../lib/helpers";
+import { enrichPost, notifyMentions } from "../lib/helpers";
 
 const router = Router();
 
@@ -48,16 +48,26 @@ router.get("/posts", requireAuth, requireOnboarding, async (req, res) => {
 router.post("/posts", requireAuth, requireOnboarding, async (req, res) => {
   try {
     const userId = (req as any).user.id;
-    const { content, mediaUrls, mediaType, isPrivate } = req.body;
+    const { content, mediaUrls, mediaType, isPrivate, groupId } = req.body;
+
+    if (groupId) {
+      const membership = await db.select().from(groupMembersTable).where(
+        and(eq(groupMembersTable.groupId, groupId), eq(groupMembersTable.userId, userId))
+      ).limit(1);
+      if (!membership[0]) { res.status(403).json({ error: "You must join the group to post in it" }); return; }
+    }
+
     const post = await db.insert(postsTable).values({
       id: randomUUID(),
       authorId: userId,
+      groupId: groupId || null,
       content: content || null,
       mediaUrls: mediaUrls || [],
       mediaType: mediaType || null,
       isPrivate: isPrivate ?? false,
     }).returning();
     await db.update(usersTable).set({ postsCount: sql`${usersTable.postsCount} + 1` }).where(eq(usersTable.id, userId));
+    await notifyMentions({ content, actorId: userId, postId: post[0].id });
     const enriched = await enrichPost(post[0], userId);
     res.status(201).json(enriched);
   } catch (err) {

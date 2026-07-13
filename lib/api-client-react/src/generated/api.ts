@@ -24,6 +24,7 @@ import type {
   Comment,
   CommentInput,
   CommentPage,
+  CommentUpdate,
   Conversation,
   ConversationInput,
   DeleteResult,
@@ -33,6 +34,7 @@ import type {
   GetFollowersParams,
   GetFollowingParams,
   GetGroupMembersParams,
+  GetGroupPostsParams,
   GetGroupsParams,
   GetMessagesParams,
   GetMyGroupsParams,
@@ -45,6 +47,7 @@ import type {
   GroupInput,
   GroupJoinResult,
   GroupPage,
+  GroupUpdate,
   HealthStatus,
   MarkReadInput,
   Message,
@@ -2041,6 +2044,78 @@ export const useCreateComment = <TError = ErrorType<unknown>,
       return useMutation(getCreateCommentMutationOptions(options));
     }
 
+export const getUpdateCommentUrl = (commentId: string,) => {
+
+
+
+
+  return `/api/comments/${commentId}`
+}
+
+/**
+ * @summary Edit a comment
+ */
+export const updateComment = async (commentId: string,
+    commentUpdate: CommentUpdate, options?: RequestInit): Promise<Comment> => {
+
+  return customFetch<Comment>(getUpdateCommentUrl(commentId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(commentUpdate)
+  }
+);}
+
+
+
+
+
+export const getUpdateCommentMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateComment>>, TError,{commentId: string;data: BodyType<CommentUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateComment>>, TError,{commentId: string;data: BodyType<CommentUpdate>}, TContext> => {
+
+const mutationKey = ['updateComment'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateComment>>, {commentId: string;data: BodyType<CommentUpdate>}> = (props) => {
+          const {commentId,data} = props ?? {};
+
+          return  updateComment(commentId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateCommentMutationResult = NonNullable<Awaited<ReturnType<typeof updateComment>>>
+    export type UpdateCommentMutationBody = BodyType<CommentUpdate>
+    export type UpdateCommentMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Edit a comment
+ */
+export const useUpdateComment = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateComment>>, TError,{commentId: string;data: BodyType<CommentUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateComment>>,
+        TError,
+        {commentId: string;data: BodyType<CommentUpdate>},
+        TContext
+      > => {
+      return useMutation(getUpdateCommentMutationOptions(options));
+    }
+
 export const getDeleteCommentUrl = (commentId: string,) => {
 
 
@@ -3646,6 +3721,78 @@ export function useGetGroup<TData = Awaited<ReturnType<typeof getGroup>>, TError
 
 
 
+export const getUpdateGroupUrl = (groupId: string,) => {
+
+
+
+
+  return `/api/groups/${groupId}`
+}
+
+/**
+ * @summary Update a group's name, description, or photo (owner only)
+ */
+export const updateGroup = async (groupId: string,
+    groupUpdate: GroupUpdate, options?: RequestInit): Promise<Group> => {
+
+  return customFetch<Group>(getUpdateGroupUrl(groupId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(groupUpdate)
+  }
+);}
+
+
+
+
+
+export const getUpdateGroupMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateGroup>>, TError,{groupId: string;data: BodyType<GroupUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateGroup>>, TError,{groupId: string;data: BodyType<GroupUpdate>}, TContext> => {
+
+const mutationKey = ['updateGroup'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateGroup>>, {groupId: string;data: BodyType<GroupUpdate>}> = (props) => {
+          const {groupId,data} = props ?? {};
+
+          return  updateGroup(groupId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateGroupMutationResult = NonNullable<Awaited<ReturnType<typeof updateGroup>>>
+    export type UpdateGroupMutationBody = BodyType<GroupUpdate>
+    export type UpdateGroupMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Update a group's name, description, or photo (owner only)
+ */
+export const useUpdateGroup = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateGroup>>, TError,{groupId: string;data: BodyType<GroupUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateGroup>>,
+        TError,
+        {groupId: string;data: BodyType<GroupUpdate>},
+        TContext
+      > => {
+      return useMutation(getUpdateGroupMutationOptions(options));
+    }
+
 export const getDeleteGroupUrl = (groupId: string,) => {
 
 
@@ -3857,6 +4004,167 @@ export const useLeaveGroup = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getLeaveGroupMutationOptions(options));
+    }
+
+export const getGetGroupPostsUrl = (groupId: string,
+    params?: GetGroupPostsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/groups/${groupId}/posts?${stringifiedParams}` : `/api/groups/${groupId}/posts`
+}
+
+/**
+ * @summary Get posts published inside a group
+ */
+export const getGroupPosts = async (groupId: string,
+    params?: GetGroupPostsParams, options?: RequestInit): Promise<PostPage> => {
+
+  return customFetch<PostPage>(getGetGroupPostsUrl(groupId,params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetGroupPostsQueryKey = (groupId: string,
+    params?: GetGroupPostsParams,) => {
+    return [
+    `/api/groups/${groupId}/posts`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetGroupPostsQueryOptions = <TData = Awaited<ReturnType<typeof getGroupPosts>>, TError = ErrorType<unknown>>(groupId: string,
+    params?: GetGroupPostsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getGroupPosts>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetGroupPostsQueryKey(groupId,params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getGroupPosts>>> = ({ signal }) => getGroupPosts(groupId,params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: groupId !== null && groupId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getGroupPosts>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetGroupPostsQueryResult = NonNullable<Awaited<ReturnType<typeof getGroupPosts>>>
+export type GetGroupPostsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get posts published inside a group
+ */
+
+export function useGetGroupPosts<TData = Awaited<ReturnType<typeof getGroupPosts>>, TError = ErrorType<unknown>>(
+ groupId: string,
+    params?: GetGroupPostsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getGroupPosts>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetGroupPostsQueryOptions(groupId,params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateGroupPostUrl = (groupId: string,) => {
+
+
+
+
+  return `/api/groups/${groupId}/posts`
+}
+
+/**
+ * @summary Create a post inside a group (members only)
+ */
+export const createGroupPost = async (groupId: string,
+    postInput: PostInput, options?: RequestInit): Promise<Post> => {
+
+  return customFetch<Post>(getCreateGroupPostUrl(groupId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(postInput)
+  }
+);}
+
+
+
+
+
+export const getCreateGroupPostMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createGroupPost>>, TError,{groupId: string;data: BodyType<PostInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createGroupPost>>, TError,{groupId: string;data: BodyType<PostInput>}, TContext> => {
+
+const mutationKey = ['createGroupPost'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createGroupPost>>, {groupId: string;data: BodyType<PostInput>}> = (props) => {
+          const {groupId,data} = props ?? {};
+
+          return  createGroupPost(groupId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateGroupPostMutationResult = NonNullable<Awaited<ReturnType<typeof createGroupPost>>>
+    export type CreateGroupPostMutationBody = BodyType<PostInput>
+    export type CreateGroupPostMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Create a post inside a group (members only)
+ */
+export const useCreateGroupPost = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createGroupPost>>, TError,{groupId: string;data: BodyType<PostInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createGroupPost>>,
+        TError,
+        {groupId: string;data: BodyType<PostInput>},
+        TContext
+      > => {
+      return useMutation(getCreateGroupPostMutationOptions(options));
     }
 
 export const getGetGroupMembersUrl = (groupId: string,

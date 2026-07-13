@@ -563,6 +563,29 @@ paths:
                 $ref: "#/components/schemas/Comment"
 
   /comments/{commentId}:
+    patch:
+      operationId: updateComment
+      tags: [comments]
+      summary: Edit a comment
+      parameters:
+        - name: commentId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CommentUpdate"
+      responses:
+        "200":
+          description: Updated comment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Comment"
     delete:
       operationId: deleteComment
       tags: [comments]
@@ -979,6 +1002,29 @@ paths:
                 $ref: "#/components/schemas/Group"
         "404":
           description: Not found
+    patch:
+      operationId: updateGroup
+      tags: [groups]
+      summary: Update a group's name, description, or photo (owner only)
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GroupUpdate"
+      responses:
+        "200":
+          description: Updated group
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Group"
     delete:
       operationId: deleteGroup
       tags: [groups]
@@ -1032,6 +1078,57 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/GroupJoinResult"
+
+  /groups/{groupId}/posts:
+    get:
+      operationId: getGroupPosts
+      tags: [groups]
+      summary: Get posts published inside a group
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Group posts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostPage"
+    post:
+      operationId: createGroupPost
+      tags: [groups]
+      summary: Create a post inside a group (members only)
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostInput"
+      responses:
+        "201":
+          description: Created post
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Post"
 
   /groups/{groupId}/members:
     get:
@@ -1193,6 +1290,8 @@ components:
           enum: ["image", "video", null]
         isPrivate:
           type: boolean
+        groupId:
+          type: ["string", "null"]
         likesCount:
           type: integer
         dislikesCount:
@@ -1225,6 +1324,8 @@ components:
         isPrivate:
           type: boolean
           default: false
+        groupId:
+          type: string
 
     PostUpdate:
       type: object
@@ -1287,9 +1388,18 @@ components:
           type: string
         createdAt:
           type: string
+        updatedAt:
+          type: ["string", "null"]
       required: [id, postId, authorId, author, content, createdAt]
 
     CommentInput:
+      type: object
+      properties:
+        content:
+          type: string
+      required: [content]
+
+    CommentUpdate:
       type: object
       properties:
         content:
@@ -1561,6 +1671,16 @@ components:
         avatarUrl:
           type: string
       required: [name]
+
+    GroupUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        avatarUrl:
+          type: string
 
     GroupPage:
       type: object

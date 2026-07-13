@@ -19,6 +19,8 @@ export interface Post {
   /** @nullable */
   mediaType?: PostMediaType;
   isPrivate: boolean;
+  /** @nullable */
+  groupId?: string | null;
   likesCount: number;
   dislikesCount: number;
   commentsCount: number;
