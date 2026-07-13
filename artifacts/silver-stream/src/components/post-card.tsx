@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { 
   Heart, 
@@ -23,7 +23,12 @@ import {
   useSavePost, 
   useUnsavePost,
   useDeletePost,
-  useUpdatePost
+  useUpdatePost,
+  getGetFeedQueryKey,
+  getGetSavedPostsQueryKey,
+  getGetPrivatePostsQueryKey,
+  getGetPostQueryKey,
+  getGetUserPostsQueryKey,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -32,11 +37,37 @@ interface PostCardProps {
   currentUserId?: string;
 }
 
+function syncQueries(queryClient: ReturnType<typeof useQueryClient>, post: Post) {
+  queryClient.invalidateQueries({ queryKey: getGetFeedQueryKey() });
+  queryClient.invalidateQueries({ queryKey: getGetSavedPostsQueryKey() });
+  queryClient.invalidateQueries({ queryKey: getGetPrivatePostsQueryKey() });
+  queryClient.invalidateQueries({ queryKey: getGetPostQueryKey(post.id) });
+  queryClient.invalidateQueries({ queryKey: getGetUserPostsQueryKey(post.author.username) });
+}
+
 export function PostCard({ post, currentUserId }: PostCardProps) {
   const queryClient = useQueryClient();
   const isOwner = currentUserId === post.authorId;
   const [showMenu, setShowMenu] = useState(false);
-  
+
+  // Local optimistic overrides so likes/dislikes/saves reflect instantly on
+  // click instead of waiting on the mutation + cache-invalidation round trip.
+  const [local, setLocal] = useState({
+    myReaction: post.myReaction,
+    likesCount: post.likesCount,
+    dislikesCount: post.dislikesCount,
+    isSaved: post.isSaved,
+  });
+
+  useEffect(() => {
+    setLocal({
+      myReaction: post.myReaction,
+      likesCount: post.likesCount,
+      dislikesCount: post.dislikesCount,
+      isSaved: post.isSaved,
+    });
+  }, [post.id, post.myReaction, post.likesCount, post.dislikesCount, post.isSaved]);
+
   const reactMutation = useReactToPost();
   const removeReactionMutation = useRemoveReaction();
   const saveMutation = useSavePost();
@@ -45,52 +76,74 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
   const updateMutation = useUpdatePost();
 
   const handleLike = () => {
-    if (post.myReaction === 'like') {
-      removeReactionMutation.mutate({ postId: post.id }, {
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/feed"] })
-      });
+    const prev = local;
+    const wasLiked = prev.myReaction === 'like';
+    const wasDisliked = prev.myReaction === 'dislike';
+
+    setLocal({
+      myReaction: wasLiked ? null : 'like',
+      likesCount: prev.likesCount + (wasLiked ? -1 : 1),
+      dislikesCount: wasDisliked ? prev.dislikesCount - 1 : prev.dislikesCount,
+      isSaved: prev.isSaved,
+    });
+
+    const onError = () => setLocal(prev);
+    const onSuccess = () => syncQueries(queryClient, post);
+
+    if (wasLiked) {
+      removeReactionMutation.mutate({ postId: post.id }, { onSuccess, onError });
     } else {
-      reactMutation.mutate({ postId: post.id, data: { type: 'like' } }, {
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/feed"] })
-      });
+      reactMutation.mutate({ postId: post.id, data: { type: 'like' } }, { onSuccess, onError });
     }
   };
 
   const handleDislike = () => {
-    if (post.myReaction === 'dislike') {
-      removeReactionMutation.mutate({ postId: post.id }, {
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/feed"] })
-      });
+    const prev = local;
+    const wasDisliked = prev.myReaction === 'dislike';
+    const wasLiked = prev.myReaction === 'like';
+
+    setLocal({
+      myReaction: wasDisliked ? null : 'dislike',
+      dislikesCount: prev.dislikesCount + (wasDisliked ? -1 : 1),
+      likesCount: wasLiked ? prev.likesCount - 1 : prev.likesCount,
+      isSaved: prev.isSaved,
+    });
+
+    const onError = () => setLocal(prev);
+    const onSuccess = () => syncQueries(queryClient, post);
+
+    if (wasDisliked) {
+      removeReactionMutation.mutate({ postId: post.id }, { onSuccess, onError });
     } else {
-      reactMutation.mutate({ postId: post.id, data: { type: 'dislike' } }, {
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/feed"] })
-      });
+      reactMutation.mutate({ postId: post.id, data: { type: 'dislike' } }, { onSuccess, onError });
     }
   };
 
   const handleSave = () => {
-    if (post.isSaved) {
-      unsaveMutation.mutate({ postId: post.id }, {
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/feed"] })
-      });
+    const prev = local;
+    setLocal({ ...prev, isSaved: !prev.isSaved });
+
+    const onError = () => setLocal(prev);
+    const onSuccess = () => syncQueries(queryClient, post);
+
+    if (prev.isSaved) {
+      unsaveMutation.mutate({ postId: post.id }, { onSuccess, onError });
     } else {
-      saveMutation.mutate({ postId: post.id }, {
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/feed"] })
-      });
+      saveMutation.mutate({ postId: post.id }, { onSuccess, onError });
     }
   };
 
   const handleDelete = () => {
     if (confirm("Delete this post?")) {
       deleteMutation.mutate({ postId: post.id }, {
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/feed"] })
+        onSuccess: () => syncQueries(queryClient, post)
       });
     }
   };
 
   const togglePrivacy = () => {
     updateMutation.mutate({ postId: post.id, data: { isPrivate: !post.isPrivate } }, {
-      onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/feed"] })
+      onSuccess: () => syncQueries(queryClient, post)
     });
   };
 
@@ -161,14 +214,14 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
       {/* Actions */}
       <div className="flex items-center justify-between pt-1 text-muted-foreground border-t border-border/30 mt-2">
         <div className="flex items-center gap-4">
-          <button onClick={handleLike} className={cn("flex items-center gap-1.5 p-2 rounded-full transition-colors", post.myReaction === 'like' ? "text-destructive" : "hover:text-foreground hover:bg-secondary")}>
-            <Heart className={cn("w-5 h-5", post.myReaction === 'like' && "fill-current")} />
-            <span className="text-xs font-medium">{post.likesCount > 0 && post.likesCount}</span>
+          <button onClick={handleLike} className={cn("flex items-center gap-1.5 p-2 rounded-full transition-colors", local.myReaction === 'like' ? "text-destructive" : "hover:text-foreground hover:bg-secondary")}>
+            <Heart className={cn("w-5 h-5", local.myReaction === 'like' && "fill-current")} />
+            <span className="text-xs font-medium">{local.likesCount > 0 && local.likesCount}</span>
           </button>
           
-          <button onClick={handleDislike} className={cn("flex items-center gap-1.5 p-2 rounded-full transition-colors", post.myReaction === 'dislike' ? "text-accent" : "hover:text-foreground hover:bg-secondary")}>
-            <HeartCrack className={cn("w-5 h-5", post.myReaction === 'dislike' && "fill-current")} />
-            <span className="text-xs font-medium">{post.dislikesCount > 0 && post.dislikesCount}</span>
+          <button onClick={handleDislike} className={cn("flex items-center gap-1.5 p-2 rounded-full transition-colors", local.myReaction === 'dislike' ? "text-accent" : "hover:text-foreground hover:bg-secondary")}>
+            <HeartCrack className={cn("w-5 h-5", local.myReaction === 'dislike' && "fill-current")} />
+            <span className="text-xs font-medium">{local.dislikesCount > 0 && local.dislikesCount}</span>
           </button>
 
           <Link href={`/post/${post.id}`} className="flex items-center gap-1.5 p-2 rounded-full hover:text-foreground hover:bg-secondary transition-colors">
@@ -178,8 +231,8 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
         </div>
 
         <div className="flex items-center gap-1">
-          <button onClick={handleSave} className={cn("p-2 rounded-full transition-colors", post.isSaved ? "text-accent" : "hover:text-foreground hover:bg-secondary")}>
-            <Bookmark className={cn("w-5 h-5", post.isSaved && "fill-current")} />
+          <button onClick={handleSave} className={cn("p-2 rounded-full transition-colors", local.isSaved ? "text-accent" : "hover:text-foreground hover:bg-secondary")}>
+            <Bookmark className={cn("w-5 h-5", local.isSaved && "fill-current")} />
           </button>
         </div>
       </div>

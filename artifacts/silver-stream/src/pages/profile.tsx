@@ -34,11 +34,11 @@ export default function Profile() {
     if (!profile) return;
     if (profile.isFollowing) {
       unfollowMutation.mutate({ userId: profile.id }, {
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: [`/api/users/${targetUsername}`] })
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: getGetUserByUsernameQueryKey(targetUsername) })
       });
     } else {
       followMutation.mutate({ userId: profile.id }, {
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: [`/api/users/${targetUsername}`] })
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: getGetUserByUsernameQueryKey(targetUsername) })
       });
     }
   };

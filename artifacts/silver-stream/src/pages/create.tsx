@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { useCreatePost, useCreateStory, useRequestUploadUrl } from "@workspace/api-client-react";
+import { useCreatePost, useCreateStory, useRequestUploadUrl, getGetFeedQueryKey, getGetStoriesQueryKey } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch"; // Will create this
@@ -71,7 +71,7 @@ export default function Create() {
             mediaType: objectPath ? mediaType : undefined
           }
         });
-        queryClient.invalidateQueries({ queryKey: ["/api/feed"] });
+        queryClient.invalidateQueries({ queryKey: getGetFeedQueryKey() });
         setLocation("/feed");
       } else {
         await createStoryMutation.mutateAsync({
@@ -80,7 +80,7 @@ export default function Create() {
             mediaType
           }
         });
-        queryClient.invalidateQueries({ queryKey: ["/api/stories"] });
+        queryClient.invalidateQueries({ queryKey: getGetStoriesQueryKey() });
         setLocation("/feed");
       }
     } catch (e) {
