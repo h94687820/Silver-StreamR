@@ -4,7 +4,7 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useTheme } from "@/components/theme-provider";
-import { LogOut, Trash2, Moon, Sun, Monitor, Palette, Globe, ChevronRight, Lock, ShieldCheck, Users } from "lucide-react";
+import { LogOut, Trash2, Moon, Sun, Monitor, Palette, Globe, ChevronRight, Lock, Users } from "lucide-react";
 
 export default function Settings() {
   const { signOut } = useClerk();
@@ -114,7 +114,7 @@ export default function Settings() {
 
         {/* Privacy Section */}
         <section>
-          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 px-2">Privacy & Security</h2>
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 px-2">Privacy</h2>
           <div className="bg-card border border-border/50 rounded-2xl overflow-hidden divide-y divide-border/50">
             <Link href="/settings/private-posts" className="w-full p-4 flex items-center justify-between hover:bg-secondary/50 transition-colors">
               <div className="flex items-center gap-3">
@@ -123,16 +123,6 @@ export default function Settings() {
               </div>
               <ChevronRight className="w-4 h-4 text-muted-foreground" />
             </Link>
-            <div className="p-4 flex items-center justify-between opacity-60">
-              <div className="flex items-center gap-3">
-                <ShieldCheck className="w-5 h-5 text-muted-foreground" />
-                <div>
-                  <p className="font-medium">Two-Factor Authentication</p>
-                  <p className="text-xs text-muted-foreground">Coming soon</p>
-                </div>
-              </div>
-              <Switch checked={false} disabled />
-            </div>
           </div>
         </section>
 
