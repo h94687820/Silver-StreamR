@@ -819,6 +819,9 @@ export const GetStoriesResponseItem = zod.object({
   "mediaUrl": zod.string(),
   "mediaType": zod.enum(['image', 'video']),
   "viewed": zod.boolean(),
+  "myReaction": zod.string().nullish(),
+  "likesCount": zod.number().optional(),
+  "dislikesCount": zod.number().optional(),
   "expiresAt": zod.string(),
   "createdAt": zod.string()
 })),
@@ -856,6 +859,9 @@ export const CreateStoryResponse = zod.object({
   "mediaUrl": zod.string(),
   "mediaType": zod.enum(['image', 'video']),
   "viewed": zod.boolean(),
+  "myReaction": zod.string().nullish(),
+  "likesCount": zod.number().optional(),
+  "dislikesCount": zod.number().optional(),
   "expiresAt": zod.string(),
   "createdAt": zod.string()
 })
@@ -882,6 +888,38 @@ export const ViewStoryParams = zod.object({
 
 export const ViewStoryResponse = zod.object({
   "success": zod.boolean()
+})
+
+
+/**
+ * @summary React to a story (like or dislike)
+ */
+export const ReactToStoryParams = zod.object({
+  "storyId": zod.coerce.string()
+})
+
+export const ReactToStoryBody = zod.object({
+  "type": zod.enum(['like', 'dislike'])
+})
+
+export const ReactToStoryResponse = zod.object({
+  "myReaction": zod.union([zod.literal('like'),zod.literal('dislike'),zod.literal(null)]).nullish(),
+  "likesCount": zod.number(),
+  "dislikesCount": zod.number()
+})
+
+
+/**
+ * @summary Remove reaction from a story
+ */
+export const UnreactToStoryParams = zod.object({
+  "storyId": zod.coerce.string()
+})
+
+export const UnreactToStoryResponse = zod.object({
+  "myReaction": zod.union([zod.literal('like'),zod.literal('dislike'),zod.literal(null)]).nullish(),
+  "likesCount": zod.number(),
+  "dislikesCount": zod.number()
 })
 
 

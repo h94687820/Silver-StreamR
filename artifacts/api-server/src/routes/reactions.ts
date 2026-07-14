@@ -38,11 +38,11 @@ router.post("/posts/:postId/react", requireAuth, requireOnboarding, async (req, 
       } else {
         await db.update(postsTable).set({ dislikesCount: sql`${postsTable.dislikesCount} + 1` }).where(eq(postsTable.id, postId));
       }
-      // Notify post author
-      if (post[0].authorId !== userId) {
+      // Notify post author only for likes (not dislikes)
+      if (type === "like" && post[0].authorId !== userId) {
         await db.insert(notificationsTable).values({
           id: randomUUID(), recipientId: post[0].authorId, actorId: userId,
-          type: type === "like" ? "like" : "dislike", postId,
+          type: "like", postId,
         });
       }
     }

@@ -202,6 +202,10 @@ export interface Story {
   mediaUrl: string;
   mediaType: StoryMediaType;
   viewed: boolean;
+  /** @nullable */
+  myReaction?: string | null;
+  likesCount?: number;
+  dislikesCount?: number;
   expiresAt: string;
   createdAt: string;
 }

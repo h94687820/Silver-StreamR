@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Home, Play, Plus, Bookmark, User } from "lucide-react";
+import { Home, Plus, Bookmark, User, Bell } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useGetUnreadCount, getGetUnreadCountQueryKey } from "@workspace/api-client-react";
 
@@ -20,7 +20,7 @@ export function BottomNav({ username }: { username?: string }) {
 
   const navItems = [
     { icon: Home, path: "/feed", label: "Home" },
-    { icon: Play, path: "/videos", label: "Videos" },
+    { icon: Bell, path: "/notifications", label: "Notifications", badge: unread && unread.count > 0, badgeCount: unread?.count },
     { icon: Plus, path: "/create", label: "Create", special: true },
     { icon: Bookmark, path: "/saved", label: "Saved" },
     { icon: User, path: username ? `/profile/${username}` : "/profile/me", label: "Profile" },
@@ -49,8 +49,11 @@ export function BottomNav({ username }: { username?: string }) {
                 active ? "text-accent bg-accent/10" : "text-muted-foreground hover:text-foreground"
               )}>
                 <item.icon className={cn("w-6 h-6 transition-transform duration-300", active && "scale-110")} />
-                
-                {/* Unread badge logic - purely visual for now, hook it to notifications later if nav changes */}
+                {item.badge && (
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 bg-destructive text-destructive-foreground rounded-full text-[9px] font-bold flex items-center justify-center px-0.5 border border-background">
+                    {item.badgeCount && item.badgeCount > 9 ? "9+" : item.badgeCount}
+                  </span>
+                )}
               </div>
             </Link>
           );

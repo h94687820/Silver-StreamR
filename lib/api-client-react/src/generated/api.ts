@@ -2477,6 +2477,149 @@ export const useViewStory = <TError = ErrorType<unknown>,
       return useMutation(getViewStoryMutationOptions(options));
     }
 
+export const getReactToStoryUrl = (storyId: string,) => {
+
+
+
+
+  return `/api/stories/${storyId}/react`
+}
+
+/**
+ * @summary React to a story (like or dislike)
+ */
+export const reactToStory = async (storyId: string,
+    reactionInput: ReactionInput, options?: RequestInit): Promise<ReactionResult> => {
+
+  return customFetch<ReactionResult>(getReactToStoryUrl(storyId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(reactionInput)
+  }
+);}
+
+
+
+
+
+export const getReactToStoryMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reactToStory>>, TError,{storyId: string;data: BodyType<ReactionInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof reactToStory>>, TError,{storyId: string;data: BodyType<ReactionInput>}, TContext> => {
+
+const mutationKey = ['reactToStory'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof reactToStory>>, {storyId: string;data: BodyType<ReactionInput>}> = (props) => {
+          const {storyId,data} = props ?? {};
+
+          return  reactToStory(storyId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ReactToStoryMutationResult = NonNullable<Awaited<ReturnType<typeof reactToStory>>>
+    export type ReactToStoryMutationBody = BodyType<ReactionInput>
+    export type ReactToStoryMutationError = ErrorType<unknown>
+
+    /**
+ * @summary React to a story (like or dislike)
+ */
+export const useReactToStory = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reactToStory>>, TError,{storyId: string;data: BodyType<ReactionInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof reactToStory>>,
+        TError,
+        {storyId: string;data: BodyType<ReactionInput>},
+        TContext
+      > => {
+      return useMutation(getReactToStoryMutationOptions(options));
+    }
+
+export const getUnreactToStoryUrl = (storyId: string,) => {
+
+
+
+
+  return `/api/stories/${storyId}/react`
+}
+
+/**
+ * @summary Remove reaction from a story
+ */
+export const unreactToStory = async (storyId: string, options?: RequestInit): Promise<ReactionResult> => {
+
+  return customFetch<ReactionResult>(getUnreactToStoryUrl(storyId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getUnreactToStoryMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unreactToStory>>, TError,{storyId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof unreactToStory>>, TError,{storyId: string}, TContext> => {
+
+const mutationKey = ['unreactToStory'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof unreactToStory>>, {storyId: string}> = (props) => {
+          const {storyId} = props ?? {};
+
+          return  unreactToStory(storyId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UnreactToStoryMutationResult = NonNullable<Awaited<ReturnType<typeof unreactToStory>>>
+
+    export type UnreactToStoryMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Remove reaction from a story
+ */
+export const useUnreactToStory = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unreactToStory>>, TError,{storyId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof unreactToStory>>,
+        TError,
+        {storyId: string},
+        TContext
+      > => {
+      return useMutation(getUnreactToStoryMutationOptions(options));
+    }
+
 export const getGetNotificationsUrl = (params?: GetNotificationsParams,) => {
   const normalizedParams = new URLSearchParams();
 

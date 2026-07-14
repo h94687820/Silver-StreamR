@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, primaryKey } from "drizzle-orm/pg-core";
 import { usersTable } from "./users";
 
 export const storiesTable = pgTable("stories", {
@@ -16,5 +16,13 @@ export const storyViewsTable = pgTable("story_views", {
   viewedAt: timestamp("viewed_at").notNull().defaultNow(),
 });
 
+export const storyReactionsTable = pgTable("story_reactions", {
+  storyId: text("story_id").notNull().references(() => storiesTable.id, { onDelete: "cascade" }),
+  userId: text("user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
+  type: text("type").notNull(), // "like" | "dislike"
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (t) => [primaryKey({ columns: [t.storyId, t.userId] })]);
+
 export type Story = typeof storiesTable.$inferSelect;
 export type StoryView = typeof storyViewsTable.$inferSelect;
+export type StoryReaction = typeof storyReactionsTable.$inferSelect;
