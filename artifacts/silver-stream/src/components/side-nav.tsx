@@ -31,7 +31,7 @@ export function SideNav({ username }: { username?: string }) {
   return (
     <div className="hidden lg:flex sticky top-0 h-[100dvh] flex-col py-6 px-3 border-r border-border/50 w-64 xl:w-72 shrink-0">
       <Link href="/feed" className="px-3 mb-8 flex items-center gap-2">
-        <span className="text-xl font-bold silver-shimmer bg-clip-text">Silver Stream</span>
+        <span className="text-xl font-bold text-shimmer">Silver Stream</span>
       </Link>
 
       <nav className="flex-1 space-y-1">
