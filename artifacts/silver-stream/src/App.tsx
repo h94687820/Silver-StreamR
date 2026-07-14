@@ -33,6 +33,7 @@ import PrivatePosts from "@/pages/private-posts";
 import PostDetail from "@/pages/post-detail";
 import Followers from "@/pages/followers";
 import BlockedUsers from "@/pages/blocked-users";
+import EmojiLibrary from "@/pages/emoji-library";
 
 const clerkPubKey = publishableKeyFromHost(window.location.hostname, import.meta.env.VITE_CLERK_PUBLISHABLE_KEY);
 const clerkProxyUrl = import.meta.env.VITE_CLERK_PROXY_URL;
@@ -168,6 +169,7 @@ function App() {
             <Route path="/groups/:groupId" component={() => <ProtectedRoute component={GroupDetail} />} />
             <Route path="/settings/private-posts" component={() => <ProtectedRoute component={PrivatePosts} />} />
             <Route path="/settings/blocked" component={() => <ProtectedRoute component={BlockedUsers} />} />
+            <Route path="/settings/emojis" component={() => <ProtectedRoute component={EmojiLibrary} />} />
             <Route path="/followers" component={() => <ProtectedRoute component={Followers} />} />
             <Route path="/post/:id" component={() => <ProtectedRoute component={PostDetail} />} />
             

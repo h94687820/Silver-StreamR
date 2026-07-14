@@ -128,7 +128,25 @@ export default function Profile() {
 
         {/* Info */}
         <div className="space-y-1 mb-6">
-          <h1 className="text-2xl font-bold text-foreground leading-tight">{profile.displayName || profile.username}</h1>
+          <h1 className="text-2xl font-bold text-foreground leading-tight flex items-center gap-2">
+            {/* Name display emoji */}
+            {(profile as any).nameDisplayEmojiUrl && (
+              <img
+                src={(profile as any).nameDisplayEmojiUrl}
+                alt="emoji"
+                className="w-6 h-6 rounded-md object-cover inline-block"
+              />
+            )}
+            {profile.displayName || profile.username}
+            {/* Profile badge emoji */}
+            {(profile as any).profileBadgeEmojiUrl && (
+              <img
+                src={(profile as any).profileBadgeEmojiUrl}
+                alt="badge"
+                className="w-6 h-6 rounded-md object-cover border border-border/40 shadow-sm"
+              />
+            )}
+          </h1>
           <p className="text-muted-foreground text-sm">@{profile.username}</p>
           {profile.bio && (
              <p className="text-sm mt-2 text-foreground/90 whitespace-pre-wrap">{profile.bio}</p>

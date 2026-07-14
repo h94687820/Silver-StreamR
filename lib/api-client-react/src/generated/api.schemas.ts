@@ -27,6 +27,12 @@ export interface UserProfile {
   isMe: boolean;
   onboardingComplete: boolean;
   createdAt: string;
+  /** @nullable */
+  profileBadgeEmojiUrl?: string | null;
+  /** @nullable */
+  postStampEmojiUrl?: string | null;
+  /** @nullable */
+  nameDisplayEmojiUrl?: string | null;
 }
 
 export interface UserUpdate {
@@ -442,6 +448,39 @@ export interface GroupPage {
 export interface GroupJoinResult {
   isMember: boolean;
   membersCount: number;
+}
+
+export interface CustomEmoji {
+  id: string;
+  userId: string;
+  imageUrl: string;
+  name: string;
+  isPublic: boolean;
+  createdAt: string;
+}
+
+export interface CustomEmojiPage {
+  items: CustomEmoji[];
+}
+
+export interface CustomEmojiInput {
+  imageUrl: string;
+  name: string;
+  isPublic?: boolean;
+}
+
+export interface CustomEmojiUpdate {
+  name?: string;
+  isPublic?: boolean;
+}
+
+export interface ActiveEmojisInput {
+  /** @nullable */
+  profileBadgeEmojiId?: string | null;
+  /** @nullable */
+  postStampEmojiId?: string | null;
+  /** @nullable */
+  nameDisplayEmojiId?: string | null;
 }
 
 export type GetUserPostsParams = {

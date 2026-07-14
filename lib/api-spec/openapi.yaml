@@ -811,6 +811,117 @@ paths:
               schema:
                 $ref: "#/components/schemas/UserPage"
 
+  # ── CUSTOM EMOJIS ──────────────────────────────────────
+  /emojis/me:
+    get:
+      operationId: getMyEmojis
+      tags: [emojis]
+      summary: Get current user's emoji library
+      responses:
+        "200":
+          description: Emoji library
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomEmojiPage"
+    post:
+      operationId: createEmoji
+      tags: [emojis]
+      summary: Add emoji to library
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CustomEmojiInput"
+      responses:
+        "201":
+          description: Created emoji
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomEmoji"
+
+  /emojis/{emojiId}:
+    patch:
+      operationId: updateEmoji
+      tags: [emojis]
+      summary: Update emoji (name / visibility)
+      parameters:
+        - name: emojiId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CustomEmojiUpdate"
+      responses:
+        "200":
+          description: Updated emoji
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomEmoji"
+    delete:
+      operationId: deleteEmoji
+      tags: [emojis]
+      summary: Delete emoji from library
+      parameters:
+        - name: emojiId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeleteResult"
+
+  /emojis/user/{userId}:
+    get:
+      operationId: getUserEmojis
+      tags: [emojis]
+      summary: Get a user's public emojis (for picker)
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Public emojis
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomEmojiPage"
+
+  /users/me/active-emojis:
+    put:
+      operationId: setActiveEmojis
+      tags: [emojis]
+      summary: Set which emojis are active for each context
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ActiveEmojisInput"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeleteResult"
+
   # ── NOTIFICATIONS ──────────────────────────────────────
   /notifications:
     get:
@@ -1382,6 +1493,12 @@ components:
           type: boolean
         createdAt:
           type: string
+        profileBadgeEmojiUrl:
+          type: ["string", "null"]
+        postStampEmojiUrl:
+          type: ["string", "null"]
+        nameDisplayEmojiUrl:
+          type: ["string", "null"]
       required: [id, clerkId, username, followersCount, followingCount, postsCount, isFollowing, isBlocked, isMe, onboardingComplete, createdAt]
 
     UserUpdate:
@@ -1888,3 +2005,58 @@ components:
         membersCount:
           type: integer
       required: [isMember, membersCount]
+
+    CustomEmoji:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        imageUrl:
+          type: string
+        name:
+          type: string
+        isPublic:
+          type: boolean
+        createdAt:
+          type: string
+      required: [id, userId, imageUrl, name, isPublic, createdAt]
+
+    CustomEmojiPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/CustomEmoji"
+      required: [items]
+
+    CustomEmojiInput:
+      type: object
+      properties:
+        imageUrl:
+          type: string
+        name:
+          type: string
+        isPublic:
+          type: boolean
+      required: [imageUrl, name]
+
+    CustomEmojiUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        isPublic:
+          type: boolean
+
+    ActiveEmojisInput:
+      type: object
+      properties:
+        profileBadgeEmojiId:
+          type: ["string", "null"]
+        postStampEmojiId:
+          type: ["string", "null"]
+        nameDisplayEmojiId:
+          type: ["string", "null"]

@@ -13,6 +13,7 @@ import settingsRouter from "./settings";
 import storageRouter from "./storage";
 import groupsRouter from "./groups";
 import blocksRouter from "./blocks";
+import emojisRouter from "./emojis";
 
 const router: IRouter = Router();
 
@@ -30,5 +31,6 @@ router.use(settingsRouter);
 router.use(storageRouter);
 router.use(groupsRouter);
 router.use(blocksRouter);
+router.use(emojisRouter);
 
 export default router;

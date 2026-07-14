@@ -20,6 +20,7 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  ActiveEmojisInput,
   BlockResult,
   CheckUsernameParams,
   Comment,
@@ -28,6 +29,10 @@ import type {
   CommentUpdate,
   Conversation,
   ConversationInput,
+  CustomEmoji,
+  CustomEmojiInput,
+  CustomEmojiPage,
+  CustomEmojiUpdate,
   DeleteResult,
   FollowResult,
   GetCommentsParams,
@@ -2989,6 +2994,445 @@ export function useGetBlockedUsers<TData = Awaited<ReturnType<typeof getBlockedU
 
 
 
+
+export const getGetMyEmojisUrl = () => {
+
+
+
+
+  return `/api/emojis/me`
+}
+
+/**
+ * @summary Get current user's emoji library
+ */
+export const getMyEmojis = async ( options?: RequestInit): Promise<CustomEmojiPage> => {
+
+  return customFetch<CustomEmojiPage>(getGetMyEmojisUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetMyEmojisQueryKey = () => {
+    return [
+    `/api/emojis/me`
+    ] as const;
+    }
+
+
+export const getGetMyEmojisQueryOptions = <TData = Awaited<ReturnType<typeof getMyEmojis>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMyEmojis>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMyEmojisQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMyEmojis>>> = ({ signal }) => getMyEmojis({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMyEmojis>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetMyEmojisQueryResult = NonNullable<Awaited<ReturnType<typeof getMyEmojis>>>
+export type GetMyEmojisQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get current user's emoji library
+ */
+
+export function useGetMyEmojis<TData = Awaited<ReturnType<typeof getMyEmojis>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMyEmojis>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetMyEmojisQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateEmojiUrl = () => {
+
+
+
+
+  return `/api/emojis/me`
+}
+
+/**
+ * @summary Add emoji to library
+ */
+export const createEmoji = async (customEmojiInput: CustomEmojiInput, options?: RequestInit): Promise<CustomEmoji> => {
+
+  return customFetch<CustomEmoji>(getCreateEmojiUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(customEmojiInput)
+  }
+);}
+
+
+
+
+
+export const getCreateEmojiMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createEmoji>>, TError,{data: BodyType<CustomEmojiInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createEmoji>>, TError,{data: BodyType<CustomEmojiInput>}, TContext> => {
+
+const mutationKey = ['createEmoji'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createEmoji>>, {data: BodyType<CustomEmojiInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createEmoji(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateEmojiMutationResult = NonNullable<Awaited<ReturnType<typeof createEmoji>>>
+    export type CreateEmojiMutationBody = BodyType<CustomEmojiInput>
+    export type CreateEmojiMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Add emoji to library
+ */
+export const useCreateEmoji = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createEmoji>>, TError,{data: BodyType<CustomEmojiInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createEmoji>>,
+        TError,
+        {data: BodyType<CustomEmojiInput>},
+        TContext
+      > => {
+      return useMutation(getCreateEmojiMutationOptions(options));
+    }
+
+export const getUpdateEmojiUrl = (emojiId: string,) => {
+
+
+
+
+  return `/api/emojis/${emojiId}`
+}
+
+/**
+ * @summary Update emoji (name / visibility)
+ */
+export const updateEmoji = async (emojiId: string,
+    customEmojiUpdate: CustomEmojiUpdate, options?: RequestInit): Promise<CustomEmoji> => {
+
+  return customFetch<CustomEmoji>(getUpdateEmojiUrl(emojiId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(customEmojiUpdate)
+  }
+);}
+
+
+
+
+
+export const getUpdateEmojiMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateEmoji>>, TError,{emojiId: string;data: BodyType<CustomEmojiUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateEmoji>>, TError,{emojiId: string;data: BodyType<CustomEmojiUpdate>}, TContext> => {
+
+const mutationKey = ['updateEmoji'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateEmoji>>, {emojiId: string;data: BodyType<CustomEmojiUpdate>}> = (props) => {
+          const {emojiId,data} = props ?? {};
+
+          return  updateEmoji(emojiId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateEmojiMutationResult = NonNullable<Awaited<ReturnType<typeof updateEmoji>>>
+    export type UpdateEmojiMutationBody = BodyType<CustomEmojiUpdate>
+    export type UpdateEmojiMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Update emoji (name / visibility)
+ */
+export const useUpdateEmoji = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateEmoji>>, TError,{emojiId: string;data: BodyType<CustomEmojiUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateEmoji>>,
+        TError,
+        {emojiId: string;data: BodyType<CustomEmojiUpdate>},
+        TContext
+      > => {
+      return useMutation(getUpdateEmojiMutationOptions(options));
+    }
+
+export const getDeleteEmojiUrl = (emojiId: string,) => {
+
+
+
+
+  return `/api/emojis/${emojiId}`
+}
+
+/**
+ * @summary Delete emoji from library
+ */
+export const deleteEmoji = async (emojiId: string, options?: RequestInit): Promise<DeleteResult> => {
+
+  return customFetch<DeleteResult>(getDeleteEmojiUrl(emojiId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteEmojiMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteEmoji>>, TError,{emojiId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteEmoji>>, TError,{emojiId: string}, TContext> => {
+
+const mutationKey = ['deleteEmoji'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteEmoji>>, {emojiId: string}> = (props) => {
+          const {emojiId} = props ?? {};
+
+          return  deleteEmoji(emojiId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteEmojiMutationResult = NonNullable<Awaited<ReturnType<typeof deleteEmoji>>>
+
+    export type DeleteEmojiMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Delete emoji from library
+ */
+export const useDeleteEmoji = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteEmoji>>, TError,{emojiId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteEmoji>>,
+        TError,
+        {emojiId: string},
+        TContext
+      > => {
+      return useMutation(getDeleteEmojiMutationOptions(options));
+    }
+
+export const getGetUserEmojisUrl = (userId: string,) => {
+
+
+
+
+  return `/api/emojis/user/${userId}`
+}
+
+/**
+ * @summary Get a user's public emojis (for picker)
+ */
+export const getUserEmojis = async (userId: string, options?: RequestInit): Promise<CustomEmojiPage> => {
+
+  return customFetch<CustomEmojiPage>(getGetUserEmojisUrl(userId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetUserEmojisQueryKey = (userId: string,) => {
+    return [
+    `/api/emojis/user/${userId}`
+    ] as const;
+    }
+
+
+export const getGetUserEmojisQueryOptions = <TData = Awaited<ReturnType<typeof getUserEmojis>>, TError = ErrorType<unknown>>(userId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getUserEmojis>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetUserEmojisQueryKey(userId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getUserEmojis>>> = ({ signal }) => getUserEmojis(userId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: userId !== null && userId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getUserEmojis>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetUserEmojisQueryResult = NonNullable<Awaited<ReturnType<typeof getUserEmojis>>>
+export type GetUserEmojisQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get a user's public emojis (for picker)
+ */
+
+export function useGetUserEmojis<TData = Awaited<ReturnType<typeof getUserEmojis>>, TError = ErrorType<unknown>>(
+ userId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getUserEmojis>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetUserEmojisQueryOptions(userId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getSetActiveEmojisUrl = () => {
+
+
+
+
+  return `/api/users/me/active-emojis`
+}
+
+/**
+ * @summary Set which emojis are active for each context
+ */
+export const setActiveEmojis = async (activeEmojisInput: ActiveEmojisInput, options?: RequestInit): Promise<DeleteResult> => {
+
+  return customFetch<DeleteResult>(getSetActiveEmojisUrl(),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(activeEmojisInput)
+  }
+);}
+
+
+
+
+
+export const getSetActiveEmojisMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setActiveEmojis>>, TError,{data: BodyType<ActiveEmojisInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof setActiveEmojis>>, TError,{data: BodyType<ActiveEmojisInput>}, TContext> => {
+
+const mutationKey = ['setActiveEmojis'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof setActiveEmojis>>, {data: BodyType<ActiveEmojisInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  setActiveEmojis(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SetActiveEmojisMutationResult = NonNullable<Awaited<ReturnType<typeof setActiveEmojis>>>
+    export type SetActiveEmojisMutationBody = BodyType<ActiveEmojisInput>
+    export type SetActiveEmojisMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Set which emojis are active for each context
+ */
+export const useSetActiveEmojis = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setActiveEmojis>>, TError,{data: BodyType<ActiveEmojisInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof setActiveEmojis>>,
+        TError,
+        {data: BodyType<ActiveEmojisInput>},
+        TContext
+      > => {
+      return useMutation(getSetActiveEmojisMutationOptions(options));
+    }
 
 export const getGetNotificationsUrl = (params?: GetNotificationsParams,) => {
   const normalizedParams = new URLSearchParams();

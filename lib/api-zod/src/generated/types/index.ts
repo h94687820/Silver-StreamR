@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from './activeEmojisInput';
 export * from './blockResult';
 export * from './checkUsernameParams';
 export * from './comment';
@@ -15,6 +16,10 @@ export * from './commentUpdate';
 export * from './conversation';
 export * from './conversationInput';
 export * from './conversationLastMessage';
+export * from './customEmoji';
+export * from './customEmojiInput';
+export * from './customEmojiPage';
+export * from './customEmojiUpdate';
 export * from './deleteResult';
 export * from './followResult';
 export * from './getCommentsParams';

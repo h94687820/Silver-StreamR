@@ -24,4 +24,10 @@ export interface UserProfile {
   isMe: boolean;
   onboardingComplete: boolean;
   createdAt: string;
+  /** @nullable */
+  profileBadgeEmojiUrl?: string | null;
+  /** @nullable */
+  postStampEmojiUrl?: string | null;
+  /** @nullable */
+  nameDisplayEmojiUrl?: string | null;
 }

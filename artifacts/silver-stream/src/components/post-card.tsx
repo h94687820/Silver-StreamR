@@ -153,14 +153,32 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <Link href={`/profile/${post.author.username}`} className="flex items-center gap-3">
-          <Avatar>
-            <AvatarImage src={post.author.avatarUrl || undefined} />
-            <AvatarFallback>{post.author.displayName?.[0] || post.author.username[0]}</AvatarFallback>
-          </Avatar>
+          <div className="relative">
+            <Avatar>
+              <AvatarImage src={post.author.avatarUrl || undefined} />
+              <AvatarFallback>{post.author.displayName?.[0] || post.author.username[0]}</AvatarFallback>
+            </Avatar>
+            {/* Profile badge emoji */}
+            {(post.author as any).profileBadgeEmojiUrl && (
+              <img
+                src={(post.author as any).profileBadgeEmojiUrl}
+                alt="badge"
+                className="absolute -bottom-1 -end-1 w-5 h-5 rounded-md object-cover border border-background shadow-sm"
+              />
+            )}
+          </div>
           <div>
-            <p className="font-semibold text-sm leading-tight flex items-center gap-1">
+            <p className="font-semibold text-sm leading-tight flex items-center gap-1.5">
+              {/* Name display emoji */}
+              {(post.author as any).nameDisplayEmojiUrl && (
+                <img
+                  src={(post.author as any).nameDisplayEmojiUrl}
+                  alt="emoji"
+                  className="w-4 h-4 rounded-sm object-cover inline-block"
+                />
+              )}
               {post.author.displayName || post.author.username}
-              {post.isPrivate && <Lock className="w-3 h-3 text-muted-foreground ml-1" />}
+              {post.isPrivate && <Lock className="w-3 h-3 text-muted-foreground" />}
             </p>
             <p className="text-xs text-muted-foreground">
               @{post.author.username} • {formatDistanceToNow(new Date(post.createdAt))} ago
@@ -200,6 +218,20 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
           <MentionText content={post.content} className="text-sm whitespace-pre-wrap break-words" />
         )}
       </div>
+
+      {/* Post stamp emoji */}
+      {(post.author as any).postStampEmojiUrl && (
+        <div className="flex justify-end mb-2">
+          <div className="relative inline-block">
+            <img
+              src={(post.author as any).postStampEmojiUrl}
+              alt="stamp"
+              className="w-10 h-10 rounded-xl object-cover border-2 border-border/40 shadow opacity-80"
+              style={{ transform: "rotate(-8deg)" }}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Media */}
       {post.mediaUrls && post.mediaUrls.length > 0 && (

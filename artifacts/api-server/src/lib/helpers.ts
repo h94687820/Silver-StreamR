@@ -1,5 +1,5 @@
 import { db } from "@workspace/db";
-import { usersTable, followsTable, reactionsTable, savedPostsTable, postsTable, notificationsTable, blocksTable } from "@workspace/db";
+import { usersTable, followsTable, reactionsTable, savedPostsTable, postsTable, notificationsTable, blocksTable, customEmojisTable } from "@workspace/db";
 import { eq, and, inArray } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
@@ -67,6 +67,22 @@ export async function getUserProfile(targetId: string, viewerId?: string) {
     isBlocked = block.length > 0;
   }
 
+  // Resolve active emoji URLs
+  const emojiIds = [user.profileBadgeEmojiId, user.postStampEmojiId, user.nameDisplayEmojiId].filter(Boolean) as string[];
+  let profileBadgeEmojiUrl: string | null = null;
+  let postStampEmojiUrl: string | null = null;
+  let nameDisplayEmojiUrl: string | null = null;
+
+  if (emojiIds.length > 0) {
+    const emojis = await db.select().from(customEmojisTable).where(
+      inArray(customEmojisTable.id, emojiIds)
+    );
+    const emojiMap = new Map(emojis.map(e => [e.id, e.imageUrl]));
+    profileBadgeEmojiUrl = user.profileBadgeEmojiId ? (emojiMap.get(user.profileBadgeEmojiId) ?? null) : null;
+    postStampEmojiUrl    = user.postStampEmojiId    ? (emojiMap.get(user.postStampEmojiId)    ?? null) : null;
+    nameDisplayEmojiUrl  = user.nameDisplayEmojiId  ? (emojiMap.get(user.nameDisplayEmojiId)  ?? null) : null;
+  }
+
   return {
     id: user.id,
     clerkId: user.id,
@@ -82,6 +98,9 @@ export async function getUserProfile(targetId: string, viewerId?: string) {
     isMe: viewerId === targetId,
     onboardingComplete: user.onboardingComplete,
     createdAt: user.createdAt.toISOString(),
+    profileBadgeEmojiUrl,
+    postStampEmojiUrl,
+    nameDisplayEmojiUrl,
   };
 }
 
