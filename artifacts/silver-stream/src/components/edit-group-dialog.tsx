@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -20,6 +20,7 @@ import {
   type Group,
 } from "@workspace/api-client-react";
 import { uploadFileAndGetUrl } from "@/lib/upload";
+import { EmojiPicker } from "@/components/emoji-picker";
 
 interface EditGroupDialogProps {
   open: boolean;
@@ -35,6 +36,7 @@ export function EditGroupDialog({ open, onOpenChange, group }: EditGroupDialogPr
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const descriptionRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (open) {
@@ -55,6 +57,19 @@ export function EditGroupDialog({ open, onOpenChange, group }: EditGroupDialogPr
     if (!f) return;
     setAvatarFile(f);
     setAvatarPreview(URL.createObjectURL(f));
+  };
+
+  const handleDescriptionEmoji = (emoji: { id: string; imageUrl: string; name: string }) => {
+    const textarea = descriptionRef.current;
+    const cursor = textarea?.selectionStart ?? description.length;
+    const token = `{{emoji:${emoji.imageUrl}}}`;
+    const next = description.slice(0, cursor) + token + description.slice(cursor);
+    setDescription(next);
+    requestAnimationFrame(() => {
+      const pos = cursor + token.length;
+      textarea?.focus();
+      textarea?.setSelectionRange(pos, pos);
+    });
   };
 
   const handleSave = async () => {
@@ -128,8 +143,12 @@ export function EditGroupDialog({ open, onOpenChange, group }: EditGroupDialogPr
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Description</label>
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium">Description</label>
+              <EmojiPicker onSelect={handleDescriptionEmoji} />
+            </div>
             <Textarea
+              ref={descriptionRef}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="rounded-xl resize-none min-h-[80px]"

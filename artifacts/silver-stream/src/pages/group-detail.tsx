@@ -15,6 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { PostCard } from "@/components/post-card";
 import { MentionTextarea } from "@/components/mention-textarea";
+import { MentionText } from "@/components/mention-text";
 import { EditGroupDialog } from "@/components/edit-group-dialog";
 import { Crown, Users, Trash2, Pencil, Send, ImagePlus, Video, X } from "lucide-react";
 
@@ -137,9 +138,10 @@ export default function GroupDetail() {
 
       <div className="p-4 space-y-4">
         {group.description && (
-          <p className="text-sm text-foreground/90 bg-secondary/30 rounded-2xl p-4 whitespace-pre-wrap">
-            {group.description}
-          </p>
+          <MentionText
+            content={group.description}
+            className="text-sm text-foreground/90 bg-secondary/30 rounded-2xl p-4 whitespace-pre-wrap block"
+          />
         )}
 
         {group.isOwner ? (

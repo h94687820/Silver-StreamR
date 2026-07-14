@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -21,6 +21,7 @@ import {
 } from "@workspace/api-client-react";
 import { uploadFileAndGetUrl } from "@/lib/upload";
 import { useDebounce } from "@/lib/use-debounce";
+import { EmojiPicker } from "@/components/emoji-picker";
 
 interface EditProfileDialogProps {
   open: boolean;
@@ -37,6 +38,7 @@ export function EditProfileDialog({ open, onOpenChange, profile }: EditProfileDi
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const bioRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (open) {
@@ -74,6 +76,19 @@ export function EditProfileDialog({ open, onOpenChange, profile }: EditProfileDi
     if (!f) return;
     setAvatarFile(f);
     setAvatarPreview(URL.createObjectURL(f));
+  };
+
+  const handleBioEmoji = (emoji: { id: string; imageUrl: string; name: string }) => {
+    const textarea = bioRef.current;
+    const cursor = textarea?.selectionStart ?? bio.length;
+    const token = `{{emoji:${emoji.imageUrl}}}`;
+    const next = bio.slice(0, cursor) + token + bio.slice(cursor);
+    setBio(next);
+    requestAnimationFrame(() => {
+      const pos = cursor + token.length;
+      textarea?.focus();
+      textarea?.setSelectionRange(pos, pos);
+    });
   };
 
   const handleSave = async () => {
@@ -173,8 +188,12 @@ export function EditProfileDialog({ open, onOpenChange, profile }: EditProfileDi
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Bio</label>
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium">Bio</label>
+              <EmojiPicker onSelect={handleBioEmoji} />
+            </div>
             <Textarea
+              ref={bioRef}
               value={bio}
               onChange={(e) => setBio(e.target.value)}
               className="rounded-xl resize-none min-h-[80px]"

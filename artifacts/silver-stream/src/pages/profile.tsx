@@ -3,6 +3,7 @@ import { useGetUserByUsername, useGetUserPosts, useFollowUser, useUnfollowUser, 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { PostCard } from "@/components/post-card";
+import { MentionText } from "@/components/mention-text";
 import { Grid, Video, Bookmark, Edit3, ShieldOff, Shield } from "lucide-react";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -149,7 +150,7 @@ export default function Profile() {
           </h1>
           <p className="text-muted-foreground text-sm">@{profile.username}</p>
           {profile.bio && (
-             <p className="text-sm mt-2 text-foreground/90 whitespace-pre-wrap">{profile.bio}</p>
+             <MentionText content={profile.bio} className="text-sm mt-2 text-foreground/90 whitespace-pre-wrap block" />
           )}
         </div>
 

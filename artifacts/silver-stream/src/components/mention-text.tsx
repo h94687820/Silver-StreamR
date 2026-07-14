@@ -1,12 +1,15 @@
 import { Link } from "wouter";
 import { Fragment } from "react";
 
-// Matches either an @mention or a #hashtag token (Unicode-aware so Arabic hashtags work too).
-const TOKEN_REGEX = /(@[a-zA-Z0-9_]{2,30})|(#[\p{L}\p{N}_]{2,50})/gu;
+// Matches an @mention, a #hashtag, or an embedded custom-emoji token
+// (Unicode-aware so Arabic hashtags work too). Custom emojis are embedded
+// as `{{emoji:<imageUrl>}}` when the user picks one from their emoji library.
+const TOKEN_REGEX = /(@[a-zA-Z0-9_]{2,30})|(#[\p{L}\p{N}_]{2,50})|(\{\{emoji:[^{}]+\}\})/gu;
 
 /**
  * Renders text content, turning any @username token into a link to that user's
- * profile, and any #hashtag token into a link to the hashtag's search results.
+ * profile, any #hashtag token into a link to the hashtag's search results, and
+ * any `{{emoji:<url>}}` token into an inline custom emoji image.
  */
 export function MentionText({ content, className }: { content: string; className?: string }) {
   const parts: React.ReactNode[] = [];
@@ -19,7 +22,17 @@ export function MentionText({ content, className }: { content: string; className
       parts.push(<Fragment key={`t-${lastIndex}`}>{content.slice(lastIndex, match.index)}</Fragment>);
     }
     const token = match[0];
-    if (token.startsWith("@")) {
+    if (token.startsWith("{{emoji:")) {
+      const url = token.slice("{{emoji:".length, -2);
+      parts.push(
+        <img
+          key={`e-${match.index}`}
+          src={url}
+          alt="emoji"
+          className="inline-block w-5 h-5 rounded-md object-cover align-text-bottom mx-0.5"
+        />
+      );
+    } else if (token.startsWith("@")) {
       const username = token.slice(1);
       parts.push(
         <Link

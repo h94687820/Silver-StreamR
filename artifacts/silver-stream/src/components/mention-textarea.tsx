@@ -3,6 +3,7 @@ import { useSearchUsers } from "@workspace/api-client-react";
 import { useDebounce } from "@/lib/use-debounce";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
+import { EmojiPicker } from "@/components/emoji-picker";
 
 interface MentionTextareaProps {
   value: string;
@@ -61,35 +62,51 @@ export function MentionTextarea({ value, onChange, placeholder, className, rows 
 
   const showDropdown = mentionQuery !== null && !!suggestions?.length;
 
+  const handleEmojiSelect = (emoji: { id: string; imageUrl: string; name: string }) => {
+    const textarea = textareaRef.current;
+    const cursor = textarea?.selectionStart ?? value.length;
+    const token = `{{emoji:${emoji.imageUrl}}}`;
+    const next = value.slice(0, cursor) + token + value.slice(cursor);
+    onChange(next);
+    requestAnimationFrame(() => {
+      const pos = cursor + token.length;
+      textarea?.focus();
+      textarea?.setSelectionRange(pos, pos);
+    });
+  };
+
   return (
-    <div className="relative">
-      <Textarea
-        ref={textareaRef}
-        value={value}
-        onChange={handleChange}
-        placeholder={placeholder}
-        className={className}
-        rows={rows}
-      />
-      {showDropdown && (
-        <div className="absolute z-20 bottom-full mb-1 left-0 right-0 bg-popover border border-popover-border rounded-xl shadow-lg overflow-hidden max-h-48 overflow-y-auto">
-          {suggestions!.slice(0, 6).map((u) => (
-            <button
-              key={u.id}
-              type="button"
-              onClick={() => applyMention(u.username)}
-              className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-secondary transition-colors text-left"
-            >
-              <Avatar className="w-6 h-6">
-                <AvatarImage src={u.avatarUrl || undefined} />
-                <AvatarFallback>{u.username[0]}</AvatarFallback>
-              </Avatar>
-              <span className="font-medium">{u.displayName || u.username}</span>
-              <span className="text-muted-foreground">@{u.username}</span>
-            </button>
-          ))}
-        </div>
-      )}
+    <div className="flex items-end gap-1">
+      <div className="relative flex-1">
+        <Textarea
+          ref={textareaRef}
+          value={value}
+          onChange={handleChange}
+          placeholder={placeholder}
+          className={className}
+          rows={rows}
+        />
+        {showDropdown && (
+          <div className="absolute z-20 bottom-full mb-1 left-0 right-0 bg-popover border border-popover-border rounded-xl shadow-lg overflow-hidden max-h-48 overflow-y-auto">
+            {suggestions!.slice(0, 6).map((u) => (
+              <button
+                key={u.id}
+                type="button"
+                onClick={() => applyMention(u.username)}
+                className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-secondary transition-colors text-left"
+              >
+                <Avatar className="w-6 h-6">
+                  <AvatarImage src={u.avatarUrl || undefined} />
+                  <AvatarFallback>{u.username[0]}</AvatarFallback>
+                </Avatar>
+                <span className="font-medium">{u.displayName || u.username}</span>
+                <span className="text-muted-foreground">@{u.username}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+      <EmojiPicker onSelect={handleEmojiSelect} className="mb-1 shrink-0" />
     </div>
   );
 }

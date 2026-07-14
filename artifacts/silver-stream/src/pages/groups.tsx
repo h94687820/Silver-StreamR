@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Link } from "wouter";
 import {
   useGetGroups, getGetGroupsQueryKey,
@@ -15,6 +15,8 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger,
 } from "@/components/ui/dialog";
 import { useDebounce } from "@/lib/use-debounce";
+import { EmojiPicker } from "@/components/emoji-picker";
+import { MentionText } from "@/components/mention-text";
 import { Users, Plus, Search as SearchIcon, Crown } from "lucide-react";
 
 export default function Groups() {
@@ -24,8 +26,22 @@ export default function Groups() {
   const [createOpen, setCreateOpen] = useState(false);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const descriptionRef = useRef<HTMLTextAreaElement>(null);
 
   const queryClient = useQueryClient();
+
+  const handleDescriptionEmoji = (emoji: { id: string; imageUrl: string; name: string }) => {
+    const textarea = descriptionRef.current;
+    const cursor = textarea?.selectionStart ?? description.length;
+    const token = `{{emoji:${emoji.imageUrl}}}`;
+    const next = description.slice(0, cursor) + token + description.slice(cursor);
+    setDescription(next);
+    requestAnimationFrame(() => {
+      const pos = cursor + token.length;
+      textarea?.focus();
+      textarea?.setSelectionRange(pos, pos);
+    });
+  };
 
   const { data: discoverPage, isLoading: discoverLoading } = useGetGroups(
     { q: debouncedQuery || undefined },
@@ -95,7 +111,11 @@ export default function Groups() {
                   onChange={(e) => setName(e.target.value)}
                   maxLength={60}
                 />
+                <div className="flex items-center justify-end">
+                  <EmojiPicker onSelect={handleDescriptionEmoji} />
+                </div>
                 <Textarea
+                  ref={descriptionRef}
                   placeholder="What's this group about? (optional)"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
