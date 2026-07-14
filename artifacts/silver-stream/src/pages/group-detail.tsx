@@ -6,6 +6,7 @@ import {
   useGetGroupPosts, getGetGroupPostsQueryKey,
   useJoinGroup, useLeaveGroup, useDeleteGroup,
   useCreateGroupPost,
+  useRequestUploadUrl,
   useGetMe,
   getGetGroupsQueryKey, getGetMyGroupsQueryKey,
 } from "@workspace/api-client-react";
@@ -15,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import { PostCard } from "@/components/post-card";
 import { MentionTextarea } from "@/components/mention-textarea";
 import { EditGroupDialog } from "@/components/edit-group-dialog";
-import { Crown, Users, Trash2, Pencil, Send } from "lucide-react";
+import { Crown, Users, Trash2, Pencil, Send, ImagePlus, Video, X } from "lucide-react";
 
 export default function GroupDetail() {
   const [, params] = useRoute("/groups/:groupId");
@@ -26,6 +27,9 @@ export default function GroupDetail() {
   const [tab, setTab] = useState<"posts" | "members">("posts");
   const [editOpen, setEditOpen] = useState(false);
   const [postContent, setPostContent] = useState("");
+  const [postFile, setPostFile] = useState<File | null>(null);
+  const [postPreview, setPostPreview] = useState<string | null>(null);
+  const [isUploadingPost, setIsUploadingPost] = useState(false);
 
   const { data: group, isLoading } = useGetGroup(groupId, {
     query: { enabled: !!groupId, queryKey: getGetGroupQueryKey(groupId) }
@@ -43,6 +47,7 @@ export default function GroupDetail() {
   const leaveMutation = useLeaveGroup();
   const deleteMutation = useDeleteGroup();
   const createPostMutation = useCreateGroupPost();
+  const requestUrlMutation = useRequestUploadUrl();
 
   const invalidateAll = () => {
     queryClient.invalidateQueries({ queryKey: getGetGroupQueryKey(groupId) });
@@ -54,14 +59,51 @@ export default function GroupDetail() {
   const handleJoin = () => joinMutation.mutate({ groupId }, { onSuccess: invalidateAll });
   const handleLeave = () => leaveMutation.mutate({ groupId }, { onSuccess: invalidateAll });
 
-  const handlePost = () => {
-    if (!postContent.trim()) return;
-    createPostMutation.mutate({ groupId, data: { content: postContent } }, {
-      onSuccess: () => {
-        setPostContent("");
-        queryClient.invalidateQueries({ queryKey: getGetGroupPostsQueryKey(groupId) });
+  const handlePostFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    setPostFile(f);
+    setPostPreview(URL.createObjectURL(f));
+  };
+
+  const removePostFile = () => {
+    setPostFile(null);
+    setPostPreview(null);
+  };
+
+  const handlePost = async () => {
+    if (!postContent.trim() && !postFile) return;
+    try {
+      let mediaUrls: string[] | undefined;
+      let mediaType: "image" | "video" | undefined;
+
+      if (postFile) {
+        setIsUploadingPost(true);
+        mediaType = postFile.type.startsWith("video") ? "video" : "image";
+        const urlRes = await requestUrlMutation.mutateAsync({
+          data: { name: postFile.name, size: postFile.size, contentType: postFile.type },
+        });
+        await fetch(urlRes.uploadURL, {
+          method: "PUT",
+          headers: { "Content-Type": postFile.type },
+          body: postFile,
+        });
+        mediaUrls = [`/api/storage${urlRes.objectPath}`];
       }
-    });
+
+      await createPostMutation.mutateAsync({
+        groupId,
+        data: { content: postContent, mediaUrls, mediaType },
+      });
+      setPostContent("");
+      removePostFile();
+      queryClient.invalidateQueries({ queryKey: getGetGroupPostsQueryKey(groupId) });
+    } catch (e) {
+      console.error(e);
+      alert("Failed to publish post. Please try again.");
+    } finally {
+      setIsUploadingPost(false);
+    }
   };
 
   const [shouldRedirect, setShouldRedirect] = useState(false);
@@ -152,15 +194,45 @@ export default function GroupDetail() {
                   placeholder={`Share something with ${group.name}... use @ to mention someone`}
                   className="min-h-[70px] resize-none border-none bg-secondary/30 rounded-xl focus-visible:ring-0"
                 />
+
+                {postPreview ? (
+                  <div className="relative rounded-xl overflow-hidden bg-secondary">
+                    <button
+                      onClick={removePostFile}
+                      className="absolute top-2 right-2 z-10 p-1.5 bg-black/50 text-white rounded-full backdrop-blur-md"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                    {postFile?.type.startsWith("video") ? (
+                      <video src={postPreview} controls className="w-full max-h-56 object-cover" />
+                    ) : (
+                      <img src={postPreview} className="w-full max-h-56 object-cover" />
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    <label className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:bg-secondary/50 cursor-pointer transition-colors">
+                      <ImagePlus className="w-4 h-4" />
+                      Photo
+                      <input type="file" accept="image/*" className="hidden" onChange={handlePostFileChange} />
+                    </label>
+                    <label className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:bg-secondary/50 cursor-pointer transition-colors">
+                      <Video className="w-4 h-4" />
+                      Video
+                      <input type="file" accept="video/*" className="hidden" onChange={handlePostFileChange} />
+                    </label>
+                  </div>
+                )}
+
                 <div className="flex justify-end">
                   <Button
                     size="sm"
                     className="rounded-full silver-shimmer"
-                    disabled={!postContent.trim() || createPostMutation.isPending}
+                    disabled={(!postContent.trim() && !postFile) || isUploadingPost || createPostMutation.isPending}
                     onClick={handlePost}
                   >
                     <Send className="w-3.5 h-3.5 mr-1.5 rtl:-scale-x-100" />
-                    Post
+                    {isUploadingPost || createPostMutation.isPending ? "Posting..." : "Post"}
                   </Button>
                 </div>
               </div>
