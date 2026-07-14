@@ -6,10 +6,10 @@ import {
   useGetGroupPosts, getGetGroupPostsQueryKey,
   useJoinGroup, useLeaveGroup, useDeleteGroup,
   useCreateGroupPost,
-  useRequestUploadUrl,
   useGetMe,
   getGetGroupsQueryKey, getGetMyGroupsQueryKey,
 } from "@workspace/api-client-react";
+import { uploadFileAndGetUrl } from "@/lib/upload";
 import { useQueryClient } from "@tanstack/react-query";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -47,7 +47,6 @@ export default function GroupDetail() {
   const leaveMutation = useLeaveGroup();
   const deleteMutation = useDeleteGroup();
   const createPostMutation = useCreateGroupPost();
-  const requestUrlMutation = useRequestUploadUrl();
 
   const invalidateAll = () => {
     queryClient.invalidateQueries({ queryKey: getGetGroupQueryKey(groupId) });
@@ -80,15 +79,7 @@ export default function GroupDetail() {
       if (postFile) {
         setIsUploadingPost(true);
         mediaType = postFile.type.startsWith("video") ? "video" : "image";
-        const urlRes = await requestUrlMutation.mutateAsync({
-          data: { name: postFile.name, size: postFile.size, contentType: postFile.type },
-        });
-        await fetch(urlRes.uploadURL, {
-          method: "PUT",
-          headers: { "Content-Type": postFile.type },
-          body: postFile,
-        });
-        mediaUrls = [`/api/storage${urlRes.objectPath}`];
+        mediaUrls = [await uploadFileAndGetUrl(postFile)];
       }
 
       await createPostMutation.mutateAsync({

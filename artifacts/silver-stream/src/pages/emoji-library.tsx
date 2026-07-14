@@ -15,22 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useTranslation } from "@/lib/i18n";
 import { Trash2, Globe, Lock, Upload, Star, User, Stamp, Type } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-// ── Simple upload via the existing presigned-URL storage endpoint ──────────
-async function uploadEmojiImage(file: File): Promise<string> {
-  // 1. Request presigned upload URL
-  const res = await fetch("/api/storage/uploads/request-url", {
-    method: "POST",
-    credentials: "include",
-  });
-  if (!res.ok) throw new Error("Failed to get upload URL");
-  const { uploadURL, publicURL } = await res.json();
-
-  // 2. Upload directly
-  await fetch(uploadURL, { method: "PUT", body: file, headers: { "Content-Type": file.type } });
-
-  return publicURL as string;
-}
+import { uploadFileAndGetUrl } from "@/lib/upload";
 
 export default function EmojiLibrary() {
   const { t } = useTranslation();
@@ -59,7 +44,7 @@ export default function EmojiLibrary() {
     if (!file || !newName.trim()) return;
     setUploading(true);
     try {
-      const imageUrl = await uploadEmojiImage(file);
+      const imageUrl = await uploadFileAndGetUrl(file);
       await createMutation.mutateAsync({ data: { imageUrl, name: newName.trim(), isPublic: false } });
       setNewName("");
       refresh();

@@ -16,12 +16,38 @@ const router: IRouter = Router();
 const objectStorageService = new ObjectStorageService();
 
 /**
- * POST /storage/uploads/request-url
+ * POST /storage/uploads
+ *
+ * Upload a file directly through the server to object storage.
+ * The client sends the raw file body with Content-Type set to the file's MIME type.
+ * Returns { objectPath } which the client can use to construct the serving URL.
+ *
+ * This approach avoids browser→GCS CORS issues that plagued the presigned-URL flow.
+ */
+router.post(
+  '/storage/uploads',
+  requireAuth,
+  async (req: Request, res: Response) => {
+    try {
+      const contentType = req.headers['content-type'] || 'application/octet-stream';
+      // Strip any "; boundary=..." suffix that multipart adds (we receive raw body)
+      const mimeType = contentType.split(';')[0].trim();
+
+      const objectPath = await objectStorageService.uploadFileFromStream(req, mimeType);
+
+      res.json({ objectPath });
+    } catch (error) {
+      req.log.error({ err: error }, 'Error uploading file');
+      res.status(500).json({ error: 'Failed to upload file' });
+    }
+  },
+);
+
+/**
+ * POST /storage/uploads/request-url  (kept for backwards compat)
  *
  * Request a presigned URL for file upload.
- * The client sends JSON metadata (name, size, contentType) — NOT the file.
- * Then uploads the file directly to the returned presigned URL.
- * Requires auth middleware so public callers cannot mint write-capable URLs.
+ * Prefer POST /storage/uploads instead — it avoids CORS issues.
  */
 router.post(
   '/storage/uploads/request-url',

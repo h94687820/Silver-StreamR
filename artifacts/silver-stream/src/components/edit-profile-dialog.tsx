@@ -15,11 +15,11 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   useUpdateMe,
   useCheckUsername,
-  useRequestUploadUrl,
   getGetMeQueryKey,
   getGetUserByUsernameQueryKey,
   type UserProfile,
 } from "@workspace/api-client-react";
+import { uploadFileAndGetUrl } from "@/lib/upload";
 import { useDebounce } from "@/lib/use-debounce";
 
 interface EditProfileDialogProps {
@@ -66,7 +66,6 @@ export function EditProfileDialog({ open, onOpenChange, profile }: EditProfileDi
   const isUsernameAvailable = !usernameChanged || checkResult?.available;
   const showUsernameStatus = usernameChanged && debouncedUsername.length >= 3 && !isChecking;
 
-  const requestUrlMutation = useRequestUploadUrl();
   const updateMeMutation = useUpdateMe();
   const queryClient = useQueryClient();
 
@@ -94,15 +93,7 @@ export function EditProfileDialog({ open, onOpenChange, profile }: EditProfileDi
 
       if (avatarFile) {
         setIsUploadingAvatar(true);
-        const urlRes = await requestUrlMutation.mutateAsync({
-          data: { name: avatarFile.name, size: avatarFile.size, contentType: avatarFile.type },
-        });
-        await fetch(urlRes.uploadURL, {
-          method: "PUT",
-          headers: { "Content-Type": avatarFile.type },
-          body: avatarFile,
-        });
-        finalAvatarUrl = `/api/storage${urlRes.objectPath}`;
+        finalAvatarUrl = await uploadFileAndGetUrl(avatarFile);
         setIsUploadingAvatar(false);
       }
 

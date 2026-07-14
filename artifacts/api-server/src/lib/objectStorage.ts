@@ -133,6 +133,39 @@ export class ObjectStorageService {
     });
   }
 
+  /**
+   * Upload a file directly from a Node.js readable stream (server-side).
+   * Returns the normalized objectPath (e.g. "/objects/uploads/<uuid>").
+   */
+  async uploadFileFromStream(
+    stream: NodeJS.ReadableStream,
+    contentType: string,
+  ): Promise<string> {
+    const privateObjectDir = this.getPrivateObjectDir();
+    const objectId = randomUUID();
+    const fullPath = `${privateObjectDir}/uploads/${objectId}`;
+    const { bucketName, objectName } = parseObjectPath(fullPath);
+
+    const bucket = objectStorageClient.bucket(bucketName);
+    const file = bucket.file(objectName);
+
+    await new Promise<void>((resolve, reject) => {
+      const writeStream = file.createWriteStream({
+        contentType,
+        resumable: false,
+      });
+      stream.pipe(writeStream);
+      writeStream.on('finish', resolve);
+      writeStream.on('error', reject);
+      stream.on('error', reject);
+    });
+
+    // Return the normalized /objects/ path
+    return this.normalizeObjectEntityPath(
+      `https://storage.googleapis.com/${bucketName}/${objectName}`,
+    );
+  }
+
   async getObjectEntityFile(objectPath: string): Promise<File> {
     if (!objectPath.startsWith('/objects/')) {
       throw new ObjectNotFoundError();

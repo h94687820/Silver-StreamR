@@ -14,12 +14,12 @@ import { Camera, Loader2 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   useUpdateGroup,
-  useRequestUploadUrl,
   getGetGroupQueryKey,
   getGetGroupsQueryKey,
   getGetMyGroupsQueryKey,
   type Group,
 } from "@workspace/api-client-react";
+import { uploadFileAndGetUrl } from "@/lib/upload";
 
 interface EditGroupDialogProps {
   open: boolean;
@@ -47,7 +47,6 @@ export function EditGroupDialog({ open, onOpenChange, group }: EditGroupDialogPr
     }
   }, [open, group]);
 
-  const requestUrlMutation = useRequestUploadUrl();
   const updateGroupMutation = useUpdateGroup();
   const queryClient = useQueryClient();
 
@@ -70,15 +69,7 @@ export function EditGroupDialog({ open, onOpenChange, group }: EditGroupDialogPr
 
       if (avatarFile) {
         setIsUploadingAvatar(true);
-        const urlRes = await requestUrlMutation.mutateAsync({
-          data: { name: avatarFile.name, size: avatarFile.size, contentType: avatarFile.type },
-        });
-        await fetch(urlRes.uploadURL, {
-          method: "PUT",
-          headers: { "Content-Type": avatarFile.type },
-          body: avatarFile,
-        });
-        finalAvatarUrl = `/api/storage${urlRes.objectPath}`;
+        finalAvatarUrl = await uploadFileAndGetUrl(avatarFile);
         setIsUploadingAvatar(false);
       }
 

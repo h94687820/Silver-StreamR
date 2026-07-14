@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import {
-  useCreatePost, useCreateStory, useRequestUploadUrl,
+  useCreatePost, useCreateStory,
   getGetFeedQueryKey, getGetStoriesQueryKey,
   useGetGroup, getGetGroupQueryKey, getGetGroupPostsQueryKey,
 } from "@workspace/api-client-react";
+import { uploadFileAndGetUrl } from "@/lib/upload";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch"; // Will create this
 import { MentionTextarea } from "@/components/mention-textarea";
@@ -28,7 +29,6 @@ export default function Create() {
   const [isPrivate, setIsPrivate] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
-  const requestUrlMutation = useRequestUploadUrl();
   const createPostMutation = useCreatePost();
   const createStoryMutation = useCreateStory();
   const queryClient = useQueryClient();
@@ -60,16 +60,7 @@ export default function Create() {
 
       if (file) {
         mediaType = file.type.startsWith("video") ? "video" : "image";
-        const urlRes = await requestUrlMutation.mutateAsync({
-          data: { name: file.name, size: file.size, contentType: file.type }
-        });
-        
-        await fetch(urlRes.uploadURL, {
-          method: "PUT",
-          headers: { "Content-Type": file.type },
-          body: file
-        });
-        objectPath = `/api/storage${urlRes.objectPath}`;
+        objectPath = await uploadFileAndGetUrl(file);
       }
 
       if (mode === "post") {
