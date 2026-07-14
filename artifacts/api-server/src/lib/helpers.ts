@@ -24,7 +24,7 @@ export async function notifyMentions(opts: {
   if (usernames.length === 0) return;
 
   const mentioned = await db.select().from(usersTable).where(inArray(usersTable.username, usernames));
-  const targets = mentioned.filter(u => u.id !== actorId);
+  const targets = mentioned;
   if (targets.length === 0) return;
 
   await db.insert(notificationsTable).values(targets.map(u => ({

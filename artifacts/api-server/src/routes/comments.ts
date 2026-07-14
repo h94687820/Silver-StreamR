@@ -46,12 +46,10 @@ router.post("/posts/:postId/comments", requireAuth, requireOnboarding, async (re
     }).returning();
     await db.update(postsTable).set({ commentsCount: sql`${postsTable.commentsCount} + 1` }).where(eq(postsTable.id, req.params.postId));
 
-    if (post[0].authorId !== userId) {
-      await db.insert(notificationsTable).values({
-        id: randomUUID(), recipientId: post[0].authorId, actorId: userId,
-        type: "comment", postId: req.params.postId, commentId: comment.id,
-      });
-    }
+    await db.insert(notificationsTable).values({
+      id: randomUUID(), recipientId: post[0].authorId, actorId: userId,
+      type: "comment", postId: req.params.postId, commentId: comment.id,
+    });
     await notifyMentions({ content, actorId: userId, postId: req.params.postId, commentId: comment.id });
 
     const author = await getUserProfile(userId, userId);
