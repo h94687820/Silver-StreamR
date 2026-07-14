@@ -12,6 +12,7 @@ export default function Onboarding() {
   const [username, setUsername] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   
   const debouncedUsername = useDebounce(username, 300);
   
@@ -29,13 +30,21 @@ export default function Onboarding() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!isAvailable || !acceptedTerms || username.length < 3) return;
+    setSubmitError(null);
 
     completeMutation.mutate(
       { data: { username, displayName, acceptedTerms } },
       {
-        onSuccess: async () => {
-          await queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() });
+        onSuccess: (profile) => {
+          // Write the fresh profile into the cache synchronously so that
+          // ProtectedRoute sees `onboardingComplete: true` immediately on
+          // navigation, instead of racing an async invalidation/refetch
+          // (which could still read stale data and bounce back here).
+          queryClient.setQueryData(getGetMeQueryKey(), profile);
           setLocation("/feed");
+        },
+        onError: (err: any) => {
+          setSubmitError(err?.message || "Something went wrong. Please try again.");
         }
       }
     );
@@ -95,6 +104,10 @@ export default function Onboarding() {
               I agree to the Terms of Service and Privacy Policy
             </label>
           </div>
+
+          {submitError && (
+            <p className="text-sm text-destructive text-center">{submitError}</p>
+          )}
 
           <Button 
             type="submit" 
