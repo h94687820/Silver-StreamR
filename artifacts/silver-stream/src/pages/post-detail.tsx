@@ -123,7 +123,7 @@ export default function PostDetail() {
                       {formatDistanceToNow(new Date(comment.createdAt))} ago
                       {comment.updatedAt && " · edited"}
                     </span>
-                    {comment.authorId === me?.id && editingId !== comment.id && (
+                    {comment.author?.isMe && editingId !== comment.id && (
                       <>
                         <button onClick={() => startEdit(comment.id, comment.content)} className="text-muted-foreground hover:text-foreground transition-colors">
                           <Pencil className="w-3.5 h-3.5" />
