@@ -104,8 +104,8 @@ router.get("/comments/:commentId/replies", requireAuth, requireOnboarding, async
   }
 });
 
-// POST /comments/:commentId/reply — reply to a comment
-router.post("/comments/:commentId/reply", requireAuth, requireOnboarding, async (req, res) => {
+// POST /comments/:commentId/replies — reply to a comment
+router.post("/comments/:commentId/replies", requireAuth, requireOnboarding, async (req, res) => {
   try {
     const userId = (req as any).user.id;
     const { content } = req.body;
