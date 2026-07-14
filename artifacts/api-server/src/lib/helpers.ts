@@ -4,6 +4,16 @@ import { eq, and, inArray } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
 const MENTION_REGEX = /@([a-zA-Z0-9_]{2,30})/g;
+const HASHTAG_REGEX = /#([\p{L}\p{N}_]{2,50})/gu;
+
+/**
+ * Extracts unique, lowercased #hashtag tokens from post content.
+ */
+export function extractHashtags(content: string | null | undefined): string[] {
+  if (!content) return [];
+  const tags = Array.from(content.matchAll(HASHTAG_REGEX)).map(m => m[1].toLowerCase());
+  return Array.from(new Set(tags));
+}
 
 /**
  * Parses @username mentions out of content, resolves them to real users,
@@ -92,6 +102,7 @@ export async function enrichPost(post: typeof postsTable.$inferSelect, viewerId?
     content: post.content ?? null,
     mediaUrls: post.mediaUrls ?? [],
     mediaType: post.mediaType ?? null,
+    hashtags: post.hashtags ?? [],
     isPrivate: post.isPrivate,
     groupId: post.groupId ?? null,
     likesCount: post.likesCount,

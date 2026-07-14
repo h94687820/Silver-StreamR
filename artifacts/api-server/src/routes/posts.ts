@@ -4,7 +4,7 @@ import { postsTable, usersTable, savedPostsTable, followsTable, reactionsTable, 
 import { eq, and, desc, lt, inArray, or, sql } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { requireAuth, requireOnboarding } from "../lib/auth";
-import { enrichPost, notifyMentions } from "../lib/helpers";
+import { enrichPost, notifyMentions, extractHashtags } from "../lib/helpers";
 
 const router = Router();
 
@@ -64,6 +64,7 @@ router.post("/posts", requireAuth, requireOnboarding, async (req, res) => {
       content: content || null,
       mediaUrls: mediaUrls || [],
       mediaType: mediaType || null,
+      hashtags: extractHashtags(content),
       isPrivate: isPrivate ?? false,
     }).returning();
     await db.update(usersTable).set({ postsCount: sql`${usersTable.postsCount} + 1` }).where(eq(usersTable.id, userId));
@@ -151,7 +152,7 @@ router.patch("/posts/:postId", requireAuth, requireOnboarding, async (req, res) 
     if (!post[0]) { res.status(404).json({ error: "Not found" }); return; }
     if (post[0].authorId !== userId) { res.status(403).json({ error: "Forbidden" }); return; }
     const updated = await db.update(postsTable).set({
-      ...(content !== undefined ? { content } : {}),
+      ...(content !== undefined ? { content, hashtags: extractHashtags(content) } : {}),
       ...(isPrivate !== undefined ? { isPrivate } : {}),
       updatedAt: new Date(),
     }).where(eq(postsTable.id, req.params.postId)).returning();

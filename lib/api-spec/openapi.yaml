@@ -954,6 +954,34 @@ paths:
               schema:
                 $ref: "#/components/schemas/PostPage"
 
+  /search/videos:
+    get:
+      operationId: searchVideos
+      tags: [search]
+      summary: Search for video posts by content
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Video results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostPage"
+
   # ── SETTINGS ──────────────────────────────────────────
   /settings:
     get:
@@ -1372,6 +1400,10 @@ components:
         mediaType:
           type: ["string", "null"]
           enum: ["image", "video", null]
+        hashtags:
+          type: array
+          items:
+            type: string
         isPrivate:
           type: boolean
         groupId:

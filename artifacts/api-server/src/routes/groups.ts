@@ -4,7 +4,7 @@ import { groupsTable, groupMembersTable, usersTable, postsTable } from "@workspa
 import { eq, and, desc, lt, ilike, sql } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { requireAuth, requireOnboarding } from "../lib/auth";
-import { getUserProfile, enrichPost, notifyMentions } from "../lib/helpers";
+import { getUserProfile, enrichPost, notifyMentions, extractHashtags } from "../lib/helpers";
 
 const router = Router();
 
@@ -187,6 +187,7 @@ router.post("/groups/:groupId/posts", requireAuth, requireOnboarding, async (req
       content: content || null,
       mediaUrls: mediaUrls || [],
       mediaType: mediaType || null,
+      hashtags: extractHashtags(content),
       isPrivate: false,
     }).returning();
     await db.update(usersTable).set({ postsCount: sql`${usersTable.postsCount} + 1` }).where(eq(usersTable.id, userId));

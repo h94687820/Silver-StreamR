@@ -88,6 +88,7 @@ export interface Post {
   mediaUrls?: string[];
   /** @nullable */
   mediaType?: PostMediaType;
+  hashtags?: string[];
   isPrivate: boolean;
   /** @nullable */
   groupId?: string | null;
@@ -498,6 +499,12 @@ limit?: number;
 };
 
 export type SearchPostsParams = {
+q: string;
+cursor?: string;
+limit?: number;
+};
+
+export type SearchVideosParams = {
 q: string;
 cursor?: string;
 limit?: number;

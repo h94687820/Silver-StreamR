@@ -43,4 +43,26 @@ router.get("/search/posts", requireAuth, requireOnboarding, async (req, res) => 
   }
 });
 
+// GET /search/videos
+router.get("/search/videos", requireAuth, requireOnboarding, async (req, res) => {
+  try {
+    const clerkId = (req as any).user.id;
+    const q = (req.query.q as string) || "";
+    const limit = Math.min(Number(req.query.limit) || 20, 30);
+    if (!q.trim()) { res.json({ items: [], nextCursor: null }); return; }
+    const posts = await db.select().from(postsTable)
+      .where(and(
+        ilike(postsTable.content, `%${q}%`),
+        eq(postsTable.isPrivate, false),
+        eq(postsTable.mediaType, "video"),
+      ))
+      .orderBy(desc(postsTable.createdAt)).limit(limit);
+    const items = await Promise.all(posts.map(p => enrichPost(p, clerkId)));
+    res.json({ items, nextCursor: null });
+  } catch (err) {
+    req.log.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 export default router;

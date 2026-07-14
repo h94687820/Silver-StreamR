@@ -142,7 +142,7 @@ export default function Settings() {
 
         <div className="text-center pt-8 pb-4 text-xs text-muted-foreground space-y-1">
           <p className="font-medium">Silver Stream</p>
-          <p className="text-accent font-semibold">V0.2.1 Beta</p>
+          <p className="text-accent font-semibold">V0.3 Beta</p>
           <p>Created by WhiteWase</p>
         </div>
 

@@ -58,6 +58,7 @@ export * from './reactionResultMyReaction';
 export * from './saveResult';
 export * from './searchPostsParams';
 export * from './searchUsersParams';
+export * from './searchVideosParams';
 export * from './settingsUpdate';
 export * from './settingsUpdateAccentColor';
 export * from './settingsUpdateLanguage';

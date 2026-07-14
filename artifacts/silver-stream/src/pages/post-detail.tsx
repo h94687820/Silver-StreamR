@@ -26,6 +26,7 @@ function CommentReplies({ commentId, postId }: { commentId: string; postId: stri
   const updateMutation = useUpdateComment();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
+  const [replyingToReply, setReplyingToReply] = useState<{ id: string; username: string } | null>(null);
 
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: getGetRepliesQueryKey(commentId) });
@@ -40,74 +41,101 @@ function CommentReplies({ commentId, postId }: { commentId: string; postId: stri
   return (
     <div className="ml-11 mt-2 space-y-2 border-l-2 border-border/40 pl-3">
       {repliesPage.items.map(reply => (
-        <div key={reply.id} className="flex items-start gap-2">
-          <Link href={`/profile/${reply.author.username}`}>
-            <Avatar className="w-6 h-6 shrink-0">
-              <AvatarImage src={reply.author.avatarUrl || undefined} />
-              <AvatarFallback className="text-[10px]">
-                {reply.author.displayName?.[0] || reply.author.username[0]}
-              </AvatarFallback>
-            </Avatar>
-          </Link>
-          <div className="flex-1 bg-secondary/40 rounded-xl px-2.5 py-1.5 min-w-0">
-            <div className="flex items-center justify-between gap-2 flex-wrap">
-              <Link href={`/profile/${reply.author.username}`} className="font-semibold text-xs hover:underline">
-                {reply.author.displayName || reply.author.username}
-              </Link>
-              <div className="flex items-center gap-1.5 shrink-0">
-                <span className="text-[10px] text-muted-foreground">
-                  {formatDistanceToNow(new Date(reply.createdAt))} ago
-                  {reply.updatedAt && " · edited"}
-                </span>
-                {reply.author?.isMe && editingId !== reply.id && (
-                  <>
-                    <button
-                      onClick={() => { setEditingId(reply.id); setEditContent(reply.content); }}
-                      className="text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      <Pencil className="w-3 h-3" />
-                    </button>
-                    <button
-                      onClick={() => {
-                        if (!confirm("Delete this reply?")) return;
-                        deleteMutation.mutate({ commentId: reply.id }, { onSuccess: invalidate });
-                      }}
-                      className="text-muted-foreground hover:text-destructive transition-colors"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </button>
-                  </>
-                )}
-              </div>
-            </div>
-
-            {editingId === reply.id ? (
-              <div className="mt-1 space-y-1">
-                <MentionTextarea
-                  value={editContent}
-                  onChange={setEditContent}
-                  className="min-h-[44px] text-xs bg-background rounded-lg resize-none"
-                />
-                <div className="flex gap-1 justify-end">
-                  <Button size="sm" variant="ghost" className="h-6 px-2 text-xs" onClick={() => setEditingId(null)}>
-                    <X className="w-3 h-3 mr-1" /> Cancel
-                  </Button>
-                  <Button
-                    size="sm" className="h-6 px-2 text-xs"
-                    disabled={!editContent.trim() || updateMutation.isPending}
-                    onClick={() => updateMutation.mutate(
-                      { commentId: reply.id, data: { content: editContent } },
-                      { onSuccess: () => { setEditingId(null); invalidate(); } }
-                    )}
-                  >
-                    <Check className="w-3 h-3 mr-1" /> Save
-                  </Button>
+        <div key={reply.id}>
+          <div className="flex items-start gap-2">
+            <Link href={`/profile/${reply.author.username}`}>
+              <Avatar className="w-6 h-6 shrink-0">
+                <AvatarImage src={reply.author.avatarUrl || undefined} />
+                <AvatarFallback className="text-[10px]">
+                  {reply.author.displayName?.[0] || reply.author.username[0]}
+                </AvatarFallback>
+              </Avatar>
+            </Link>
+            <div className="flex-1 bg-secondary/40 rounded-xl px-2.5 py-1.5 min-w-0">
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <Link href={`/profile/${reply.author.username}`} className="font-semibold text-xs hover:underline">
+                  {reply.author.displayName || reply.author.username}
+                </Link>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <span className="text-[10px] text-muted-foreground">
+                    {formatDistanceToNow(new Date(reply.createdAt))} ago
+                    {reply.updatedAt && " · edited"}
+                  </span>
+                  {reply.author?.isMe && editingId !== reply.id && (
+                    <>
+                      <button
+                        onClick={() => { setEditingId(reply.id); setEditContent(reply.content); }}
+                        className="text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        <Pencil className="w-3 h-3" />
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (!confirm("Delete this reply?")) return;
+                          deleteMutation.mutate({ commentId: reply.id }, { onSuccess: invalidate });
+                        }}
+                        className="text-muted-foreground hover:text-destructive transition-colors"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
-            ) : (
-              <MentionText content={reply.content} className="text-xs mt-0.5 whitespace-pre-wrap break-words" />
-            )}
+
+              {editingId === reply.id ? (
+                <div className="mt-1 space-y-1">
+                  <MentionTextarea
+                    value={editContent}
+                    onChange={setEditContent}
+                    className="min-h-[44px] text-xs bg-background rounded-lg resize-none"
+                  />
+                  <div className="flex gap-1 justify-end">
+                    <Button size="sm" variant="ghost" className="h-6 px-2 text-xs" onClick={() => setEditingId(null)}>
+                      <X className="w-3 h-3 mr-1" /> Cancel
+                    </Button>
+                    <Button
+                      size="sm" className="h-6 px-2 text-xs"
+                      disabled={!editContent.trim() || updateMutation.isPending}
+                      onClick={() => updateMutation.mutate(
+                        { commentId: reply.id, data: { content: editContent } },
+                        { onSuccess: () => { setEditingId(null); invalidate(); } }
+                      )}
+                    >
+                      <Check className="w-3 h-3 mr-1" /> Save
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <MentionText content={reply.content} className="text-xs mt-0.5 whitespace-pre-wrap break-words" />
+              )}
+            </div>
           </div>
+
+          {/* Reply-to-reply action */}
+          <div className="ml-8 mt-0.5">
+            <button
+              onClick={() => setReplyingToReply(
+                replyingToReply?.id === reply.id
+                  ? null
+                  : { id: reply.id, username: reply.author.username }
+              )}
+              className="text-[11px] text-muted-foreground hover:text-foreground font-medium transition-colors flex items-center gap-1"
+            >
+              <CornerDownRight className="w-2.5 h-2.5" />
+              {replyingToReply?.id === reply.id ? "Cancel" : "Reply"}
+            </button>
+          </div>
+
+          {/* Inline input for reply-to-reply */}
+          {replyingToReply?.id === reply.id && (
+            <ReplyInput
+              commentId={commentId}
+              postId={postId}
+              prefill={`@${replyingToReply.username} `}
+              onDone={() => setReplyingToReply(null)}
+            />
+          )}
         </div>
       ))}
     </div>
@@ -116,11 +144,11 @@ function CommentReplies({ commentId, postId }: { commentId: string; postId: stri
 
 /* ── Inline reply input ───────────────────────────────────── */
 function ReplyInput({
-  commentId, postId, onDone,
+  commentId, postId, prefill = "", onDone,
 }: {
-  commentId: string; postId: string; onDone: () => void;
+  commentId: string; postId: string; prefill?: string; onDone: () => void;
 }) {
-  const [text, setText] = useState("");
+  const [text, setText] = useState(prefill);
   const queryClient = useQueryClient();
   const createReply = useCreateReply();
 

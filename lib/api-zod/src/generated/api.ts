@@ -149,6 +149,7 @@ export const GetUserPostsResponse = zod.object({
   "content": zod.string().nullish(),
   "mediaUrls": zod.array(zod.string()).optional(),
   "mediaType": zod.union([zod.literal('image'),zod.literal('video'),zod.literal(null)]).nullish(),
+  "hashtags": zod.array(zod.string()).optional(),
   "isPrivate": zod.boolean(),
   "groupId": zod.string().nullish(),
   "likesCount": zod.number(),
@@ -302,6 +303,7 @@ export const GetFeedResponse = zod.object({
   "content": zod.string().nullish(),
   "mediaUrls": zod.array(zod.string()).optional(),
   "mediaType": zod.union([zod.literal('image'),zod.literal('video'),zod.literal(null)]).nullish(),
+  "hashtags": zod.array(zod.string()).optional(),
   "isPrivate": zod.boolean(),
   "groupId": zod.string().nullish(),
   "likesCount": zod.number(),
@@ -350,6 +352,7 @@ export const CreatePostResponse = zod.object({
   "content": zod.string().nullish(),
   "mediaUrls": zod.array(zod.string()).optional(),
   "mediaType": zod.union([zod.literal('image'),zod.literal('video'),zod.literal(null)]).nullish(),
+  "hashtags": zod.array(zod.string()).optional(),
   "isPrivate": zod.boolean(),
   "groupId": zod.string().nullish(),
   "likesCount": zod.number(),
@@ -394,6 +397,7 @@ export const GetVideoFeedResponse = zod.object({
   "content": zod.string().nullish(),
   "mediaUrls": zod.array(zod.string()).optional(),
   "mediaType": zod.union([zod.literal('image'),zod.literal('video'),zod.literal(null)]).nullish(),
+  "hashtags": zod.array(zod.string()).optional(),
   "isPrivate": zod.boolean(),
   "groupId": zod.string().nullish(),
   "likesCount": zod.number(),
@@ -440,6 +444,7 @@ export const GetSavedPostsResponse = zod.object({
   "content": zod.string().nullish(),
   "mediaUrls": zod.array(zod.string()).optional(),
   "mediaType": zod.union([zod.literal('image'),zod.literal('video'),zod.literal(null)]).nullish(),
+  "hashtags": zod.array(zod.string()).optional(),
   "isPrivate": zod.boolean(),
   "groupId": zod.string().nullish(),
   "likesCount": zod.number(),
@@ -486,6 +491,7 @@ export const GetPrivatePostsResponse = zod.object({
   "content": zod.string().nullish(),
   "mediaUrls": zod.array(zod.string()).optional(),
   "mediaType": zod.union([zod.literal('image'),zod.literal('video'),zod.literal(null)]).nullish(),
+  "hashtags": zod.array(zod.string()).optional(),
   "isPrivate": zod.boolean(),
   "groupId": zod.string().nullish(),
   "likesCount": zod.number(),
@@ -528,6 +534,7 @@ export const GetPostResponse = zod.object({
   "content": zod.string().nullish(),
   "mediaUrls": zod.array(zod.string()).optional(),
   "mediaType": zod.union([zod.literal('image'),zod.literal('video'),zod.literal(null)]).nullish(),
+  "hashtags": zod.array(zod.string()).optional(),
   "isPrivate": zod.boolean(),
   "groupId": zod.string().nullish(),
   "likesCount": zod.number(),
@@ -573,6 +580,7 @@ export const UpdatePostResponse = zod.object({
   "content": zod.string().nullish(),
   "mediaUrls": zod.array(zod.string()).optional(),
   "mediaType": zod.union([zod.literal('image'),zod.literal('video'),zod.literal(null)]).nullish(),
+  "hashtags": zod.array(zod.string()).optional(),
   "isPrivate": zod.boolean(),
   "groupId": zod.string().nullish(),
   "likesCount": zod.number(),
@@ -1268,6 +1276,55 @@ export const SearchPostsResponse = zod.object({
   "content": zod.string().nullish(),
   "mediaUrls": zod.array(zod.string()).optional(),
   "mediaType": zod.union([zod.literal('image'),zod.literal('video'),zod.literal(null)]).nullish(),
+  "hashtags": zod.array(zod.string()).optional(),
+  "isPrivate": zod.boolean(),
+  "groupId": zod.string().nullish(),
+  "likesCount": zod.number(),
+  "dislikesCount": zod.number(),
+  "commentsCount": zod.number(),
+  "myReaction": zod.union([zod.literal('like'),zod.literal('dislike'),zod.literal(null)]).nullish(),
+  "isSaved": zod.boolean(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})),
+  "nextCursor": zod.string().nullish()
+})
+
+
+/**
+ * @summary Search for video posts by content
+ */
+export const searchVideosQueryLimitDefault = 20;
+
+export const SearchVideosQueryParams = zod.object({
+  "q": zod.coerce.string(),
+  "cursor": zod.coerce.string().optional(),
+  "limit": zod.coerce.number().default(searchVideosQueryLimitDefault)
+})
+
+export const SearchVideosResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.string(),
+  "authorId": zod.string(),
+  "author": zod.object({
+  "id": zod.string(),
+  "clerkId": zod.string(),
+  "username": zod.string(),
+  "displayName": zod.string().nullish(),
+  "bio": zod.string().nullish(),
+  "avatarUrl": zod.string().nullish(),
+  "followersCount": zod.number(),
+  "followingCount": zod.number(),
+  "postsCount": zod.number(),
+  "isFollowing": zod.boolean(),
+  "isMe": zod.boolean(),
+  "onboardingComplete": zod.boolean(),
+  "createdAt": zod.string()
+}),
+  "content": zod.string().nullish(),
+  "mediaUrls": zod.array(zod.string()).optional(),
+  "mediaType": zod.union([zod.literal('image'),zod.literal('video'),zod.literal(null)]).nullish(),
+  "hashtags": zod.array(zod.string()).optional(),
   "isPrivate": zod.boolean(),
   "groupId": zod.string().nullish(),
   "likesCount": zod.number(),
@@ -1590,6 +1647,7 @@ export const GetGroupPostsResponse = zod.object({
   "content": zod.string().nullish(),
   "mediaUrls": zod.array(zod.string()).optional(),
   "mediaType": zod.union([zod.literal('image'),zod.literal('video'),zod.literal(null)]).nullish(),
+  "hashtags": zod.array(zod.string()).optional(),
   "isPrivate": zod.boolean(),
   "groupId": zod.string().nullish(),
   "likesCount": zod.number(),
@@ -1642,6 +1700,7 @@ export const CreateGroupPostResponse = zod.object({
   "content": zod.string().nullish(),
   "mediaUrls": zod.array(zod.string()).optional(),
   "mediaType": zod.union([zod.literal('image'),zod.literal('video'),zod.literal(null)]).nullish(),
+  "hashtags": zod.array(zod.string()).optional(),
   "isPrivate": zod.boolean(),
   "groupId": zod.string().nullish(),
   "likesCount": zod.number(),

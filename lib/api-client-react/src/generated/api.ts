@@ -64,6 +64,7 @@ import type {
   SaveResult,
   SearchPostsParams,
   SearchUsersParams,
+  SearchVideosParams,
   SettingsUpdate,
   Story,
   StoryGroup,
@@ -3466,6 +3467,90 @@ export function useSearchPosts<TData = Awaited<ReturnType<typeof searchPosts>>, 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getSearchPostsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getSearchVideosUrl = (params: SearchVideosParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/search/videos?${stringifiedParams}` : `/api/search/videos`
+}
+
+/**
+ * @summary Search for video posts by content
+ */
+export const searchVideos = async (params: SearchVideosParams, options?: RequestInit): Promise<PostPage> => {
+
+  return customFetch<PostPage>(getSearchVideosUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getSearchVideosQueryKey = (params?: SearchVideosParams,) => {
+    return [
+    `/api/search/videos`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getSearchVideosQueryOptions = <TData = Awaited<ReturnType<typeof searchVideos>>, TError = ErrorType<unknown>>(params: SearchVideosParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof searchVideos>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getSearchVideosQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof searchVideos>>> = ({ signal }) => searchVideos(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof searchVideos>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type SearchVideosQueryResult = NonNullable<Awaited<ReturnType<typeof searchVideos>>>
+export type SearchVideosQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Search for video posts by content
+ */
+
+export function useSearchVideos<TData = Awaited<ReturnType<typeof searchVideos>>, TError = ErrorType<unknown>>(
+ params: SearchVideosParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof searchVideos>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getSearchVideosQueryOptions(params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

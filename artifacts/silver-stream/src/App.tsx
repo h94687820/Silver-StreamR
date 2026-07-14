@@ -21,6 +21,7 @@ import Settings from "@/pages/settings";
 import Profile from "@/pages/profile";
 import Create from "@/pages/create";
 import Search from "@/pages/search";
+import SearchResults from "@/pages/search-results";
 import Notifications from "@/pages/notifications";
 import Videos from "@/pages/videos";
 import Saved from "@/pages/saved";
@@ -157,6 +158,7 @@ function App() {
             <Route path="/create" component={() => <ProtectedRoute component={Create} />} />
             <Route path="/settings" component={() => <ProtectedRoute component={Settings} />} />
             <Route path="/search" component={() => <ProtectedRoute component={Search} />} />
+            <Route path="/search/results" component={() => <ProtectedRoute component={SearchResults} />} />
             <Route path="/notifications" component={() => <ProtectedRoute component={Notifications} />} />
             <Route path="/profile/:username" component={() => <ProtectedRoute component={Profile} />} />
             <Route path="/saved" component={() => <ProtectedRoute component={Saved} />} />

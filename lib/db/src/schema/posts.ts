@@ -11,6 +11,7 @@ export const postsTable = pgTable("posts", {
   content: text("content"),
   mediaUrls: text("media_urls").array().notNull().default([]),
   mediaType: text("media_type"), // "image" | "video"
+  hashtags: text("hashtags").array().notNull().default([]),
   isPrivate: boolean("is_private").notNull().default(false),
   likesCount: integer("likes_count").notNull().default(0),
   dislikesCount: integer("dislikes_count").notNull().default(0),
