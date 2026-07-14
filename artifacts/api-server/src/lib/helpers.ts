@@ -1,5 +1,5 @@
 import { db } from "@workspace/db";
-import { usersTable, followsTable, reactionsTable, savedPostsTable, postsTable, notificationsTable } from "@workspace/db";
+import { usersTable, followsTable, reactionsTable, savedPostsTable, postsTable, notificationsTable, blocksTable } from "@workspace/db";
 import { eq, and, inArray } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
@@ -53,11 +53,18 @@ export async function getUserProfile(targetId: string, viewerId?: string) {
   const user = users[0];
 
   let isFollowing = false;
+  let isBlocked = false;
   if (viewerId && viewerId !== targetId) {
-    const follow = await db.select().from(followsTable).where(
-      and(eq(followsTable.followerId, viewerId), eq(followsTable.followingId, targetId))
-    ).limit(1);
+    const [follow, block] = await Promise.all([
+      db.select().from(followsTable).where(
+        and(eq(followsTable.followerId, viewerId), eq(followsTable.followingId, targetId))
+      ).limit(1),
+      db.select().from(blocksTable).where(
+        and(eq(blocksTable.blockerId, viewerId), eq(blocksTable.blockedId, targetId))
+      ).limit(1),
+    ]);
     isFollowing = follow.length > 0;
+    isBlocked = block.length > 0;
   }
 
   return {
@@ -71,6 +78,7 @@ export async function getUserProfile(targetId: string, viewerId?: string) {
     followingCount: user.followingCount,
     postsCount: user.postsCount,
     isFollowing,
+    isBlocked,
     isMe: viewerId === targetId,
     onboardingComplete: user.onboardingComplete,
     createdAt: user.createdAt.toISOString(),

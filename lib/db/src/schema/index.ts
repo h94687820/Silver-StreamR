@@ -9,3 +9,4 @@ export * from "./conversations";
 export * from "./savedPosts";
 export * from "./settings";
 export * from "./groups";
+export * from "./blocks";

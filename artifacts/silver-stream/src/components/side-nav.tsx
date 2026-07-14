@@ -2,9 +2,11 @@ import { Link, useLocation } from "wouter";
 import { Home, Play, Plus, Bookmark, User, Search, Bell, MessageSquare, Users, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useGetUnreadCount, getGetUnreadCountQueryKey } from "@workspace/api-client-react";
+import { useTranslation } from "@/lib/i18n";
 
 export function SideNav({ username }: { username?: string }) {
   const [location] = useLocation();
+  const { t } = useTranslation();
   const { data: unread } = useGetUnreadCount({
     query: {
       queryKey: getGetUnreadCountQueryKey(),
@@ -17,19 +19,19 @@ export function SideNav({ username }: { username?: string }) {
     return location === path;
   };
 
-  const navItems = [
-    { icon: Home, path: "/feed", label: "Home" },
-    { icon: Search, path: "/search", label: "Search" },
-    { icon: Play, path: "/videos", label: "Videos" },
-    { icon: Bell, path: "/notifications", label: "Notifications", badge: unread && unread.count > 0 },
-    { icon: MessageSquare, path: "/chat", label: "Messages" },
-    { icon: Bookmark, path: "/saved", label: "Saved" },
-    { icon: Users, path: "/groups", label: "Groups" },
-    { icon: User, path: username ? `/profile/${username}` : "/profile/me", label: "Profile" },
+  const navItems: Array<{ icon: React.ElementType; path: string; labelKey: string; badge?: boolean }> = [
+    { icon: Home, path: "/feed", labelKey: "nav_home" },
+    { icon: Search, path: "/search", labelKey: "nav_search" },
+    { icon: Play, path: "/videos", labelKey: "nav_videos" },
+    { icon: Bell, path: "/notifications", labelKey: "nav_notifications", badge: !!(unread && unread.count > 0) },
+    { icon: MessageSquare, path: "/chat", labelKey: "nav_chat" },
+    { icon: Bookmark, path: "/saved", labelKey: "nav_saved" },
+    { icon: Users, path: "/groups", labelKey: "nav_groups" },
+    { icon: User, path: username ? `/profile/${username}` : "/profile/me", labelKey: "nav_profile" },
   ];
 
   return (
-    <div className="hidden lg:flex sticky top-0 h-[100dvh] flex-col py-6 px-3 border-r border-border/50 w-64 xl:w-72 shrink-0">
+    <div className="hidden lg:flex sticky top-0 h-[100dvh] flex-col py-6 px-3 border-e border-border/50 w-64 xl:w-72 shrink-0">
       <Link href="/feed" className="px-3 mb-8 flex items-center gap-2">
         <span className="text-xl font-bold text-shimmer">Silver Stream</span>
       </Link>
@@ -49,10 +51,10 @@ export function SideNav({ username }: { username?: string }) {
               <span className="relative">
                 <item.icon className={cn("w-6 h-6", active && "scale-110")} />
                 {item.badge && (
-                  <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-destructive rounded-full border border-background" />
+                  <span className="absolute -top-0.5 -end-0.5 w-2 h-2 bg-destructive rounded-full border border-background" />
                 )}
               </span>
-              <span>{item.label}</span>
+              <span>{t(item.labelKey as any)}</span>
             </Link>
           );
         })}
@@ -63,7 +65,7 @@ export function SideNav({ username }: { username?: string }) {
         className="mx-3 mb-3 h-12 rounded-2xl bg-gradient-to-tr from-accent to-accent/80 text-accent-foreground flex items-center justify-center gap-2 font-semibold shadow-lg silver-shimmer transition-transform active:scale-95"
       >
         <Plus className="w-5 h-5" />
-        Create
+        {t("nav_create")}
       </Link>
 
       <Link
@@ -74,7 +76,7 @@ export function SideNav({ username }: { username?: string }) {
         )}
       >
         <Settings className="w-6 h-6" />
-        <span>Settings</span>
+        <span>{t("nav_settings")}</span>
       </Link>
     </div>
   );

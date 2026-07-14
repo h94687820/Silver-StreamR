@@ -23,6 +23,7 @@ export interface UserProfile {
   followingCount: number;
   postsCount: number;
   isFollowing: boolean;
+  isBlocked: boolean;
   isMe: boolean;
   onboardingComplete: boolean;
   createdAt: string;
@@ -384,6 +385,10 @@ export interface SettingsUpdate {
   theme?: SettingsUpdateTheme;
   accentColor?: SettingsUpdateAccentColor;
   language?: SettingsUpdateLanguage;
+}
+
+export interface BlockResult {
+  blocked: boolean;
 }
 
 export interface DeleteResult {

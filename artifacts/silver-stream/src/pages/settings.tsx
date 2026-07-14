@@ -2,20 +2,21 @@ import { useGetSettings, useUpdateSettings, useGetMe, useDeleteAccount } from "@
 import { useClerk } from "@clerk/react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
 import { useTheme } from "@/components/theme-provider";
-import { LogOut, Trash2, Moon, Sun, Monitor, Palette, Globe, ChevronRight, Lock, Users } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
+import { LogOut, Trash2, Moon, Sun, Monitor, Palette, Globe, ChevronRight, Lock, Users, UserX, UserCheck } from "lucide-react";
 
 export default function Settings() {
   const { signOut } = useClerk();
   const { mode, setMode, accent, setAccent, language, setLanguage } = useTheme();
+  const { t } = useTranslation();
   const { data: me } = useGetMe();
   const deleteMutation = useDeleteAccount();
 
   const handleLogout = () => signOut();
 
   const handleDelete = () => {
-    if (confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
+    if (confirm(t("settings_delete_confirm"))) {
       deleteMutation.mutate(undefined, {
         onSuccess: () => signOut()
       });
@@ -25,28 +26,28 @@ export default function Settings() {
   return (
     <div className="w-full pb-8">
       <div className="p-6 pb-2 border-b border-border/50">
-        <h1 className="text-2xl font-bold">Settings</h1>
+        <h1 className="text-2xl font-bold">{t("settings_title")}</h1>
       </div>
 
       <div className="p-4 space-y-6">
         
-        {/* Theme Section */}
+        {/* Appearance Section */}
         <section>
-          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 px-2">Appearance</h2>
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 px-2">{t("settings_appearance")}</h2>
           <div className="bg-card border border-border/50 rounded-2xl overflow-hidden divide-y divide-border/50">
             <div className="p-4 flex items-center justify-between">
               <div className="flex items-center gap-3 text-foreground">
                 {mode === "dark" ? <Moon className="w-5 h-5 text-muted-foreground" /> : mode === "light" ? <Sun className="w-5 h-5 text-muted-foreground" /> : <Monitor className="w-5 h-5 text-muted-foreground" />}
-                <span className="font-medium">Theme Mode</span>
+                <span className="font-medium">{t("settings_theme")}</span>
               </div>
               <div className="flex bg-secondary rounded-lg p-1">
-                {["auto", "light", "dark"].map((m) => (
+                {(["auto", "light", "dark"] as const).map((m) => (
                   <button
                     key={m}
-                    className={`px-3 py-1 text-xs rounded-md capitalize font-medium transition-colors ${mode === m ? "bg-background shadow text-foreground" : "text-muted-foreground"}`}
-                    onClick={() => setMode(m as any)}
+                    className={`px-3 py-1 text-xs rounded-md font-medium transition-colors ${mode === m ? "bg-background shadow text-foreground" : "text-muted-foreground"}`}
+                    onClick={() => setMode(m)}
                   >
-                    {m}
+                    {t(`settings_theme_${m}` as any)}
                   </button>
                 ))}
               </div>
@@ -55,7 +56,7 @@ export default function Settings() {
             <div className="p-4 flex items-center justify-between">
               <div className="flex items-center gap-3 text-foreground">
                 <Palette className="w-5 h-5 text-muted-foreground" />
-                <span className="font-medium">Accent Color</span>
+                <span className="font-medium">{t("settings_accent")}</span>
               </div>
               <div className="flex items-center gap-2">
                 {["blue", "green", "purple", "brown", "black", "white"].map((color) => (
@@ -74,7 +75,7 @@ export default function Settings() {
             <div className="p-4 flex items-center justify-between">
               <div className="flex items-center gap-3 text-foreground">
                 <Globe className="w-5 h-5 text-muted-foreground" />
-                <span className="font-medium">Language</span>
+                <span className="font-medium">{t("settings_language")}</span>
               </div>
               <div className="flex bg-secondary rounded-lg p-1">
                 <button
@@ -96,16 +97,23 @@ export default function Settings() {
 
         {/* Account Section */}
         <section>
-          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 px-2">Account</h2>
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 px-2">{t("settings_account")}</h2>
           <div className="bg-card border border-border/50 rounded-2xl overflow-hidden divide-y divide-border/50">
             <Link href={me?.username ? `/profile/${me.username}` : "/profile/me"} className="w-full p-4 flex items-center justify-between hover:bg-secondary/50 transition-colors">
-              <span className="font-medium">Edit Profile</span>
+              <span className="font-medium">{t("settings_edit_profile")}</span>
               <ChevronRight className="w-4 h-4 text-muted-foreground" />
             </Link>
             <Link href="/groups" className="w-full p-4 flex items-center justify-between hover:bg-secondary/50 transition-colors">
               <div className="flex items-center gap-3">
                 <Users className="w-5 h-5 text-muted-foreground" />
-                <span className="font-medium">Groups</span>
+                <span className="font-medium">{t("settings_groups")}</span>
+              </div>
+              <ChevronRight className="w-4 h-4 text-muted-foreground" />
+            </Link>
+            <Link href="/followers" className="w-full p-4 flex items-center justify-between hover:bg-secondary/50 transition-colors">
+              <div className="flex items-center gap-3">
+                <UserCheck className="w-5 h-5 text-muted-foreground" />
+                <span className="font-medium">{t("settings_my_followers")}</span>
               </div>
               <ChevronRight className="w-4 h-4 text-muted-foreground" />
             </Link>
@@ -114,12 +122,19 @@ export default function Settings() {
 
         {/* Privacy Section */}
         <section>
-          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 px-2">Privacy</h2>
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 px-2">{t("settings_privacy")}</h2>
           <div className="bg-card border border-border/50 rounded-2xl overflow-hidden divide-y divide-border/50">
             <Link href="/settings/private-posts" className="w-full p-4 flex items-center justify-between hover:bg-secondary/50 transition-colors">
               <div className="flex items-center gap-3">
                 <Lock className="w-5 h-5 text-muted-foreground" />
-                <span className="font-medium">Private Posts</span>
+                <span className="font-medium">{t("settings_private_posts")}</span>
+              </div>
+              <ChevronRight className="w-4 h-4 text-muted-foreground" />
+            </Link>
+            <Link href="/settings/blocked" className="w-full p-4 flex items-center justify-between hover:bg-secondary/50 transition-colors">
+              <div className="flex items-center gap-3">
+                <UserX className="w-5 h-5 text-muted-foreground" />
+                <span className="font-medium">{t("settings_blocked_users")}</span>
               </div>
               <ChevronRight className="w-4 h-4 text-muted-foreground" />
             </Link>
@@ -131,18 +146,19 @@ export default function Settings() {
           <div className="bg-card border border-border/50 rounded-2xl overflow-hidden divide-y divide-border/50">
             <button onClick={handleLogout} className="w-full p-4 flex items-center gap-3 text-foreground hover:bg-secondary/50 transition-colors">
               <LogOut className="w-5 h-5 text-muted-foreground" />
-              <span className="font-medium">Sign Out</span>
+              <span className="font-medium">{t("settings_sign_out")}</span>
             </button>
             <button onClick={handleDelete} className="w-full p-4 flex items-center gap-3 text-destructive hover:bg-destructive/10 transition-colors">
               <Trash2 className="w-5 h-5" />
-              <span className="font-medium">Delete Account</span>
+              <span className="font-medium">{t("settings_delete_account")}</span>
             </button>
           </div>
         </section>
 
         <div className="text-center pt-8 pb-4 text-xs text-muted-foreground space-y-1">
           <p className="font-medium">Silver Stream</p>
-          <p className="text-accent font-semibold">V0.3 Beta</p>
+          <p className="text-accent font-semibold">V0.4 Beta</p>
+          <p className="text-muted-foreground/70">Summit Beginning Edition</p>
           <p>Created by WhiteWase</p>
         </div>
 

@@ -1,17 +1,21 @@
 import { useRoute } from "wouter";
-import { useGetUserByUsername, useGetUserPosts, useFollowUser, useUnfollowUser, useGetMe, getGetUserByUsernameQueryKey, getGetUserPostsQueryKey } from "@workspace/api-client-react";
+import { useGetUserByUsername, useGetUserPosts, useFollowUser, useUnfollowUser, useBlockUser, useUnblockUser, useGetMe, getGetUserByUsernameQueryKey, getGetUserPostsQueryKey } from "@workspace/api-client-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { PostCard } from "@/components/post-card";
-import { Grid, Video, Bookmark, Settings, Edit3 } from "lucide-react";
+import { Grid, Video, Bookmark, Edit3, ShieldOff, Shield } from "lucide-react";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { EditProfileDialog } from "@/components/edit-profile-dialog";
+import { useTranslation } from "@/lib/i18n";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { MoreHorizontal } from "lucide-react";
 
 export default function Profile() {
   const [match, params] = useRoute("/profile/:username");
   const username = params?.username;
   const { data: me } = useGetMe();
+  const { t } = useTranslation();
   
   const isMe = username === "me" || username === me?.username;
   const targetUsername = isMe ? (me?.username || "") : (username || "");
@@ -29,6 +33,8 @@ export default function Profile() {
   const queryClient = useQueryClient();
   const followMutation = useFollowUser();
   const unfollowMutation = useUnfollowUser();
+  const blockMutation = useBlockUser();
+  const unblockMutation = useUnblockUser();
 
   const handleFollowToggle = () => {
     if (!profile) return;
@@ -43,8 +49,23 @@ export default function Profile() {
     }
   };
 
-  if (isLoading) return <div className="p-8 text-center">Loading profile...</div>;
-  if (!profile) return <div className="p-8 text-center text-destructive">Profile not found</div>;
+  const handleBlock = () => {
+    if (!profile) return;
+    if (profile.isBlocked) {
+      unblockMutation.mutate({ userId: profile.id }, {
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: getGetUserByUsernameQueryKey(targetUsername) })
+      });
+    } else {
+      if (confirm(t("profile_block_confirm"))) {
+        blockMutation.mutate({ userId: profile.id }, {
+          onSuccess: () => queryClient.invalidateQueries({ queryKey: getGetUserByUsernameQueryKey(targetUsername) })
+        });
+      }
+    }
+  };
+
+  if (isLoading) return <div className="p-8 text-center">{t("profile_loading")}</div>;
+  if (!profile) return <div className="p-8 text-center text-destructive">{t("profile_not_found")}</div>;
 
   return (
     <div className="w-full bg-background min-h-screen">
@@ -60,7 +81,7 @@ export default function Profile() {
             <AvatarFallback className="text-2xl">{profile.displayName?.[0] || profile.username[0]}</AvatarFallback>
           </Avatar>
           
-          <div className="mb-2">
+          <div className="mb-2 flex items-center gap-2">
             {isMe ? (
               <Button
                 variant="outline"
@@ -68,16 +89,39 @@ export default function Profile() {
                 className="rounded-full font-semibold border-border bg-background/50 backdrop-blur-md"
                 onClick={() => setEditOpen(true)}
               >
-                <Edit3 className="w-4 h-4 mr-2" />
-                Edit Profile
+                <Edit3 className="w-4 h-4 me-2" />
+                {t("profile_edit")}
               </Button>
             ) : (
-              <Button 
-                onClick={handleFollowToggle}
-                className={`rounded-full font-semibold px-6 shadow-md ${profile.isFollowing ? 'bg-secondary text-foreground hover:bg-destructive/10 hover:text-destructive hover:border-destructive border' : 'bg-primary text-primary-foreground silver-shimmer'}`}
-              >
-                {profile.isFollowing ? "Following" : "Follow"}
-              </Button>
+              <>
+                <Button 
+                  onClick={handleFollowToggle}
+                  disabled={followMutation.isPending || unfollowMutation.isPending}
+                  className={`rounded-full font-semibold px-6 shadow-md ${profile.isFollowing ? 'bg-secondary text-foreground hover:bg-destructive/10 hover:text-destructive hover:border-destructive border' : 'bg-primary text-primary-foreground silver-shimmer'}`}
+                >
+                  {profile.isFollowing ? t("profile_following") : t("profile_follow")}
+                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" className="rounded-full px-2 border-border">
+                      <MoreHorizontal className="w-4 h-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem
+                      onClick={handleBlock}
+                      className={profile.isBlocked ? "text-foreground" : "text-destructive focus:text-destructive"}
+                      disabled={blockMutation.isPending || unblockMutation.isPending}
+                    >
+                      {profile.isBlocked ? (
+                        <><Shield className="w-4 h-4 me-2" />{t("profile_unblock")}</>
+                      ) : (
+                        <><ShieldOff className="w-4 h-4 me-2" />{t("profile_block")}</>
+                      )}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
             )}
           </div>
         </div>
@@ -95,15 +139,15 @@ export default function Profile() {
         <div className="flex gap-6 mb-8 border-y border-border/50 py-3">
           <div className="flex flex-col">
             <span className="font-bold text-foreground text-lg">{profile.postsCount}</span>
-            <span className="text-xs text-muted-foreground">Posts</span>
+            <span className="text-xs text-muted-foreground">{t("profile_posts")}</span>
           </div>
           <div className="flex flex-col">
             <span className="font-bold text-foreground text-lg">{profile.followersCount}</span>
-            <span className="text-xs text-muted-foreground">Followers</span>
+            <span className="text-xs text-muted-foreground">{t("profile_followers")}</span>
           </div>
           <div className="flex flex-col">
             <span className="font-bold text-foreground text-lg">{profile.followingCount}</span>
-            <span className="text-xs text-muted-foreground">Following</span>
+            <span className="text-xs text-muted-foreground">{t("profile_following_count")}</span>
           </div>
         </div>
 
@@ -114,14 +158,14 @@ export default function Profile() {
             className={`flex-1 flex items-center justify-center gap-2 py-3 border-b-2 transition-colors ${tab === "posts" ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
           >
             <Grid className="w-4 h-4" />
-            <span className="text-sm font-semibold uppercase tracking-wider hidden sm:inline">Posts</span>
+            <span className="text-sm font-semibold uppercase tracking-wider hidden sm:inline">{t("profile_tab_posts")}</span>
           </button>
           <button 
             onClick={() => setTab("reels")}
             className={`flex-1 flex items-center justify-center gap-2 py-3 border-b-2 transition-colors ${tab === "reels" ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
           >
             <Video className="w-4 h-4" />
-            <span className="text-sm font-semibold uppercase tracking-wider hidden sm:inline">Reels</span>
+            <span className="text-sm font-semibold uppercase tracking-wider hidden sm:inline">{t("profile_tab_reels")}</span>
           </button>
           {isMe && (
             <button 
@@ -129,7 +173,7 @@ export default function Profile() {
               className={`flex-1 flex items-center justify-center gap-2 py-3 border-b-2 transition-colors ${tab === "saved" ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
             >
               <Bookmark className="w-4 h-4" />
-              <span className="text-sm font-semibold uppercase tracking-wider hidden sm:inline">Saved</span>
+              <span className="text-sm font-semibold uppercase tracking-wider hidden sm:inline">{t("profile_tab_saved")}</span>
             </button>
           )}
         </div>
@@ -140,7 +184,7 @@ export default function Profile() {
             <div className="space-y-0">
               {postsPage?.items.length === 0 ? (
                 <div className="py-12 text-center text-muted-foreground bg-secondary/20 rounded-2xl border border-border/50">
-                  No posts yet.
+                  {t("profile_no_posts")}
                 </div>
               ) : (
                 postsPage?.items.map(post => (
@@ -151,12 +195,12 @@ export default function Profile() {
           )}
           {tab === "reels" && (
             <div className="py-12 text-center text-muted-foreground bg-secondary/20 rounded-2xl border border-border/50">
-              Reels coming soon.
+              {t("profile_reels_soon")}
             </div>
           )}
           {tab === "saved" && isMe && (
             <div className="py-12 text-center text-muted-foreground bg-secondary/20 rounded-2xl border border-border/50">
-              Saved items will appear here.
+              {t("profile_tab_saved")}
             </div>
           )}
         </div>

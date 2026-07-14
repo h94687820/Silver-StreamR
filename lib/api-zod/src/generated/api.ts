@@ -30,6 +30,7 @@ export const GetMeResponse = zod.object({
   "followingCount": zod.number(),
   "postsCount": zod.number(),
   "isFollowing": zod.boolean(),
+  "isBlocked": zod.boolean(),
   "isMe": zod.boolean(),
   "onboardingComplete": zod.boolean(),
   "createdAt": zod.string()
@@ -57,6 +58,7 @@ export const UpdateMeResponse = zod.object({
   "followingCount": zod.number(),
   "postsCount": zod.number(),
   "isFollowing": zod.boolean(),
+  "isBlocked": zod.boolean(),
   "isMe": zod.boolean(),
   "onboardingComplete": zod.boolean(),
   "createdAt": zod.string()
@@ -83,6 +85,7 @@ export const CompleteOnboardingResponse = zod.object({
   "followingCount": zod.number(),
   "postsCount": zod.number(),
   "isFollowing": zod.boolean(),
+  "isBlocked": zod.boolean(),
   "isMe": zod.boolean(),
   "onboardingComplete": zod.boolean(),
   "createdAt": zod.string()
@@ -107,6 +110,7 @@ export const GetUserByUsernameResponse = zod.object({
   "followingCount": zod.number(),
   "postsCount": zod.number(),
   "isFollowing": zod.boolean(),
+  "isBlocked": zod.boolean(),
   "isMe": zod.boolean(),
   "onboardingComplete": zod.boolean(),
   "createdAt": zod.string()
@@ -142,6 +146,7 @@ export const GetUserPostsResponse = zod.object({
   "followingCount": zod.number(),
   "postsCount": zod.number(),
   "isFollowing": zod.boolean(),
+  "isBlocked": zod.boolean(),
   "isMe": zod.boolean(),
   "onboardingComplete": zod.boolean(),
   "createdAt": zod.string()
@@ -229,6 +234,7 @@ export const GetFollowersResponse = zod.object({
   "followingCount": zod.number(),
   "postsCount": zod.number(),
   "isFollowing": zod.boolean(),
+  "isBlocked": zod.boolean(),
   "isMe": zod.boolean(),
   "onboardingComplete": zod.boolean(),
   "createdAt": zod.string()
@@ -263,6 +269,7 @@ export const GetFollowingResponse = zod.object({
   "followingCount": zod.number(),
   "postsCount": zod.number(),
   "isFollowing": zod.boolean(),
+  "isBlocked": zod.boolean(),
   "isMe": zod.boolean(),
   "onboardingComplete": zod.boolean(),
   "createdAt": zod.string()
@@ -296,6 +303,7 @@ export const GetFeedResponse = zod.object({
   "followingCount": zod.number(),
   "postsCount": zod.number(),
   "isFollowing": zod.boolean(),
+  "isBlocked": zod.boolean(),
   "isMe": zod.boolean(),
   "onboardingComplete": zod.boolean(),
   "createdAt": zod.string()
@@ -345,6 +353,7 @@ export const CreatePostResponse = zod.object({
   "followingCount": zod.number(),
   "postsCount": zod.number(),
   "isFollowing": zod.boolean(),
+  "isBlocked": zod.boolean(),
   "isMe": zod.boolean(),
   "onboardingComplete": zod.boolean(),
   "createdAt": zod.string()
@@ -390,6 +399,7 @@ export const GetVideoFeedResponse = zod.object({
   "followingCount": zod.number(),
   "postsCount": zod.number(),
   "isFollowing": zod.boolean(),
+  "isBlocked": zod.boolean(),
   "isMe": zod.boolean(),
   "onboardingComplete": zod.boolean(),
   "createdAt": zod.string()
@@ -437,6 +447,7 @@ export const GetSavedPostsResponse = zod.object({
   "followingCount": zod.number(),
   "postsCount": zod.number(),
   "isFollowing": zod.boolean(),
+  "isBlocked": zod.boolean(),
   "isMe": zod.boolean(),
   "onboardingComplete": zod.boolean(),
   "createdAt": zod.string()
@@ -484,6 +495,7 @@ export const GetPrivatePostsResponse = zod.object({
   "followingCount": zod.number(),
   "postsCount": zod.number(),
   "isFollowing": zod.boolean(),
+  "isBlocked": zod.boolean(),
   "isMe": zod.boolean(),
   "onboardingComplete": zod.boolean(),
   "createdAt": zod.string()
@@ -527,6 +539,7 @@ export const GetPostResponse = zod.object({
   "followingCount": zod.number(),
   "postsCount": zod.number(),
   "isFollowing": zod.boolean(),
+  "isBlocked": zod.boolean(),
   "isMe": zod.boolean(),
   "onboardingComplete": zod.boolean(),
   "createdAt": zod.string()
@@ -573,6 +586,7 @@ export const UpdatePostResponse = zod.object({
   "followingCount": zod.number(),
   "postsCount": zod.number(),
   "isFollowing": zod.boolean(),
+  "isBlocked": zod.boolean(),
   "isMe": zod.boolean(),
   "onboardingComplete": zod.boolean(),
   "createdAt": zod.string()
@@ -691,6 +705,7 @@ export const GetCommentsResponse = zod.object({
   "followingCount": zod.number(),
   "postsCount": zod.number(),
   "isFollowing": zod.boolean(),
+  "isBlocked": zod.boolean(),
   "isMe": zod.boolean(),
   "onboardingComplete": zod.boolean(),
   "createdAt": zod.string()
@@ -731,6 +746,7 @@ export const CreateCommentResponse = zod.object({
   "followingCount": zod.number(),
   "postsCount": zod.number(),
   "isFollowing": zod.boolean(),
+  "isBlocked": zod.boolean(),
   "isMe": zod.boolean(),
   "onboardingComplete": zod.boolean(),
   "createdAt": zod.string()
@@ -769,6 +785,7 @@ export const UpdateCommentResponse = zod.object({
   "followingCount": zod.number(),
   "postsCount": zod.number(),
   "isFollowing": zod.boolean(),
+  "isBlocked": zod.boolean(),
   "isMe": zod.boolean(),
   "onboardingComplete": zod.boolean(),
   "createdAt": zod.string()
@@ -816,6 +833,7 @@ export const GetRepliesResponse = zod.object({
   "followingCount": zod.number(),
   "postsCount": zod.number(),
   "isFollowing": zod.boolean(),
+  "isBlocked": zod.boolean(),
   "isMe": zod.boolean(),
   "onboardingComplete": zod.boolean(),
   "createdAt": zod.string()
@@ -856,6 +874,7 @@ export const CreateReplyResponse = zod.object({
   "followingCount": zod.number(),
   "postsCount": zod.number(),
   "isFollowing": zod.boolean(),
+  "isBlocked": zod.boolean(),
   "isMe": zod.boolean(),
   "onboardingComplete": zod.boolean(),
   "createdAt": zod.string()
@@ -883,6 +902,7 @@ export const GetStoriesResponseItem = zod.object({
   "followingCount": zod.number(),
   "postsCount": zod.number(),
   "isFollowing": zod.boolean(),
+  "isBlocked": zod.boolean(),
   "isMe": zod.boolean(),
   "onboardingComplete": zod.boolean(),
   "createdAt": zod.string()
@@ -901,6 +921,7 @@ export const GetStoriesResponseItem = zod.object({
   "followingCount": zod.number(),
   "postsCount": zod.number(),
   "isFollowing": zod.boolean(),
+  "isBlocked": zod.boolean(),
   "isMe": zod.boolean(),
   "onboardingComplete": zod.boolean(),
   "createdAt": zod.string()
@@ -941,6 +962,7 @@ export const CreateStoryResponse = zod.object({
   "followingCount": zod.number(),
   "postsCount": zod.number(),
   "isFollowing": zod.boolean(),
+  "isBlocked": zod.boolean(),
   "isMe": zod.boolean(),
   "onboardingComplete": zod.boolean(),
   "createdAt": zod.string()
@@ -1013,6 +1035,54 @@ export const UnreactToStoryResponse = zod.object({
 
 
 /**
+ * @summary Block a user
+ */
+export const BlockUserParams = zod.object({
+  "userId": zod.coerce.string()
+})
+
+export const BlockUserResponse = zod.object({
+  "blocked": zod.boolean()
+})
+
+
+/**
+ * @summary Unblock a user
+ */
+export const UnblockUserParams = zod.object({
+  "userId": zod.coerce.string()
+})
+
+export const UnblockUserResponse = zod.object({
+  "blocked": zod.boolean()
+})
+
+
+/**
+ * @summary Get list of users blocked by current user
+ */
+export const GetBlockedUsersResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.string(),
+  "clerkId": zod.string(),
+  "username": zod.string(),
+  "displayName": zod.string().nullish(),
+  "bio": zod.string().nullish(),
+  "avatarUrl": zod.string().nullish(),
+  "followersCount": zod.number(),
+  "followingCount": zod.number(),
+  "postsCount": zod.number(),
+  "isFollowing": zod.boolean(),
+  "isBlocked": zod.boolean(),
+  "isMe": zod.boolean(),
+  "onboardingComplete": zod.boolean(),
+  "createdAt": zod.string()
+})),
+  "nextCursor": zod.string().nullish()
+})
+
+
+/**
  * @summary Get notifications for current user
  */
 export const getNotificationsQueryLimitDefault = 30;
@@ -1038,6 +1108,7 @@ export const GetNotificationsResponse = zod.object({
   "followingCount": zod.number(),
   "postsCount": zod.number(),
   "isFollowing": zod.boolean(),
+  "isBlocked": zod.boolean(),
   "isMe": zod.boolean(),
   "onboardingComplete": zod.boolean(),
   "createdAt": zod.string()
@@ -1088,6 +1159,7 @@ export const GetConversationsResponseItem = zod.object({
   "followingCount": zod.number(),
   "postsCount": zod.number(),
   "isFollowing": zod.boolean(),
+  "isBlocked": zod.boolean(),
   "isMe": zod.boolean(),
   "onboardingComplete": zod.boolean(),
   "createdAt": zod.string()
@@ -1123,6 +1195,7 @@ export const CreateConversationResponse = zod.object({
   "followingCount": zod.number(),
   "postsCount": zod.number(),
   "isFollowing": zod.boolean(),
+  "isBlocked": zod.boolean(),
   "isMe": zod.boolean(),
   "onboardingComplete": zod.boolean(),
   "createdAt": zod.string()
@@ -1167,6 +1240,7 @@ export const GetMessagesResponse = zod.object({
   "followingCount": zod.number(),
   "postsCount": zod.number(),
   "isFollowing": zod.boolean(),
+  "isBlocked": zod.boolean(),
   "isMe": zod.boolean(),
   "onboardingComplete": zod.boolean(),
   "createdAt": zod.string()
@@ -1205,6 +1279,7 @@ export const SendMessageResponse = zod.object({
   "followingCount": zod.number(),
   "postsCount": zod.number(),
   "isFollowing": zod.boolean(),
+  "isBlocked": zod.boolean(),
   "isMe": zod.boolean(),
   "onboardingComplete": zod.boolean(),
   "createdAt": zod.string()
@@ -1236,6 +1311,7 @@ export const SearchUsersResponseItem = zod.object({
   "followingCount": zod.number(),
   "postsCount": zod.number(),
   "isFollowing": zod.boolean(),
+  "isBlocked": zod.boolean(),
   "isMe": zod.boolean(),
   "onboardingComplete": zod.boolean(),
   "createdAt": zod.string()
@@ -1269,6 +1345,7 @@ export const SearchPostsResponse = zod.object({
   "followingCount": zod.number(),
   "postsCount": zod.number(),
   "isFollowing": zod.boolean(),
+  "isBlocked": zod.boolean(),
   "isMe": zod.boolean(),
   "onboardingComplete": zod.boolean(),
   "createdAt": zod.string()
@@ -1317,6 +1394,7 @@ export const SearchVideosResponse = zod.object({
   "followingCount": zod.number(),
   "postsCount": zod.number(),
   "isFollowing": zod.boolean(),
+  "isBlocked": zod.boolean(),
   "isMe": zod.boolean(),
   "onboardingComplete": zod.boolean(),
   "createdAt": zod.string()
@@ -1406,6 +1484,7 @@ export const GetGroupsResponse = zod.object({
   "followingCount": zod.number(),
   "postsCount": zod.number(),
   "isFollowing": zod.boolean(),
+  "isBlocked": zod.boolean(),
   "isMe": zod.boolean(),
   "onboardingComplete": zod.boolean(),
   "createdAt": zod.string()
@@ -1445,6 +1524,7 @@ export const CreateGroupResponse = zod.object({
   "followingCount": zod.number(),
   "postsCount": zod.number(),
   "isFollowing": zod.boolean(),
+  "isBlocked": zod.boolean(),
   "isMe": zod.boolean(),
   "onboardingComplete": zod.boolean(),
   "createdAt": zod.string()
@@ -1484,6 +1564,7 @@ export const GetMyGroupsResponse = zod.object({
   "followingCount": zod.number(),
   "postsCount": zod.number(),
   "isFollowing": zod.boolean(),
+  "isBlocked": zod.boolean(),
   "isMe": zod.boolean(),
   "onboardingComplete": zod.boolean(),
   "createdAt": zod.string()
@@ -1521,6 +1602,7 @@ export const GetGroupResponse = zod.object({
   "followingCount": zod.number(),
   "postsCount": zod.number(),
   "isFollowing": zod.boolean(),
+  "isBlocked": zod.boolean(),
   "isMe": zod.boolean(),
   "onboardingComplete": zod.boolean(),
   "createdAt": zod.string()
@@ -1562,6 +1644,7 @@ export const UpdateGroupResponse = zod.object({
   "followingCount": zod.number(),
   "postsCount": zod.number(),
   "isFollowing": zod.boolean(),
+  "isBlocked": zod.boolean(),
   "isMe": zod.boolean(),
   "onboardingComplete": zod.boolean(),
   "createdAt": zod.string()
@@ -1640,6 +1723,7 @@ export const GetGroupPostsResponse = zod.object({
   "followingCount": zod.number(),
   "postsCount": zod.number(),
   "isFollowing": zod.boolean(),
+  "isBlocked": zod.boolean(),
   "isMe": zod.boolean(),
   "onboardingComplete": zod.boolean(),
   "createdAt": zod.string()
@@ -1693,6 +1777,7 @@ export const CreateGroupPostResponse = zod.object({
   "followingCount": zod.number(),
   "postsCount": zod.number(),
   "isFollowing": zod.boolean(),
+  "isBlocked": zod.boolean(),
   "isMe": zod.boolean(),
   "onboardingComplete": zod.boolean(),
   "createdAt": zod.string()
@@ -1739,6 +1824,7 @@ export const GetGroupMembersResponse = zod.object({
   "followingCount": zod.number(),
   "postsCount": zod.number(),
   "isFollowing": zod.boolean(),
+  "isBlocked": zod.boolean(),
   "isMe": zod.boolean(),
   "onboardingComplete": zod.boolean(),
   "createdAt": zod.string()

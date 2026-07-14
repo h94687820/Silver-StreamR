@@ -12,6 +12,7 @@ import searchRouter from "./search";
 import settingsRouter from "./settings";
 import storageRouter from "./storage";
 import groupsRouter from "./groups";
+import blocksRouter from "./blocks";
 
 const router: IRouter = Router();
 
@@ -28,5 +29,6 @@ router.use(searchRouter);
 router.use(settingsRouter);
 router.use(storageRouter);
 router.use(groupsRouter);
+router.use(blocksRouter);
 
 export default router;

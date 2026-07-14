@@ -20,21 +20,20 @@ export default function Landing() {
         </h1>
         
         <p className="text-lg sm:text-xl text-center text-muted-foreground mb-12 max-w-md">
-          A sleek, premium digital space. Connect, share, and discover in a perfectly polished environment.
+          مساحة رقمية أنيقة ومتميزة. تواصل، شارك، واكتشف في بيئة متقنة.
         </p>
 
         <div className="flex flex-col w-full max-w-xs gap-4">
-          <Link href="/sign-up">
-            <Button size="lg" className="w-full text-base h-14 rounded-xl shadow-xl hover:shadow-2xl transition-all">
-              Join the Stream
-            </Button>
-          </Link>
           <Link href="/sign-in">
-            <Button variant="outline" size="lg" className="w-full text-base h-14 rounded-xl backdrop-blur-sm bg-background/50 border-border/50 hover:bg-secondary">
-              Sign In
+            <Button size="lg" className="w-full text-base h-14 rounded-xl shadow-xl hover:shadow-2xl transition-all silver-shimmer">
+              تسجيل الدخول / Sign In
             </Button>
           </Link>
         </div>
+
+        <p className="mt-8 text-xs text-muted-foreground/60">
+          V0.4 Beta — Summit Beginning Edition
+        </p>
       </main>
     </div>
   );

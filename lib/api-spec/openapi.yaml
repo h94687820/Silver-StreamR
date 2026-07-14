@@ -22,6 +22,8 @@ tags:
     description: Like/dislike operations
   - name: follows
     description: Follow/unfollow operations
+  - name: blocks
+    description: Block/unblock operations
   - name: notifications
     description: Notification operations
   - name: chat
@@ -759,6 +761,56 @@ paths:
               schema:
                 $ref: "#/components/schemas/ReactionResult"
 
+  # ── BLOCKS ──────────────────────────────────────────────
+  /users/{userId}/block:
+    post:
+      operationId: blockUser
+      tags: [blocks]
+      summary: Block a user
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Blocked
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BlockResult"
+    delete:
+      operationId: unblockUser
+      tags: [blocks]
+      summary: Unblock a user
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Unblocked
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BlockResult"
+
+  /users/me/blocked:
+    get:
+      operationId: getBlockedUsers
+      tags: [blocks]
+      summary: Get list of users blocked by current user
+      responses:
+        "200":
+          description: Blocked users
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserPage"
+
   # ── NOTIFICATIONS ──────────────────────────────────────
   /notifications:
     get:
@@ -1322,13 +1374,15 @@ components:
           type: integer
         isFollowing:
           type: boolean
+        isBlocked:
+          type: boolean
         isMe:
           type: boolean
         onboardingComplete:
           type: boolean
         createdAt:
           type: string
-      required: [id, clerkId, username, followersCount, followingCount, postsCount, isFollowing, isMe, onboardingComplete, createdAt]
+      required: [id, clerkId, username, followersCount, followingCount, postsCount, isFollowing, isBlocked, isMe, onboardingComplete, createdAt]
 
     UserUpdate:
       type: object
@@ -1734,6 +1788,13 @@ components:
         language:
           type: string
           enum: ["ar", "en"]
+
+    BlockResult:
+      type: object
+      properties:
+        blocked:
+          type: boolean
+      required: [blocked]
 
     DeleteResult:
       type: object

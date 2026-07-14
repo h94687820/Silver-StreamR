@@ -20,6 +20,7 @@ export interface UserProfile {
   followingCount: number;
   postsCount: number;
   isFollowing: boolean;
+  isBlocked: boolean;
   isMe: boolean;
   onboardingComplete: boolean;
   createdAt: string;

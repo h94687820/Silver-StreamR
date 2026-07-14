@@ -1,16 +1,16 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useGetSettings, useUpdateSettings, getGetSettingsQueryKey } from "@workspace/api-client-react";
+import { I18nContext, type Lang } from "@/lib/i18n";
 
 type ThemeMode = "auto" | "light" | "dark";
-type Language = "ar" | "en";
 
 interface ThemeContextType {
   mode: ThemeMode;
   setMode: (mode: ThemeMode) => void;
   accent: string;
   setAccent: (accent: string) => void;
-  language: Language;
-  setLanguage: (lang: Language) => void;
+  language: Lang;
+  setLanguage: (lang: Lang) => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -27,19 +27,20 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   const [mode, setModeState] = useState<ThemeMode>("auto");
   const [accent, setAccentState] = useState<string>("blue");
-  const [language, setLanguageState] = useState<Language>("ar");
+  const [language, setLanguageState] = useState<Lang>("ar");
 
   useEffect(() => {
     if (settings) {
       setModeState(settings.theme as ThemeMode || "auto");
       setAccentState(settings.accentColor || "blue");
-      setLanguageState(settings.language as Language || "ar");
+      setLanguageState(settings.language as Lang || "ar");
     }
   }, [settings]);
 
   useEffect(() => {
     const root = window.document.documentElement;
     root.setAttribute("dir", language === "ar" ? "rtl" : "ltr");
+    root.setAttribute("lang", language);
     root.setAttribute("data-accent", accent);
 
     const applyMode = () => {
@@ -73,14 +74,16 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     if (settings) updateSettings.mutate({ data: { accentColor: newAccent as any } });
   };
 
-  const setLanguage = (newLang: Language) => {
+  const setLanguage = (newLang: Lang) => {
     setLanguageState(newLang);
     if (settings) updateSettings.mutate({ data: { language: newLang as any } });
   };
 
   return (
     <ThemeContext.Provider value={{ mode, setMode, accent, setAccent, language, setLanguage }}>
-      {children}
+      <I18nContext.Provider value={language}>
+        {children}
+      </I18nContext.Provider>
     </ThemeContext.Provider>
   );
 }
