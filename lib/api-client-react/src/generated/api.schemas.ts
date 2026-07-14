@@ -168,6 +168,9 @@ export interface Comment {
   authorId: string;
   author: UserProfile;
   content: string;
+  /** @nullable */
+  parentId?: string | null;
+  repliesCount?: number;
   createdAt: string;
   /** @nullable */
   updatedAt?: string | null;

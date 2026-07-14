@@ -2187,6 +2187,155 @@ export const useDeleteComment = <TError = ErrorType<unknown>,
       return useMutation(getDeleteCommentMutationOptions(options));
     }
 
+export const getGetRepliesUrl = (commentId: string,) => {
+
+
+
+
+  return `/api/comments/${commentId}/replies`
+}
+
+/**
+ * @summary Get replies for a comment
+ */
+export const getReplies = async (commentId: string, options?: RequestInit): Promise<CommentPage> => {
+
+  return customFetch<CommentPage>(getGetRepliesUrl(commentId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetRepliesQueryKey = (commentId: string,) => {
+    return [
+    `/api/comments/${commentId}/replies`
+    ] as const;
+    }
+
+
+export const getGetRepliesQueryOptions = <TData = Awaited<ReturnType<typeof getReplies>>, TError = ErrorType<unknown>>(commentId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getReplies>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetRepliesQueryKey(commentId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getReplies>>> = ({ signal }) => getReplies(commentId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: commentId !== null && commentId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getReplies>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetRepliesQueryResult = NonNullable<Awaited<ReturnType<typeof getReplies>>>
+export type GetRepliesQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get replies for a comment
+ */
+
+export function useGetReplies<TData = Awaited<ReturnType<typeof getReplies>>, TError = ErrorType<unknown>>(
+ commentId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getReplies>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetRepliesQueryOptions(commentId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateReplyUrl = (commentId: string,) => {
+
+
+
+
+  return `/api/comments/${commentId}/replies`
+}
+
+/**
+ * @summary Reply to a comment
+ */
+export const createReply = async (commentId: string,
+    commentInput: CommentInput, options?: RequestInit): Promise<Comment> => {
+
+  return customFetch<Comment>(getCreateReplyUrl(commentId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(commentInput)
+  }
+);}
+
+
+
+
+
+export const getCreateReplyMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createReply>>, TError,{commentId: string;data: BodyType<CommentInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createReply>>, TError,{commentId: string;data: BodyType<CommentInput>}, TContext> => {
+
+const mutationKey = ['createReply'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createReply>>, {commentId: string;data: BodyType<CommentInput>}> = (props) => {
+          const {commentId,data} = props ?? {};
+
+          return  createReply(commentId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateReplyMutationResult = NonNullable<Awaited<ReturnType<typeof createReply>>>
+    export type CreateReplyMutationBody = BodyType<CommentInput>
+    export type CreateReplyMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Reply to a comment
+ */
+export const useCreateReply = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createReply>>, TError,{commentId: string;data: BodyType<CommentInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createReply>>,
+        TError,
+        {commentId: string;data: BodyType<CommentInput>},
+        TContext
+      > => {
+      return useMutation(getCreateReplyMutationOptions(options));
+    }
+
 export const getGetStoriesUrl = () => {
 
 

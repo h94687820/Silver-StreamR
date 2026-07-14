@@ -688,6 +688,8 @@ export const GetCommentsResponse = zod.object({
   "createdAt": zod.string()
 }),
   "content": zod.string(),
+  "parentId": zod.string().nullish(),
+  "repliesCount": zod.number().optional(),
   "createdAt": zod.string(),
   "updatedAt": zod.string().nullish()
 })),
@@ -726,6 +728,8 @@ export const CreateCommentResponse = zod.object({
   "createdAt": zod.string()
 }),
   "content": zod.string(),
+  "parentId": zod.string().nullish(),
+  "repliesCount": zod.number().optional(),
   "createdAt": zod.string(),
   "updatedAt": zod.string().nullish()
 })
@@ -762,6 +766,8 @@ export const UpdateCommentResponse = zod.object({
   "createdAt": zod.string()
 }),
   "content": zod.string(),
+  "parentId": zod.string().nullish(),
+  "repliesCount": zod.number().optional(),
   "createdAt": zod.string(),
   "updatedAt": zod.string().nullish()
 })
@@ -776,6 +782,81 @@ export const DeleteCommentParams = zod.object({
 
 export const DeleteCommentResponse = zod.object({
   "success": zod.boolean()
+})
+
+
+/**
+ * @summary Get replies for a comment
+ */
+export const GetRepliesParams = zod.object({
+  "commentId": zod.coerce.string()
+})
+
+export const GetRepliesResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.string(),
+  "postId": zod.string(),
+  "authorId": zod.string(),
+  "author": zod.object({
+  "id": zod.string(),
+  "clerkId": zod.string(),
+  "username": zod.string(),
+  "displayName": zod.string().nullish(),
+  "bio": zod.string().nullish(),
+  "avatarUrl": zod.string().nullish(),
+  "followersCount": zod.number(),
+  "followingCount": zod.number(),
+  "postsCount": zod.number(),
+  "isFollowing": zod.boolean(),
+  "isMe": zod.boolean(),
+  "onboardingComplete": zod.boolean(),
+  "createdAt": zod.string()
+}),
+  "content": zod.string(),
+  "parentId": zod.string().nullish(),
+  "repliesCount": zod.number().optional(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string().nullish()
+})),
+  "nextCursor": zod.string().nullish()
+})
+
+
+/**
+ * @summary Reply to a comment
+ */
+export const CreateReplyParams = zod.object({
+  "commentId": zod.coerce.string()
+})
+
+export const CreateReplyBody = zod.object({
+  "content": zod.string()
+})
+
+export const CreateReplyResponse = zod.object({
+  "id": zod.string(),
+  "postId": zod.string(),
+  "authorId": zod.string(),
+  "author": zod.object({
+  "id": zod.string(),
+  "clerkId": zod.string(),
+  "username": zod.string(),
+  "displayName": zod.string().nullish(),
+  "bio": zod.string().nullish(),
+  "avatarUrl": zod.string().nullish(),
+  "followersCount": zod.number(),
+  "followingCount": zod.number(),
+  "postsCount": zod.number(),
+  "isFollowing": zod.boolean(),
+  "isMe": zod.boolean(),
+  "onboardingComplete": zod.boolean(),
+  "createdAt": zod.string()
+}),
+  "content": zod.string(),
+  "parentId": zod.string().nullish(),
+  "repliesCount": zod.number().optional(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string().nullish()
 })
 
 

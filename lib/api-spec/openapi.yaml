@@ -604,6 +604,48 @@ paths:
               schema:
                 $ref: "#/components/schemas/DeleteResult"
 
+  /comments/{commentId}/replies:
+    get:
+      operationId: getReplies
+      tags: [comments]
+      summary: Get replies for a comment
+      parameters:
+        - name: commentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Replies
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommentPage"
+    post:
+      operationId: createReply
+      tags: [comments]
+      summary: Reply to a comment
+      parameters:
+        - name: commentId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CommentInput"
+      responses:
+        "201":
+          description: Created reply
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Comment"
+
   # ── STORIES ──────────────────────────────────────────
   /stories:
     get:
@@ -1428,6 +1470,10 @@ components:
           $ref: "#/components/schemas/UserProfile"
         content:
           type: string
+        parentId:
+          type: ["string", "null"]
+        repliesCount:
+          type: integer
         createdAt:
           type: string
         updatedAt:
