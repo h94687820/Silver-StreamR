@@ -4,7 +4,7 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/components/theme-provider";
 import { useTranslation } from "@/lib/i18n";
-import { LogOut, Trash2, Moon, Sun, Monitor, Palette, Globe, ChevronRight, Lock, Users, UserX, UserCheck, Smile } from "lucide-react";
+import { LogOut, Trash2, Moon, Sun, Monitor, Palette, Globe, ChevronRight, Lock, Users, UserX, UserCheck, Smile, KeyRound } from "lucide-react";
 
 export default function Settings() {
   const { signOut } = useClerk();
@@ -114,6 +114,13 @@ export default function Settings() {
               <div className="flex items-center gap-3">
                 <UserCheck className="w-5 h-5 text-muted-foreground" />
                 <span className="font-medium">{t("settings_my_followers")}</span>
+              </div>
+              <ChevronRight className="w-4 h-4 text-muted-foreground" />
+            </Link>
+            <Link href="/settings/account" className="w-full p-4 flex items-center justify-between hover:bg-secondary/50 transition-colors">
+              <div className="flex items-center gap-3">
+                <KeyRound className="w-5 h-5 text-muted-foreground" />
+                <span className="font-medium">{t("settings_account_settings")}</span>
               </div>
               <ChevronRight className="w-4 h-4 text-muted-foreground" />
             </Link>

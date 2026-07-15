@@ -18,6 +18,7 @@ import Feed from "@/pages/feed";
 import Onboarding from "@/pages/onboarding";
 import Landing from "@/pages/landing";
 import Settings from "@/pages/settings";
+import AccountSettings from "@/pages/account-settings";
 import Profile from "@/pages/profile";
 import Create from "@/pages/create";
 import Search from "@/pages/search";
@@ -158,6 +159,7 @@ function App() {
             <Route path="/videos" component={() => <ProtectedRoute component={Videos} />} />
             <Route path="/create" component={() => <ProtectedRoute component={Create} />} />
             <Route path="/settings" component={() => <ProtectedRoute component={Settings} />} />
+            <Route path="/settings/account" component={() => <ProtectedRoute component={AccountSettings} />} />
             <Route path="/search" component={() => <ProtectedRoute component={Search} />} />
             <Route path="/search/results" component={() => <ProtectedRoute component={SearchResults} />} />
             <Route path="/notifications" component={() => <ProtectedRoute component={Notifications} />} />
