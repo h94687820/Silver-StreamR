@@ -5,3 +5,4 @@
 - [Clerk + wouter routing bridge](clerk-wouter-routing-bridge.md) — Clerk's routerPush/routerReplace must call wouter's setLocation, not raw history.pushState, or nav appears "stuck" until refresh.
 - [Object storage secrets present but bucket unprovisioned](object-storage-secrets-vs-provisioned.md) — env var names existing doesn't mean `setupObjectStorage()` ever ran; check for empty values, not just key presence.
 - [api-zod barrel export collision](api-zod-barrel-export-collision.md) — never `export *` generated/types in lib/api-zod/src/index.ts; orval params types collide with same-named zod schema values (TS2308).
+- [Cloudflare Worker structure](cloudflare-worker-structure.md) — Hono API Worker lives in cloudflare/worker/; uses neon-http DB, Clerk verifyToken, aws4fetch for S3.

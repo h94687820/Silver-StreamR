@@ -1,0 +1,16 @@
+import { pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import type { AnyPgColumn } from "drizzle-orm/pg-core";
+import { usersTable } from "./users";
+import { postsTable } from "./posts";
+
+export const commentsTable = pgTable("comments", {
+  id: text("id").primaryKey(),
+  postId: text("post_id").notNull().references(() => postsTable.id, { onDelete: "cascade" }),
+  authorId: text("author_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
+  parentId: text("parent_id").references((): AnyPgColumn => commentsTable.id, { onDelete: "cascade" }),
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at"),
+});
+
+export type Comment = typeof commentsTable.$inferSelect;

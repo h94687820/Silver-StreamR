@@ -1,0 +1,20 @@
+name = "silver-stream-api"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+# ─── تُضاف هذه القيم عبر: wrangler secret put SECRET_NAME ───
+# DATABASE_URL       = "postgres://..."        (رابط قاعدة البيانات)
+# CLERK_SECRET_KEY   = "sk_..."               (من لوحة Clerk)
+# CLERK_PUBLISHABLE_KEY = "pk_..."
+# STORAGE_ENDPOINT   = "https://..."          (رابط S3-compatible)
+# STORAGE_BUCKET     = "silver-stream"        (اسم الـ bucket)
+# STORAGE_ACCESS_KEY_ID = "..."
+# STORAGE_SECRET_ACCESS_KEY = "..."
+# STORAGE_REGION     = "auto"                 (أو اسم المنطقة)
+# STORAGE_PUBLIC_URL = "https://cdn.example.com" (رابط الملفات العامة)
+
+[[routes]]
+pattern = "/api/*"
+zone_name = ""
