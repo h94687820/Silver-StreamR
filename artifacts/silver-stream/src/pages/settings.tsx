@@ -110,10 +110,17 @@ export default function Settings() {
               </div>
               <ChevronRight className="w-4 h-4 text-muted-foreground" />
             </Link>
-            <Link href="/followers" className="w-full p-4 flex items-center justify-between hover:bg-secondary/50 transition-colors">
+            <Link href={me?.username ? `/profile/${me.username}/followers` : "/followers"} className="w-full p-4 flex items-center justify-between hover:bg-secondary/50 transition-colors">
               <div className="flex items-center gap-3">
                 <UserCheck className="w-5 h-5 text-muted-foreground" />
                 <span className="font-medium">{t("settings_my_followers")}</span>
+              </div>
+              <ChevronRight className="w-4 h-4 text-muted-foreground" />
+            </Link>
+            <Link href={me?.username ? `/profile/${me.username}/following` : "/followers"} className="w-full p-4 flex items-center justify-between hover:bg-secondary/50 transition-colors">
+              <div className="flex items-center gap-3">
+                <Users className="w-5 h-5 text-muted-foreground" />
+                <span className="font-medium">{t("settings_my_following")}</span>
               </div>
               <ChevronRight className="w-4 h-4 text-muted-foreground" />
             </Link>

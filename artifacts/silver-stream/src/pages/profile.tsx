@@ -1,4 +1,4 @@
-import { useRoute } from "wouter";
+import { useRoute, Link } from "wouter";
 import { useGetUserByUsername, useGetUserPosts, useFollowUser, useUnfollowUser, useBlockUser, useUnblockUser, useGetMe, getGetUserByUsernameQueryKey, getGetUserPostsQueryKey } from "@workspace/api-client-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -71,7 +71,10 @@ export default function Profile() {
   return (
     <div className="w-full bg-background min-h-screen">
       {/* Cover / Top */}
-      <div className="h-32 sm:h-48 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-800 dark:via-gray-700 dark:to-gray-800 w-full relative silver-shimmer">
+      <div className="h-32 sm:h-48 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-800 dark:via-gray-700 dark:to-gray-800 w-full relative silver-shimmer overflow-hidden">
+        {(profile as any).coverUrl && (
+          <img src={(profile as any).coverUrl} alt="" className="w-full h-full object-cover" />
+        )}
       </div>
 
       <div className="px-4 pb-4">
@@ -160,14 +163,14 @@ export default function Profile() {
             <span className="font-bold text-foreground text-lg">{profile.postsCount}</span>
             <span className="text-xs text-muted-foreground">{t("profile_posts")}</span>
           </div>
-          <div className="flex flex-col">
+          <Link href={`/profile/${profile.username}/followers`} className="flex flex-col hover:opacity-70 transition-opacity">
             <span className="font-bold text-foreground text-lg">{profile.followersCount}</span>
             <span className="text-xs text-muted-foreground">{t("profile_followers")}</span>
-          </div>
-          <div className="flex flex-col">
+          </Link>
+          <Link href={`/profile/${profile.username}/following`} className="flex flex-col hover:opacity-70 transition-opacity">
             <span className="font-bold text-foreground text-lg">{profile.followingCount}</span>
             <span className="text-xs text-muted-foreground">{t("profile_following_count")}</span>
-          </div>
+          </Link>
         </div>
 
         {/* Tabs */}

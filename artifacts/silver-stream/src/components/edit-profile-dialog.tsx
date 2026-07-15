@@ -37,6 +37,10 @@ export function EditProfileDialog({ open, onOpenChange, profile }: EditProfileDi
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [coverUrl, setCoverUrl] = useState((profile as any).coverUrl || "");
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [coverPreview, setCoverPreview] = useState<string | null>(null);
+  const [isUploadingCover, setIsUploadingCover] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const bioRef = useRef<HTMLTextAreaElement>(null);
 
@@ -48,6 +52,9 @@ export function EditProfileDialog({ open, onOpenChange, profile }: EditProfileDi
       setAvatarUrl(profile.avatarUrl || "");
       setAvatarFile(null);
       setAvatarPreview(null);
+      setCoverUrl((profile as any).coverUrl || "");
+      setCoverFile(null);
+      setCoverPreview(null);
       setError(null);
     }
   }, [open, profile]);
@@ -78,6 +85,13 @@ export function EditProfileDialog({ open, onOpenChange, profile }: EditProfileDi
     setAvatarPreview(URL.createObjectURL(f));
   };
 
+  const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    setCoverFile(f);
+    setCoverPreview(URL.createObjectURL(f));
+  };
+
   const handleBioEmoji = (emoji: { id: string; imageUrl: string; name: string }) => {
     const textarea = bioRef.current;
     const cursor = textarea?.selectionStart ?? bio.length;
@@ -105,11 +119,18 @@ export function EditProfileDialog({ open, onOpenChange, profile }: EditProfileDi
 
     try {
       let finalAvatarUrl = avatarUrl;
+      let finalCoverUrl = coverUrl;
 
       if (avatarFile) {
         setIsUploadingAvatar(true);
         finalAvatarUrl = await uploadFileAndGetUrl(avatarFile);
         setIsUploadingAvatar(false);
+      }
+
+      if (coverFile) {
+        setIsUploadingCover(true);
+        finalCoverUrl = await uploadFileAndGetUrl(coverFile);
+        setIsUploadingCover(false);
       }
 
       await updateMeMutation.mutateAsync({
@@ -118,7 +139,8 @@ export function EditProfileDialog({ open, onOpenChange, profile }: EditProfileDi
           displayName,
           bio,
           avatarUrl: finalAvatarUrl,
-        },
+          coverUrl: finalCoverUrl,
+        } as any,
       });
 
       await queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() });
@@ -130,11 +152,12 @@ export function EditProfileDialog({ open, onOpenChange, profile }: EditProfileDi
       onOpenChange(false);
     } catch (e: any) {
       setIsUploadingAvatar(false);
+      setIsUploadingCover(false);
       setError(e?.message || "Failed to save changes. Please try again.");
     }
   };
 
-  const isSaving = isUploadingAvatar || updateMeMutation.isPending;
+  const isSaving = isUploadingAvatar || isUploadingCover || updateMeMutation.isPending;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -144,21 +167,31 @@ export function EditProfileDialog({ open, onOpenChange, profile }: EditProfileDi
         </DialogHeader>
 
         <div className="space-y-5">
-          <div className="flex flex-col items-center gap-3">
-            <label className="relative cursor-pointer group">
-              <Avatar className="w-24 h-24 border-2 border-border">
+          <div className="relative -mx-6 -mt-2">
+            <label className="relative block cursor-pointer group h-28 w-full overflow-hidden bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-800 dark:via-gray-700 dark:to-gray-800">
+              {(coverPreview || coverUrl) && (
+                <img src={coverPreview || coverUrl} className="w-full h-full object-cover" alt="Cover" />
+              )}
+              <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Camera className="w-6 h-6 text-white" />
+              </div>
+              <input type="file" accept="image/*" className="hidden" onChange={handleCoverChange} />
+            </label>
+
+            <label className="absolute left-6 -bottom-10 cursor-pointer group">
+              <Avatar className="w-20 h-20 border-4 border-card shadow-lg">
                 <AvatarImage src={avatarPreview || avatarUrl || undefined} className="object-cover" />
                 <AvatarFallback className="text-2xl">
                   {displayName?.[0] || username[0]}
                 </AvatarFallback>
               </Avatar>
               <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-                <Camera className="w-6 h-6 text-white" />
+                <Camera className="w-5 h-5 text-white" />
               </div>
               <input type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
             </label>
-            <span className="text-xs text-muted-foreground">Tap to change photo</span>
           </div>
+          <div className="h-8" />
 
           <div className="space-y-2">
             <label className="text-sm font-medium">Username</label>

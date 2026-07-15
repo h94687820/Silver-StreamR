@@ -8,6 +8,7 @@ export const usersTable = pgTable("users", {
   displayName: text("display_name"),
   bio: text("bio"),
   avatarUrl: text("avatar_url"),
+  coverUrl: text("cover_url"),
   followersCount: integer("followers_count").notNull().default(0),
   followingCount: integer("following_count").notNull().default(0),
   postsCount: integer("posts_count").notNull().default(0),

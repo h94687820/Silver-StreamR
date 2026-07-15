@@ -25,7 +25,7 @@ router.get("/users/me", requireAuth, async (req, res) => {
 router.patch("/users/me", requireAuth, async (req, res) => {
   try {
     const clerkId = (req as any).clerkId;
-    const { username, displayName, bio, avatarUrl } = req.body;
+    const { username, displayName, bio, avatarUrl, coverUrl } = req.body;
 
     if (username !== undefined) {
       const normalized = String(username).toLowerCase().trim();
@@ -46,6 +46,7 @@ router.patch("/users/me", requireAuth, async (req, res) => {
       ...(displayName !== undefined ? { displayName } : {}),
       ...(bio !== undefined ? { bio } : {}),
       ...(avatarUrl !== undefined ? { avatarUrl } : {}),
+      ...(coverUrl !== undefined ? { coverUrl } : {}),
       updatedAt: new Date(),
     }).where(eq(usersTable.id, clerkId));
     const profile = await getUserProfile(clerkId, clerkId);

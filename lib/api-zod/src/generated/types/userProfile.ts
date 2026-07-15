@@ -16,6 +16,8 @@ export interface UserProfile {
   bio?: string | null;
   /** @nullable */
   avatarUrl?: string | null;
+  /** @nullable */
+  coverUrl?: string | null;
   followersCount: number;
   followingCount: number;
   postsCount: number;

@@ -30,6 +30,7 @@ const translations = {
     settings_privacy: "Privacy",
     settings_private_posts: "Private Posts",
     settings_my_followers: "My Followers",
+    settings_my_following: "Following",
     settings_blocked_users: "Blocked Users",
     settings_sign_out: "Sign Out",
     settings_delete_account: "Delete Account",
@@ -63,7 +64,12 @@ const translations = {
     notifications_interacted: "interacted with you",
     // Followers page
     followers_title: "My Followers",
+    followers_title_of: "{username}'s Followers",
     followers_empty: "No followers yet",
+    // Following page
+    following_title: "Following",
+    following_title_of: "Followed by {username}",
+    following_empty: "Not following anyone yet",
     // Blocked users page
     blocked_title: "Blocked Users",
     blocked_empty: "You haven't blocked anyone",
@@ -158,6 +164,7 @@ const translations = {
     settings_privacy: "الخصوصية",
     settings_private_posts: "المنشورات الخاصة",
     settings_my_followers: "متابعوني",
+    settings_my_following: "من أتابعهم",
     settings_blocked_users: "المستخدمون المحظورون",
     settings_sign_out: "تسجيل الخروج",
     settings_delete_account: "حذف الحساب",
@@ -191,7 +198,12 @@ const translations = {
     notifications_interacted: "تفاعل معك",
     // Followers page
     followers_title: "متابعوني",
+    followers_title_of: "متابعو {username}",
     followers_empty: "لا يوجد متابعون بعد",
+    // Following page
+    following_title: "من أتابعهم",
+    following_title_of: "من يتابعهم {username}",
+    following_empty: "لا يتابع أحداً بعد",
     // Blocked users page
     blocked_title: "المستخدمون المحظورون",
     blocked_empty: "لم تحظر أحداً بعد",

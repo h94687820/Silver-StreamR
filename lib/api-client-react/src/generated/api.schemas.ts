@@ -19,6 +19,8 @@ export interface UserProfile {
   bio?: string | null;
   /** @nullable */
   avatarUrl?: string | null;
+  /** @nullable */
+  coverUrl?: string | null;
   followersCount: number;
   followingCount: number;
   postsCount: number;
@@ -40,6 +42,7 @@ export interface UserUpdate {
   displayName?: string;
   bio?: string;
   avatarUrl?: string;
+  coverUrl?: string;
 }
 
 export interface OnboardingInput {

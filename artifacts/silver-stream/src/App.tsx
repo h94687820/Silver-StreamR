@@ -33,6 +33,7 @@ import GroupDetail from "@/pages/group-detail";
 import PrivatePosts from "@/pages/private-posts";
 import PostDetail from "@/pages/post-detail";
 import Followers from "@/pages/followers";
+import Following from "@/pages/following";
 import BlockedUsers from "@/pages/blocked-users";
 import EmojiLibrary from "@/pages/emoji-library";
 
@@ -173,6 +174,8 @@ function App() {
             <Route path="/settings/blocked" component={() => <ProtectedRoute component={BlockedUsers} />} />
             <Route path="/settings/emojis" component={() => <ProtectedRoute component={EmojiLibrary} />} />
             <Route path="/followers" component={() => <ProtectedRoute component={Followers} />} />
+            <Route path="/profile/:username/followers" component={() => <ProtectedRoute component={Followers} />} />
+            <Route path="/profile/:username/following" component={() => <ProtectedRoute component={Following} />} />
             <Route path="/post/:id" component={() => <ProtectedRoute component={PostDetail} />} />
             
             <Route>

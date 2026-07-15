@@ -1,14 +1,14 @@
 import { useRoute } from "wouter";
-import { useGetFollowers, useGetMe, useGetUserByUsername, useFollowUser, useUnfollowUser, getGetFollowersQueryKey, getGetUserByUsernameQueryKey } from "@workspace/api-client-react";
+import { useGetFollowing, useGetMe, useGetUserByUsername, useFollowUser, useUnfollowUser, getGetFollowingQueryKey, getGetUserByUsernameQueryKey } from "@workspace/api-client-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { useTranslation } from "@/lib/i18n";
 
-export default function Followers() {
+export default function Following() {
   const { t } = useTranslation();
-  const [, params] = useRoute("/profile/:username/followers");
+  const [, params] = useRoute("/profile/:username/following");
   const { data: me } = useGetMe();
 
   const isMe = !params?.username || params.username === "me" || params.username === me?.username;
@@ -21,8 +21,8 @@ export default function Followers() {
 
   const queryClient = useQueryClient();
 
-  const { data: followersPage, isLoading } = useGetFollowers(targetUserId ?? "", undefined, {
-    query: { enabled: !!targetUserId, queryKey: getGetFollowersQueryKey(targetUserId ?? "") }
+  const { data: followingPage, isLoading } = useGetFollowing(targetUserId ?? "", undefined, {
+    query: { enabled: !!targetUserId, queryKey: getGetFollowingQueryKey(targetUserId ?? "") }
   });
 
   const followMutation = useFollowUser();
@@ -31,11 +31,11 @@ export default function Followers() {
   const handleFollowToggle = (userId: string, isFollowing: boolean) => {
     if (isFollowing) {
       unfollowMutation.mutate({ userId }, {
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: getGetFollowersQueryKey(targetUserId ?? "") })
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: getGetFollowingQueryKey(targetUserId ?? "") })
       });
     } else {
       followMutation.mutate({ userId }, {
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: getGetFollowersQueryKey(targetUserId ?? "") })
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: getGetFollowingQueryKey(targetUserId ?? "") })
       });
     }
   };
@@ -44,22 +44,22 @@ export default function Followers() {
     <div className="w-full">
       <div className="px-4 py-3 border-b border-border/50 sticky top-0 z-30 bg-background/95 backdrop-blur-xl">
         <h1 className="text-lg font-bold">
-          {isMe ? t("followers_title") : t("followers_title_of").replace("{username}", targetUsername)}
+          {isMe ? t("following_title") : t("following_title_of").replace("{username}", targetUsername)}
         </h1>
       </div>
 
       <div className="divide-y divide-border/50">
         {isLoading ? (
           <div className="p-8 text-center text-muted-foreground">{t("loading")}</div>
-        ) : followersPage?.items.length === 0 ? (
+        ) : followingPage?.items.length === 0 ? (
           <div className="p-12 text-center text-muted-foreground">
             <div className="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mx-auto mb-4">
               <span className="text-3xl opacity-50">👥</span>
             </div>
-            <p>{t("followers_empty")}</p>
+            <p>{t("following_empty")}</p>
           </div>
         ) : (
-          followersPage?.items.map(user => (
+          followingPage?.items.map(user => (
             <div key={user.id} className="flex items-center gap-3 p-4">
               <Link href={`/profile/${user.username}`} className="flex items-center gap-3 flex-1">
                 <Avatar className="w-12 h-12">

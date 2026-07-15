@@ -11,4 +11,5 @@ export interface UserUpdate {
   displayName?: string;
   bio?: string;
   avatarUrl?: string;
+  coverUrl?: string;
 }

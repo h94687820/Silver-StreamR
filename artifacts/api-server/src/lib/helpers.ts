@@ -90,6 +90,7 @@ export async function getUserProfile(targetId: string, viewerId?: string) {
     displayName: user.displayName ?? null,
     bio: user.bio ?? null,
     avatarUrl: user.avatarUrl ?? null,
+    coverUrl: user.coverUrl ?? null,
     followersCount: user.followersCount,
     followingCount: user.followingCount,
     postsCount: user.postsCount,

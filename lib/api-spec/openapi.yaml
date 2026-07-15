@@ -1477,6 +1477,8 @@ components:
           type: ["string", "null"]
         avatarUrl:
           type: ["string", "null"]
+        coverUrl:
+          type: ["string", "null"]
         followersCount:
           type: integer
         followingCount:
@@ -1511,6 +1513,8 @@ components:
         bio:
           type: string
         avatarUrl:
+          type: string
+        coverUrl:
           type: string
 
     OnboardingInput:
