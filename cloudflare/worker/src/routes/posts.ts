@@ -25,7 +25,7 @@ async function checkOnboarding(db: ReturnType<typeof createDb>, clerkId: string)
 // GET /posts (feed)
 router.get("/posts", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const user = await checkOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
@@ -75,7 +75,7 @@ router.get("/posts", async (c) => {
 // POST /posts
 router.post("/posts", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const user = await checkOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
@@ -125,7 +125,7 @@ router.post("/posts", async (c) => {
 // GET /posts/videos
 router.get("/posts/videos", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const user = await checkOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
@@ -155,7 +155,7 @@ router.get("/posts/videos", async (c) => {
 // GET /posts/saved
 router.get("/posts/saved", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const user = await checkOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
@@ -178,7 +178,7 @@ router.get("/posts/saved", async (c) => {
 // GET /posts/private
 router.get("/posts/private", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const user = await checkOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
@@ -200,7 +200,7 @@ router.get("/posts/private", async (c) => {
 // GET /posts/:postId  (auth only, no onboarding)
 router.get("/posts/:postId", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const post = await db
       .select()
@@ -219,7 +219,7 @@ router.get("/posts/:postId", async (c) => {
 // PATCH /posts/:postId
 router.patch("/posts/:postId", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const user = await checkOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
@@ -248,7 +248,7 @@ router.patch("/posts/:postId", async (c) => {
 // DELETE /posts/:postId
 router.delete("/posts/:postId", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const user = await checkOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
@@ -272,7 +272,7 @@ router.delete("/posts/:postId", async (c) => {
 // POST /posts/:postId/save
 router.post("/posts/:postId/save", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const user = await checkOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
@@ -290,7 +290,7 @@ router.post("/posts/:postId/save", async (c) => {
 // DELETE /posts/:postId/save
 router.delete("/posts/:postId/save", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const user = await checkOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
@@ -312,7 +312,7 @@ router.delete("/posts/:postId/save", async (c) => {
 // GET /users/:username/saved-posts
 router.get("/users/:username/saved-posts", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const user = await checkOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
@@ -353,7 +353,7 @@ router.get("/users/:username/saved-posts", async (c) => {
 // GET /users/:username/posts
 router.get("/users/:username/posts", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const limit = Math.min(Number(c.req.query("limit")) || 20, 50);
     const users = await db

@@ -16,7 +16,7 @@ async function requireOnboarding(db: ReturnType<typeof createDb>, clerkId: strin
 // GET /notifications
 router.get("/notifications", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
@@ -50,7 +50,7 @@ router.get("/notifications", async (c) => {
 // POST /notifications/read
 router.post("/notifications/read", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
@@ -81,7 +81,7 @@ router.post("/notifications/read", async (c) => {
 // GET /notifications/unread-count
 router.get("/notifications/unread-count", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);

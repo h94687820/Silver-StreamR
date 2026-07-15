@@ -15,7 +15,7 @@ async function requireOnboarding(db: ReturnType<typeof createDb>, clerkId: strin
 // POST /posts/:postId/react
 router.post("/posts/:postId/react", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
@@ -100,7 +100,7 @@ router.post("/posts/:postId/react", async (c) => {
 // DELETE /posts/:postId/react
 router.delete("/posts/:postId/react", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);

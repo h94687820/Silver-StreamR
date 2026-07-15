@@ -5,14 +5,16 @@
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "db:create": "wrangler d1 create silver-stream-db",
+    "db:migrate": "wrangler d1 migrations apply silver-stream-db",
+    "db:migrate:local": "wrangler d1 migrations apply silver-stream-db --local",
+    "storage:create": "wrangler r2 bucket create silver-stream-storage"
   },
   "dependencies": {
     "hono": "^4.6.0",
-    "@neondatabase/serverless": "^0.10.4",
     "drizzle-orm": "^0.38.3",
-    "@clerk/backend": "^1.28.3",
-    "aws4fetch": "^1.0.20"
+    "@clerk/backend": "^1.28.3"
   },
   "devDependencies": {
     "wrangler": "^3.99.0",

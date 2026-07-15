@@ -1,21 +1,21 @@
-import { pgTable, text, integer, timestamp, primaryKey } from "drizzle-orm/pg-core";
+import { sqliteTable, text, integer, primaryKey } from "drizzle-orm/sqlite-core";
 import { usersTable } from "./users";
 
-export const groupsTable = pgTable("groups", {
+export const groupsTable = sqliteTable("groups", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   description: text("description"),
   avatarUrl: text("avatar_url"),
   ownerId: text("owner_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
   membersCount: integer("members_count").notNull().default(1),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull().$defaultFn(() => new Date()),
 });
 
-export const groupMembersTable = pgTable("group_members", {
+export const groupMembersTable = sqliteTable("group_members", {
   groupId: text("group_id").notNull().references(() => groupsTable.id, { onDelete: "cascade" }),
   userId: text("user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
   role: text("role").notNull().default("member"),
-  joinedAt: timestamp("joined_at").notNull().defaultNow(),
+  joinedAt: integer("joined_at", { mode: "timestamp_ms" }).notNull().$defaultFn(() => new Date()),
 }, (t) => [primaryKey({ columns: [t.groupId, t.userId] })]);
 
 export type Group = typeof groupsTable.$inferSelect;

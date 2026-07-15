@@ -1,13 +1,13 @@
 /**
  * POST /storage/uploads
  *
- * Upload a file directly to the configured S3-compatible storage.
- * Client sends the raw binary body with Content-Type set to the file's MIME type.
- * Returns { objectPath } — the public URL of the uploaded file.
+ * رفع ملف مباشرة إلى Cloudflare R2.
+ * يرسل العميل الـ binary body مع Content-Type للملف.
+ * يُعيد { objectPath } — الرابط العام للملف المرفوع.
  */
 import { Hono } from "hono";
 import type { HonoEnv } from "../types";
-import { createStorageClient, uploadFile } from "../storage";
+import { uploadFile } from "../storage";
 
 const router = new Hono<HonoEnv>();
 
@@ -21,16 +21,8 @@ router.post("/storage/uploads", async (c) => {
       return c.json({ error: "Empty body" }, 400);
     }
 
-    const client = createStorageClient(
-      c.env.STORAGE_ACCESS_KEY_ID,
-      c.env.STORAGE_SECRET_ACCESS_KEY,
-      c.env.STORAGE_REGION || "auto",
-    );
-
     const objectPath = await uploadFile(
-      client,
-      c.env.STORAGE_ENDPOINT,
-      c.env.STORAGE_BUCKET,
+      c.env.STORAGE,
       c.env.STORAGE_PUBLIC_URL,
       body,
       contentType,

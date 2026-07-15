@@ -42,7 +42,7 @@ async function enrichGroup(db: DB, group: typeof groupsTable.$inferSelect, viewe
 // GET /groups
 router.get("/groups", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
@@ -74,7 +74,7 @@ router.get("/groups", async (c) => {
 // POST /groups
 router.post("/groups", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
@@ -105,7 +105,7 @@ router.post("/groups", async (c) => {
 // GET /groups/mine
 router.get("/groups/mine", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
@@ -128,7 +128,7 @@ router.get("/groups/mine", async (c) => {
 // GET /groups/:groupId
 router.get("/groups/:groupId", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
@@ -148,7 +148,7 @@ router.get("/groups/:groupId", async (c) => {
 // PATCH /groups/:groupId
 router.patch("/groups/:groupId", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
@@ -179,7 +179,7 @@ router.patch("/groups/:groupId", async (c) => {
 // DELETE /groups/:groupId
 router.delete("/groups/:groupId", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
@@ -198,7 +198,7 @@ router.delete("/groups/:groupId", async (c) => {
 // GET /groups/:groupId/posts
 router.get("/groups/:groupId/posts", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
@@ -231,7 +231,7 @@ router.get("/groups/:groupId/posts", async (c) => {
 // POST /groups/:groupId/posts
 router.post("/groups/:groupId/posts", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
@@ -276,7 +276,7 @@ router.post("/groups/:groupId/posts", async (c) => {
 // POST /groups/:groupId/join
 router.post("/groups/:groupId/join", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
@@ -309,7 +309,7 @@ router.post("/groups/:groupId/join", async (c) => {
 // DELETE /groups/:groupId/join (leave)
 router.delete("/groups/:groupId/join", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
@@ -343,7 +343,7 @@ router.delete("/groups/:groupId/join", async (c) => {
 // GET /groups/:groupId/members
 router.get("/groups/:groupId/members", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);

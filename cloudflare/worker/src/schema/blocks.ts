@@ -1,8 +1,8 @@
-import { pgTable, text, timestamp, primaryKey } from "drizzle-orm/pg-core";
+import { sqliteTable, text, integer, primaryKey } from "drizzle-orm/sqlite-core";
 import { usersTable } from "./users";
 
-export const blocksTable = pgTable("blocks", {
+export const blocksTable = sqliteTable("blocks", {
   blockerId: text("blocker_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
   blockedId: text("blocked_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull().$defaultFn(() => new Date()),
 }, (t) => [primaryKey({ columns: [t.blockerId, t.blockedId] })]);

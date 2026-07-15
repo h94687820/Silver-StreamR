@@ -20,7 +20,7 @@ async function requireOnboarding(db: ReturnType<typeof createDb>, clerkId: strin
 // GET /conversations
 router.get("/conversations", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
@@ -84,7 +84,7 @@ router.get("/conversations", async (c) => {
 // POST /conversations
 router.post("/conversations", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
@@ -133,7 +133,7 @@ router.post("/conversations", async (c) => {
 // GET /conversations/:conversationId/messages
 router.get("/conversations/:conversationId/messages", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
@@ -169,7 +169,7 @@ router.get("/conversations/:conversationId/messages", async (c) => {
 // POST /conversations/:conversationId/messages
 router.post("/conversations/:conversationId/messages", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);

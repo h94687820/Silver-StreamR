@@ -1,15 +1,15 @@
-import { pgTable, text, boolean, timestamp } from "drizzle-orm/pg-core";
+import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 import { usersTable } from "./users";
 
-export const notificationsTable = pgTable("notifications", {
+export const notificationsTable = sqliteTable("notifications", {
   id: text("id").primaryKey(),
   recipientId: text("recipient_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
   actorId: text("actor_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
   type: text("type").notNull(),
   postId: text("post_id"),
   commentId: text("comment_id"),
-  isRead: boolean("is_read").notNull().default(false),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  isRead: integer("is_read", { mode: "boolean" }).notNull().default(false),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull().$defaultFn(() => new Date()),
 });
 
 export type Notification = typeof notificationsTable.$inferSelect;

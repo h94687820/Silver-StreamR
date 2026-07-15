@@ -3,17 +3,28 @@ main = "src/index.ts"
 compatibility_date = "2025-01-01"
 compatibility_flags = ["nodejs_compat"]
 
+# ─── Cloudflare D1 (قاعدة البيانات) ───────────────────────────────────────────
+# بعد إنشاء الـ database عبر: wrangler d1 create silver-stream-db
+# انسخ الـ database_id هنا
+[[d1_databases]]
+binding = "DB"
+database_name = "silver-stream-db"
+database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+
+# ─── Cloudflare R2 (تخزين الملفات) ────────────────────────────────────────────
+# بعد إنشاء الـ bucket عبر: wrangler r2 bucket create silver-stream-storage
+[[r2_buckets]]
+binding = "STORAGE"
+bucket_name = "silver-stream-storage"
+
+# ─── متغيرات عادية (غير سرية) ─────────────────────────────────────────────────
 [vars]
-# ─── تُضاف هذه القيم عبر: wrangler secret put SECRET_NAME ───
-# DATABASE_URL       = "postgres://..."        (رابط قاعدة البيانات)
-# CLERK_SECRET_KEY   = "sk_..."               (من لوحة Clerk)
-# CLERK_PUBLISHABLE_KEY = "pk_..."
-# STORAGE_ENDPOINT   = "https://..."          (رابط S3-compatible)
-# STORAGE_BUCKET     = "silver-stream"        (اسم الـ bucket)
-# STORAGE_ACCESS_KEY_ID = "..."
-# STORAGE_SECRET_ACCESS_KEY = "..."
-# STORAGE_REGION     = "auto"                 (أو اسم المنطقة)
-# STORAGE_PUBLIC_URL = "https://cdn.example.com" (رابط الملفات العامة)
+# رابط R2 العام — عدّله بعد تفعيل Custom Domain أو Public Access على الـ bucket
+STORAGE_PUBLIC_URL = "https://pub-REPLACE.r2.dev"
+
+# ─── أسرار — تُضاف عبر: wrangler secret put SECRET_NAME ──────────────────────
+# CLERK_SECRET_KEY        = "sk_..."
+# CLERK_PUBLISHABLE_KEY   = "pk_..."
 
 [[routes]]
 pattern = "/api/*"

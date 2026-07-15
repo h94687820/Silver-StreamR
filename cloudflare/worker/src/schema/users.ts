@@ -1,6 +1,6 @@
-import { pgTable, text, boolean, integer, timestamp } from "drizzle-orm/pg-core";
+import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 
-export const usersTable = pgTable("users", {
+export const usersTable = sqliteTable("users", {
   id: text("id").primaryKey(),
   username: text("username").notNull().unique(),
   displayName: text("display_name"),
@@ -10,13 +10,13 @@ export const usersTable = pgTable("users", {
   followersCount: integer("followers_count").notNull().default(0),
   followingCount: integer("following_count").notNull().default(0),
   postsCount: integer("posts_count").notNull().default(0),
-  onboardingComplete: boolean("onboarding_complete").notNull().default(false),
-  acceptedTerms: boolean("accepted_terms").notNull().default(false),
+  onboardingComplete: integer("onboarding_complete", { mode: "boolean" }).notNull().default(false),
+  acceptedTerms: integer("accepted_terms", { mode: "boolean" }).notNull().default(false),
   profileBadgeEmojiId: text("profile_badge_emoji_id"),
   postStampEmojiId: text("post_stamp_emoji_id"),
   nameDisplayEmojiId: text("name_display_emoji_id"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull().$defaultFn(() => new Date()),
+  updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull().$defaultFn(() => new Date()),
 });
 
 export type User = typeof usersTable.$inferSelect;

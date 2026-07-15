@@ -16,7 +16,7 @@ async function requireOnboarding(db: ReturnType<typeof createDb>, clerkId: strin
 // GET /posts/:postId/comments
 router.get("/posts/:postId/comments", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
@@ -61,7 +61,7 @@ router.get("/posts/:postId/comments", async (c) => {
 // POST /posts/:postId/comments
 router.post("/posts/:postId/comments", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
@@ -114,7 +114,7 @@ router.post("/posts/:postId/comments", async (c) => {
 // GET /comments/:commentId/replies
 router.get("/comments/:commentId/replies", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
@@ -149,7 +149,7 @@ router.get("/comments/:commentId/replies", async (c) => {
 // POST /comments/:commentId/replies
 router.post("/comments/:commentId/replies", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
@@ -213,7 +213,7 @@ router.post("/comments/:commentId/replies", async (c) => {
 // PATCH /comments/:commentId
 router.patch("/comments/:commentId", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
@@ -263,7 +263,7 @@ router.patch("/comments/:commentId", async (c) => {
 // DELETE /comments/:commentId
 router.delete("/comments/:commentId", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);

@@ -15,7 +15,7 @@ async function requireOnboarding(db: ReturnType<typeof createDb>, clerkId: strin
 // GET /emojis/me
 router.get("/emojis/me", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
@@ -34,7 +34,7 @@ router.get("/emojis/me", async (c) => {
 // POST /emojis/me
 router.post("/emojis/me", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
@@ -55,7 +55,7 @@ router.post("/emojis/me", async (c) => {
 // PATCH /emojis/:emojiId
 router.patch("/emojis/:emojiId", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
@@ -87,7 +87,7 @@ router.patch("/emojis/:emojiId", async (c) => {
 // DELETE /emojis/:emojiId
 router.delete("/emojis/:emojiId", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
@@ -121,7 +121,7 @@ router.delete("/emojis/:emojiId", async (c) => {
 // GET /emojis/user/:userId — public emojis of a user
 router.get("/emojis/user/:userId", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const userId = c.req.param("userId");
     const emojis = await db
       .select()
@@ -137,7 +137,7 @@ router.get("/emojis/user/:userId", async (c) => {
 // PUT /users/me/active-emojis
 router.put("/users/me/active-emojis", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);

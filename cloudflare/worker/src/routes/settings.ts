@@ -35,7 +35,7 @@ async function ensureSettings(db: ReturnType<typeof createDb>, userId: string) {
 // GET /settings
 router.get("/settings", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
@@ -49,7 +49,7 @@ router.get("/settings", async (c) => {
 // PATCH /settings
 router.patch("/settings", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
@@ -82,7 +82,7 @@ router.patch("/settings", async (c) => {
 // DELETE /settings/delete-account
 router.delete("/settings/delete-account", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);

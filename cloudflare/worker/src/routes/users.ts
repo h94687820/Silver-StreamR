@@ -11,7 +11,7 @@ const router = new Hono<HonoEnv>();
 // GET /users/me
 router.get("/users/me", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const user = await getOrCreateUser(db, clerkId);
     const profile = await getUserProfile(db, user.id, clerkId);
@@ -24,7 +24,7 @@ router.get("/users/me", async (c) => {
 // PATCH /users/me
 router.patch("/users/me", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const body = await c.req.json<{
       username?: string;
@@ -75,7 +75,7 @@ router.patch("/users/me", async (c) => {
 // POST /users/me/complete-onboarding
 router.post("/users/me/complete-onboarding", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const body = await c.req.json<{
       username?: string;
@@ -129,7 +129,7 @@ router.post("/users/me/complete-onboarding", async (c) => {
 // GET /users/check-username  (public, no onboarding needed)
 router.get("/users/check-username", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const username = c.req.query("username");
     if (!username) return c.json({ error: "Username required" }, 400);
     const existing = await db
@@ -146,7 +146,7 @@ router.get("/users/check-username", async (c) => {
 // GET /users/:username
 router.get("/users/:username", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const username = c.req.param("username");
     const users = await db
@@ -165,7 +165,7 @@ router.get("/users/:username", async (c) => {
 // GET /users/:userId/followers
 router.get("/users/:userId/followers", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const userId = c.req.param("userId");
     const followers = await db
@@ -184,7 +184,7 @@ router.get("/users/:userId/followers", async (c) => {
 // GET /users/:userId/following
 router.get("/users/:userId/following", async (c) => {
   try {
-    const db = createDb(c.env.DATABASE_URL);
+    const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const userId = c.req.param("userId");
     const following = await db

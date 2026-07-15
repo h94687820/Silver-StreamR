@@ -1,9 +1,8 @@
-DATABASE_URL=postgres://user:password@host/dbname
+# انسخ هذا الملف إلى .dev.vars وأضف القيم الحقيقية
+# wrangler dev يقرأ هذا الملف تلقائياً للتطوير المحلي
+
 CLERK_SECRET_KEY=sk_test_...
 CLERK_PUBLISHABLE_KEY=pk_test_...
-STORAGE_ENDPOINT=https://s3.example.com
-STORAGE_BUCKET=silver-stream
-STORAGE_ACCESS_KEY_ID=your-access-key
-STORAGE_SECRET_ACCESS_KEY=your-secret-key
-STORAGE_REGION=auto
-STORAGE_PUBLIC_URL=https://cdn.example.com
+
+# R2 Public URL — في التطوير المحلي يمكن تركه هكذا
+STORAGE_PUBLIC_URL=http://localhost:8787/cdn

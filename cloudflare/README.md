@@ -1,128 +1,125 @@
 # Silver Stream — Cloudflare Deployment Guide
 
-## Architecture
+## نظرة عامة على البنية
 
 ```
-Frontend  →  Cloudflare Pages   (static Vite build)
-API       →  Cloudflare Workers (Hono, cloudflare/worker/)
-Database  →  Your PostgreSQL service (via HTTPS/WebSocket)
-Storage   →  Your S3-compatible service
-Auth      →  Clerk (JWT verification in Worker)
+Cloudflare Pages  ──→  Cloudflare Worker (Hono API)
+                              │
+                    ┌─────────┴──────────┐
+                    │                    │
+              Cloudflare D1        Cloudflare R2
+            (قاعدة البيانات)    (تخزين الملفات)
 ```
+
+- **Frontend:** Vite + React → Cloudflare Pages
+- **API:** Hono Worker → `cloudflare/worker/`
+- **Database:** Cloudflare D1 (SQLite مدمج — مجاني)
+- **Storage:** Cloudflare R2 (تخزين ملفات — 10 GB مجاناً)
+- **Auth:** Clerk (JWT verification داخل الـ Worker)
 
 ---
 
-## Prerequisites
+## الإعداد الأولي (مرة واحدة)
 
+### 1. تثبيت wrangler
 ```bash
 npm install -g wrangler
 wrangler login
 ```
 
+### 2. إنشاء قاعدة البيانات D1
+```bash
+cd cloudflare/worker
+wrangler d1 create silver-stream-db
+```
+انسخ الـ `database_id` الظاهر وضعه في `wrangler.toml`:
+```toml
+[[d1_databases]]
+binding = "DB"
+database_name = "silver-stream-db"
+database_id = "xxxx-xxxx-xxxx-xxxx"   # ← ضع هنا
+```
+
+### 3. إنشاء bucket التخزين R2
+```bash
+wrangler r2 bucket create silver-stream-storage
+```
+ثم فعّل **Public Access** على الـ bucket من لوحة Cloudflare:
+- Dashboard → R2 → silver-stream-storage → Settings → Public Access → Enable
+- انسخ الـ Public URL وضعه في `wrangler.toml` تحت `STORAGE_PUBLIC_URL`
+
+### 4. إضافة الأسرار
+```bash
+wrangler secret put CLERK_SECRET_KEY
+wrangler secret put CLERK_PUBLISHABLE_KEY
+```
+
+### 5. إنشاء جداول قاعدة البيانات
+```bash
+# أنشئ ملف migration أولاً
+wrangler d1 execute silver-stream-db --file=./schema.sql
+```
+
+> **ملاحظة:** استخدم `wrangler d1 export` لإنشاء schema.sql من قاعدة بيانات موجودة، أو اكتب الجداول يدوياً. Schema موجودة في `src/schema/`.
+
 ---
 
-## 1 — Deploy the API Worker
-
-### 1-a Install dependencies
+## نشر الـ Worker
 
 ```bash
 cd cloudflare/worker
 npm install
-```
-
-### 1-b Set secrets
-
-Run each command and paste the value when prompted:
-
-```bash
-wrangler secret put DATABASE_URL          # postgres://user:pass@host/db
-wrangler secret put CLERK_SECRET_KEY      # sk_live_...
-wrangler secret put CLERK_PUBLISHABLE_KEY # pk_live_...
-wrangler secret put STORAGE_ENDPOINT     # https://s3.example.com
-wrangler secret put STORAGE_BUCKET       # silver-stream
-wrangler secret put STORAGE_ACCESS_KEY_ID
-wrangler secret put STORAGE_SECRET_ACCESS_KEY
-wrangler secret put STORAGE_REGION       # auto  (or us-east-1, etc.)
-wrangler secret put STORAGE_PUBLIC_URL   # https://cdn.example.com
-```
-
-### 1-c Deploy
-
-```bash
 wrangler deploy
 ```
 
-Note the Worker URL — it will look like:
-`https://silver-stream-api.<your-subdomain>.workers.dev`
-
-### 1-d (Optional) Custom domain
-
-In the Cloudflare dashboard → Workers & Pages → your Worker → Settings → Domains & Routes,
-add a custom route such as `api.yourdomain.com/*`.
+سيظهر رابط الـ Worker مثل:
+```
+https://silver-stream-api.YOUR_SUBDOMAIN.workers.dev
+```
 
 ---
 
-## 2 — Deploy the Frontend (Cloudflare Pages)
+## نشر الـ Frontend (Cloudflare Pages)
 
-### 2-a Build settings in Pages dashboard
+في لوحة Cloudflare Pages، أنشئ مشروع جديد:
 
-| Setting | Value |
+| الإعداد | القيمة |
 |---|---|
-| Framework preset | **Vite** |
 | Build command | `pnpm --filter @workspace/silver-stream run build` |
 | Build output directory | `artifacts/silver-stream/dist` |
-| Root directory | `/` (repo root) |
+| Root directory | `/` (جذر المشروع) |
 
-### 2-b Environment variables (Pages → Settings → Environment variables)
-
-| Variable | Value |
+### متغيرات البيئة (Environment Variables):
+| الاسم | القيمة |
 |---|---|
-| `VITE_CLERK_PUBLISHABLE_KEY` | `pk_live_...` |
-| `VITE_API_URL` | `https://silver-stream-api.<subdomain>.workers.dev` |
-
-`VITE_API_URL` points the frontend at your Worker. If left empty, API calls fall back to the same origin (`/api/...`) which is fine for local dev.
+| `VITE_CLERK_PUBLISHABLE_KEY` | `pk_...` |
+| `VITE_API_URL` | رابط الـ Worker أعلاه |
 
 ---
 
-## 3 — Database migrations
+## التطوير المحلي
 
-The Worker uses the same schema as the existing Express API. Run migrations against
-your PostgreSQL service the same way you always have (e.g. `pnpm --filter @workspace/db db:push`),
-pointing `DATABASE_URL` at your service.
-
----
-
-## 4 — Local development
-
+### Worker
 ```bash
 cd cloudflare/worker
-cp .dev.vars.example .dev.vars   # fill in values
+cp .dev.vars.example .dev.vars   # أضف القيم
 wrangler dev
 ```
 
-Create `.dev.vars` (git-ignored):
+> D1 و R2 يعملان محلياً تلقائياً عبر `wrangler dev` بدون إعداد إضافي.
 
-```ini
-DATABASE_URL=postgres://...
-CLERK_SECRET_KEY=sk_test_...
-CLERK_PUBLISHABLE_KEY=pk_test_...
-STORAGE_ENDPOINT=https://...
-STORAGE_BUCKET=silver-stream
-STORAGE_ACCESS_KEY_ID=...
-STORAGE_SECRET_ACCESS_KEY=...
-STORAGE_REGION=auto
-STORAGE_PUBLIC_URL=https://...
+### Frontend
+```bash
+pnpm --filter @workspace/silver-stream run dev
 ```
-
-The Worker will be available at `http://localhost:8787`.
+اتركه يستخدم الـ `/api/...` المحلي عبر الـ Express API server الموجود للتطوير.
 
 ---
 
-## 5 — Troubleshooting
+## ملفات .dev.vars.example
 
-| Symptom | Fix |
-|---|---|
-| `401 Unauthorized` | Check `CLERK_SECRET_KEY` secret is set and matches the Clerk app |
-| DB connection error | Ensure `DATABASE_URL` uses `https://` or `wss://` transport (not plain TCP); neon-serverless requires HTTP/WebSocket |
-| Storage upload fails | Verify endpoint, bucket name, and credentials; check CORS policy on your bucket allows PUT from `workers.dev` |
-| `onboardingRequired: true` loop | User exists in Clerk but not in DB — call `POST /api/users/me/complete-onboarding` |
+```
+CLERK_SECRET_KEY=sk_test_...
+CLERK_PUBLISHABLE_KEY=pk_test_...
+STORAGE_PUBLIC_URL=http://localhost:8787  # مؤقت للتطوير المحلي
+```
