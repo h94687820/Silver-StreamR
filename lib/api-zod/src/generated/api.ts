@@ -37,7 +37,8 @@ export const GetMeResponse = zod.object({
   "createdAt": zod.string(),
   "profileBadgeEmojiUrl": zod.string().nullish(),
   "postStampEmojiUrl": zod.string().nullish(),
-  "nameDisplayEmojiUrl": zod.string().nullish()
+  "nameDisplayEmojiUrl": zod.string().nullish(),
+  "savedPostsPublic": zod.boolean()
 })
 
 
@@ -70,7 +71,8 @@ export const UpdateMeResponse = zod.object({
   "createdAt": zod.string(),
   "profileBadgeEmojiUrl": zod.string().nullish(),
   "postStampEmojiUrl": zod.string().nullish(),
-  "nameDisplayEmojiUrl": zod.string().nullish()
+  "nameDisplayEmojiUrl": zod.string().nullish(),
+  "savedPostsPublic": zod.boolean()
 })
 
 
@@ -101,7 +103,8 @@ export const CompleteOnboardingResponse = zod.object({
   "createdAt": zod.string(),
   "profileBadgeEmojiUrl": zod.string().nullish(),
   "postStampEmojiUrl": zod.string().nullish(),
-  "nameDisplayEmojiUrl": zod.string().nullish()
+  "nameDisplayEmojiUrl": zod.string().nullish(),
+  "savedPostsPublic": zod.boolean()
 })
 
 
@@ -130,7 +133,8 @@ export const GetUserByUsernameResponse = zod.object({
   "createdAt": zod.string(),
   "profileBadgeEmojiUrl": zod.string().nullish(),
   "postStampEmojiUrl": zod.string().nullish(),
-  "nameDisplayEmojiUrl": zod.string().nullish()
+  "nameDisplayEmojiUrl": zod.string().nullish(),
+  "savedPostsPublic": zod.boolean()
 })
 
 
@@ -170,7 +174,8 @@ export const GetUserPostsResponse = zod.object({
   "createdAt": zod.string(),
   "profileBadgeEmojiUrl": zod.string().nullish(),
   "postStampEmojiUrl": zod.string().nullish(),
-  "nameDisplayEmojiUrl": zod.string().nullish()
+  "nameDisplayEmojiUrl": zod.string().nullish(),
+  "savedPostsPublic": zod.boolean()
 }),
   "content": zod.string().nullish(),
   "mediaUrls": zod.array(zod.string()).optional(),
@@ -262,7 +267,8 @@ export const GetFollowersResponse = zod.object({
   "createdAt": zod.string(),
   "profileBadgeEmojiUrl": zod.string().nullish(),
   "postStampEmojiUrl": zod.string().nullish(),
-  "nameDisplayEmojiUrl": zod.string().nullish()
+  "nameDisplayEmojiUrl": zod.string().nullish(),
+  "savedPostsPublic": zod.boolean()
 })),
   "nextCursor": zod.string().nullish()
 })
@@ -301,7 +307,8 @@ export const GetFollowingResponse = zod.object({
   "createdAt": zod.string(),
   "profileBadgeEmojiUrl": zod.string().nullish(),
   "postStampEmojiUrl": zod.string().nullish(),
-  "nameDisplayEmojiUrl": zod.string().nullish()
+  "nameDisplayEmojiUrl": zod.string().nullish(),
+  "savedPostsPublic": zod.boolean()
 })),
   "nextCursor": zod.string().nullish()
 })
@@ -339,7 +346,8 @@ export const GetFeedResponse = zod.object({
   "createdAt": zod.string(),
   "profileBadgeEmojiUrl": zod.string().nullish(),
   "postStampEmojiUrl": zod.string().nullish(),
-  "nameDisplayEmojiUrl": zod.string().nullish()
+  "nameDisplayEmojiUrl": zod.string().nullish(),
+  "savedPostsPublic": zod.boolean()
 }),
   "content": zod.string().nullish(),
   "mediaUrls": zod.array(zod.string()).optional(),
@@ -393,7 +401,8 @@ export const CreatePostResponse = zod.object({
   "createdAt": zod.string(),
   "profileBadgeEmojiUrl": zod.string().nullish(),
   "postStampEmojiUrl": zod.string().nullish(),
-  "nameDisplayEmojiUrl": zod.string().nullish()
+  "nameDisplayEmojiUrl": zod.string().nullish(),
+  "savedPostsPublic": zod.boolean()
 }),
   "content": zod.string().nullish(),
   "mediaUrls": zod.array(zod.string()).optional(),
@@ -443,7 +452,8 @@ export const GetVideoFeedResponse = zod.object({
   "createdAt": zod.string(),
   "profileBadgeEmojiUrl": zod.string().nullish(),
   "postStampEmojiUrl": zod.string().nullish(),
-  "nameDisplayEmojiUrl": zod.string().nullish()
+  "nameDisplayEmojiUrl": zod.string().nullish(),
+  "savedPostsPublic": zod.boolean()
 }),
   "content": zod.string().nullish(),
   "mediaUrls": zod.array(zod.string()).optional(),
@@ -495,7 +505,65 @@ export const GetSavedPostsResponse = zod.object({
   "createdAt": zod.string(),
   "profileBadgeEmojiUrl": zod.string().nullish(),
   "postStampEmojiUrl": zod.string().nullish(),
-  "nameDisplayEmojiUrl": zod.string().nullish()
+  "nameDisplayEmojiUrl": zod.string().nullish(),
+  "savedPostsPublic": zod.boolean()
+}),
+  "content": zod.string().nullish(),
+  "mediaUrls": zod.array(zod.string()).optional(),
+  "mediaType": zod.union([zod.literal('image'),zod.literal('video'),zod.literal(null)]).nullish(),
+  "hashtags": zod.array(zod.string()).optional(),
+  "isPrivate": zod.boolean(),
+  "groupId": zod.string().nullish(),
+  "likesCount": zod.number(),
+  "dislikesCount": zod.number(),
+  "commentsCount": zod.number(),
+  "myReaction": zod.union([zod.literal('like'),zod.literal('dislike'),zod.literal(null)]).nullish(),
+  "isSaved": zod.boolean(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})),
+  "nextCursor": zod.string().nullish()
+})
+
+
+/**
+ * @summary Get a user's saved posts, if they've made their favorites public
+ */
+export const GetUserSavedPostsParams = zod.object({
+  "username": zod.coerce.string()
+})
+
+export const getUserSavedPostsQueryLimitDefault = 20;
+
+export const GetUserSavedPostsQueryParams = zod.object({
+  "cursor": zod.coerce.string().optional(),
+  "limit": zod.coerce.number().default(getUserSavedPostsQueryLimitDefault)
+})
+
+export const GetUserSavedPostsResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.string(),
+  "authorId": zod.string(),
+  "author": zod.object({
+  "id": zod.string(),
+  "clerkId": zod.string(),
+  "username": zod.string(),
+  "displayName": zod.string().nullish(),
+  "bio": zod.string().nullish(),
+  "avatarUrl": zod.string().nullish(),
+  "coverUrl": zod.string().nullish(),
+  "followersCount": zod.number(),
+  "followingCount": zod.number(),
+  "postsCount": zod.number(),
+  "isFollowing": zod.boolean(),
+  "isBlocked": zod.boolean(),
+  "isMe": zod.boolean(),
+  "onboardingComplete": zod.boolean(),
+  "createdAt": zod.string(),
+  "profileBadgeEmojiUrl": zod.string().nullish(),
+  "postStampEmojiUrl": zod.string().nullish(),
+  "nameDisplayEmojiUrl": zod.string().nullish(),
+  "savedPostsPublic": zod.boolean()
 }),
   "content": zod.string().nullish(),
   "mediaUrls": zod.array(zod.string()).optional(),
@@ -547,7 +615,8 @@ export const GetPrivatePostsResponse = zod.object({
   "createdAt": zod.string(),
   "profileBadgeEmojiUrl": zod.string().nullish(),
   "postStampEmojiUrl": zod.string().nullish(),
-  "nameDisplayEmojiUrl": zod.string().nullish()
+  "nameDisplayEmojiUrl": zod.string().nullish(),
+  "savedPostsPublic": zod.boolean()
 }),
   "content": zod.string().nullish(),
   "mediaUrls": zod.array(zod.string()).optional(),
@@ -595,7 +664,8 @@ export const GetPostResponse = zod.object({
   "createdAt": zod.string(),
   "profileBadgeEmojiUrl": zod.string().nullish(),
   "postStampEmojiUrl": zod.string().nullish(),
-  "nameDisplayEmojiUrl": zod.string().nullish()
+  "nameDisplayEmojiUrl": zod.string().nullish(),
+  "savedPostsPublic": zod.boolean()
 }),
   "content": zod.string().nullish(),
   "mediaUrls": zod.array(zod.string()).optional(),
@@ -646,7 +716,8 @@ export const UpdatePostResponse = zod.object({
   "createdAt": zod.string(),
   "profileBadgeEmojiUrl": zod.string().nullish(),
   "postStampEmojiUrl": zod.string().nullish(),
-  "nameDisplayEmojiUrl": zod.string().nullish()
+  "nameDisplayEmojiUrl": zod.string().nullish(),
+  "savedPostsPublic": zod.boolean()
 }),
   "content": zod.string().nullish(),
   "mediaUrls": zod.array(zod.string()).optional(),
@@ -769,7 +840,8 @@ export const GetCommentsResponse = zod.object({
   "createdAt": zod.string(),
   "profileBadgeEmojiUrl": zod.string().nullish(),
   "postStampEmojiUrl": zod.string().nullish(),
-  "nameDisplayEmojiUrl": zod.string().nullish()
+  "nameDisplayEmojiUrl": zod.string().nullish(),
+  "savedPostsPublic": zod.boolean()
 }),
   "content": zod.string(),
   "parentId": zod.string().nullish(),
@@ -814,7 +886,8 @@ export const CreateCommentResponse = zod.object({
   "createdAt": zod.string(),
   "profileBadgeEmojiUrl": zod.string().nullish(),
   "postStampEmojiUrl": zod.string().nullish(),
-  "nameDisplayEmojiUrl": zod.string().nullish()
+  "nameDisplayEmojiUrl": zod.string().nullish(),
+  "savedPostsPublic": zod.boolean()
 }),
   "content": zod.string(),
   "parentId": zod.string().nullish(),
@@ -857,7 +930,8 @@ export const UpdateCommentResponse = zod.object({
   "createdAt": zod.string(),
   "profileBadgeEmojiUrl": zod.string().nullish(),
   "postStampEmojiUrl": zod.string().nullish(),
-  "nameDisplayEmojiUrl": zod.string().nullish()
+  "nameDisplayEmojiUrl": zod.string().nullish(),
+  "savedPostsPublic": zod.boolean()
 }),
   "content": zod.string(),
   "parentId": zod.string().nullish(),
@@ -909,7 +983,8 @@ export const GetRepliesResponse = zod.object({
   "createdAt": zod.string(),
   "profileBadgeEmojiUrl": zod.string().nullish(),
   "postStampEmojiUrl": zod.string().nullish(),
-  "nameDisplayEmojiUrl": zod.string().nullish()
+  "nameDisplayEmojiUrl": zod.string().nullish(),
+  "savedPostsPublic": zod.boolean()
 }),
   "content": zod.string(),
   "parentId": zod.string().nullish(),
@@ -954,7 +1029,8 @@ export const CreateReplyResponse = zod.object({
   "createdAt": zod.string(),
   "profileBadgeEmojiUrl": zod.string().nullish(),
   "postStampEmojiUrl": zod.string().nullish(),
-  "nameDisplayEmojiUrl": zod.string().nullish()
+  "nameDisplayEmojiUrl": zod.string().nullish(),
+  "savedPostsPublic": zod.boolean()
 }),
   "content": zod.string(),
   "parentId": zod.string().nullish(),
@@ -986,7 +1062,8 @@ export const GetStoriesResponseItem = zod.object({
   "createdAt": zod.string(),
   "profileBadgeEmojiUrl": zod.string().nullish(),
   "postStampEmojiUrl": zod.string().nullish(),
-  "nameDisplayEmojiUrl": zod.string().nullish()
+  "nameDisplayEmojiUrl": zod.string().nullish(),
+  "savedPostsPublic": zod.boolean()
 }),
   "stories": zod.array(zod.object({
   "id": zod.string(),
@@ -1009,7 +1086,8 @@ export const GetStoriesResponseItem = zod.object({
   "createdAt": zod.string(),
   "profileBadgeEmojiUrl": zod.string().nullish(),
   "postStampEmojiUrl": zod.string().nullish(),
-  "nameDisplayEmojiUrl": zod.string().nullish()
+  "nameDisplayEmojiUrl": zod.string().nullish(),
+  "savedPostsPublic": zod.boolean()
 }),
   "mediaUrl": zod.string(),
   "mediaType": zod.enum(['image', 'video']),
@@ -1054,7 +1132,8 @@ export const CreateStoryResponse = zod.object({
   "createdAt": zod.string(),
   "profileBadgeEmojiUrl": zod.string().nullish(),
   "postStampEmojiUrl": zod.string().nullish(),
-  "nameDisplayEmojiUrl": zod.string().nullish()
+  "nameDisplayEmojiUrl": zod.string().nullish(),
+  "savedPostsPublic": zod.boolean()
 }),
   "mediaUrl": zod.string(),
   "mediaType": zod.enum(['image', 'video']),
@@ -1169,7 +1248,8 @@ export const GetBlockedUsersResponse = zod.object({
   "createdAt": zod.string(),
   "profileBadgeEmojiUrl": zod.string().nullish(),
   "postStampEmojiUrl": zod.string().nullish(),
-  "nameDisplayEmojiUrl": zod.string().nullish()
+  "nameDisplayEmojiUrl": zod.string().nullish(),
+  "savedPostsPublic": zod.boolean()
 })),
   "nextCursor": zod.string().nullish()
 })
@@ -1309,7 +1389,8 @@ export const GetNotificationsResponse = zod.object({
   "createdAt": zod.string(),
   "profileBadgeEmojiUrl": zod.string().nullish(),
   "postStampEmojiUrl": zod.string().nullish(),
-  "nameDisplayEmojiUrl": zod.string().nullish()
+  "nameDisplayEmojiUrl": zod.string().nullish(),
+  "savedPostsPublic": zod.boolean()
 }),
   "postId": zod.string().nullish(),
   "commentId": zod.string().nullish(),
@@ -1364,7 +1445,8 @@ export const GetConversationsResponseItem = zod.object({
   "createdAt": zod.string(),
   "profileBadgeEmojiUrl": zod.string().nullish(),
   "postStampEmojiUrl": zod.string().nullish(),
-  "nameDisplayEmojiUrl": zod.string().nullish()
+  "nameDisplayEmojiUrl": zod.string().nullish(),
+  "savedPostsPublic": zod.boolean()
 }),
   "lastMessage": zod.object({
   "content": zod.string().optional(),
@@ -1404,7 +1486,8 @@ export const CreateConversationResponse = zod.object({
   "createdAt": zod.string(),
   "profileBadgeEmojiUrl": zod.string().nullish(),
   "postStampEmojiUrl": zod.string().nullish(),
-  "nameDisplayEmojiUrl": zod.string().nullish()
+  "nameDisplayEmojiUrl": zod.string().nullish(),
+  "savedPostsPublic": zod.boolean()
 }),
   "lastMessage": zod.object({
   "content": zod.string().optional(),
@@ -1453,7 +1536,8 @@ export const GetMessagesResponse = zod.object({
   "createdAt": zod.string(),
   "profileBadgeEmojiUrl": zod.string().nullish(),
   "postStampEmojiUrl": zod.string().nullish(),
-  "nameDisplayEmojiUrl": zod.string().nullish()
+  "nameDisplayEmojiUrl": zod.string().nullish(),
+  "savedPostsPublic": zod.boolean()
 }),
   "content": zod.string(),
   "isMe": zod.boolean(),
@@ -1496,7 +1580,8 @@ export const SendMessageResponse = zod.object({
   "createdAt": zod.string(),
   "profileBadgeEmojiUrl": zod.string().nullish(),
   "postStampEmojiUrl": zod.string().nullish(),
-  "nameDisplayEmojiUrl": zod.string().nullish()
+  "nameDisplayEmojiUrl": zod.string().nullish(),
+  "savedPostsPublic": zod.boolean()
 }),
   "content": zod.string(),
   "isMe": zod.boolean(),
@@ -1532,7 +1617,8 @@ export const SearchUsersResponseItem = zod.object({
   "createdAt": zod.string(),
   "profileBadgeEmojiUrl": zod.string().nullish(),
   "postStampEmojiUrl": zod.string().nullish(),
-  "nameDisplayEmojiUrl": zod.string().nullish()
+  "nameDisplayEmojiUrl": zod.string().nullish(),
+  "savedPostsPublic": zod.boolean()
 })
 export const SearchUsersResponse = zod.array(SearchUsersResponseItem)
 
@@ -1570,7 +1656,8 @@ export const SearchPostsResponse = zod.object({
   "createdAt": zod.string(),
   "profileBadgeEmojiUrl": zod.string().nullish(),
   "postStampEmojiUrl": zod.string().nullish(),
-  "nameDisplayEmojiUrl": zod.string().nullish()
+  "nameDisplayEmojiUrl": zod.string().nullish(),
+  "savedPostsPublic": zod.boolean()
 }),
   "content": zod.string().nullish(),
   "mediaUrls": zod.array(zod.string()).optional(),
@@ -1623,7 +1710,8 @@ export const SearchVideosResponse = zod.object({
   "createdAt": zod.string(),
   "profileBadgeEmojiUrl": zod.string().nullish(),
   "postStampEmojiUrl": zod.string().nullish(),
-  "nameDisplayEmojiUrl": zod.string().nullish()
+  "nameDisplayEmojiUrl": zod.string().nullish(),
+  "savedPostsPublic": zod.boolean()
 }),
   "content": zod.string().nullish(),
   "mediaUrls": zod.array(zod.string()).optional(),
@@ -1651,7 +1739,8 @@ export const GetSettingsResponse = zod.object({
   "userId": zod.string(),
   "theme": zod.enum(['auto', 'light', 'dark']),
   "accentColor": zod.enum(['blue', 'green', 'purple', 'brown', 'black', 'white']),
-  "language": zod.enum(['ar', 'en'])
+  "language": zod.enum(['ar', 'en']),
+  "savedPostsPublic": zod.boolean()
 })
 
 
@@ -1661,7 +1750,8 @@ export const GetSettingsResponse = zod.object({
 export const UpdateSettingsBody = zod.object({
   "theme": zod.enum(['auto', 'light', 'dark']).optional(),
   "accentColor": zod.enum(['blue', 'green', 'purple', 'brown', 'black', 'white']).optional(),
-  "language": zod.enum(['ar', 'en']).optional()
+  "language": zod.enum(['ar', 'en']).optional(),
+  "savedPostsPublic": zod.boolean().optional()
 })
 
 export const UpdateSettingsResponse = zod.object({
@@ -1669,7 +1759,8 @@ export const UpdateSettingsResponse = zod.object({
   "userId": zod.string(),
   "theme": zod.enum(['auto', 'light', 'dark']),
   "accentColor": zod.enum(['blue', 'green', 'purple', 'brown', 'black', 'white']),
-  "language": zod.enum(['ar', 'en'])
+  "language": zod.enum(['ar', 'en']),
+  "savedPostsPublic": zod.boolean()
 })
 
 
@@ -1717,7 +1808,8 @@ export const GetGroupsResponse = zod.object({
   "createdAt": zod.string(),
   "profileBadgeEmojiUrl": zod.string().nullish(),
   "postStampEmojiUrl": zod.string().nullish(),
-  "nameDisplayEmojiUrl": zod.string().nullish()
+  "nameDisplayEmojiUrl": zod.string().nullish(),
+  "savedPostsPublic": zod.boolean()
 }),
   "membersCount": zod.number(),
   "isMember": zod.boolean(),
@@ -1761,7 +1853,8 @@ export const CreateGroupResponse = zod.object({
   "createdAt": zod.string(),
   "profileBadgeEmojiUrl": zod.string().nullish(),
   "postStampEmojiUrl": zod.string().nullish(),
-  "nameDisplayEmojiUrl": zod.string().nullish()
+  "nameDisplayEmojiUrl": zod.string().nullish(),
+  "savedPostsPublic": zod.boolean()
 }),
   "membersCount": zod.number(),
   "isMember": zod.boolean(),
@@ -1805,7 +1898,8 @@ export const GetMyGroupsResponse = zod.object({
   "createdAt": zod.string(),
   "profileBadgeEmojiUrl": zod.string().nullish(),
   "postStampEmojiUrl": zod.string().nullish(),
-  "nameDisplayEmojiUrl": zod.string().nullish()
+  "nameDisplayEmojiUrl": zod.string().nullish(),
+  "savedPostsPublic": zod.boolean()
 }),
   "membersCount": zod.number(),
   "isMember": zod.boolean(),
@@ -1847,7 +1941,8 @@ export const GetGroupResponse = zod.object({
   "createdAt": zod.string(),
   "profileBadgeEmojiUrl": zod.string().nullish(),
   "postStampEmojiUrl": zod.string().nullish(),
-  "nameDisplayEmojiUrl": zod.string().nullish()
+  "nameDisplayEmojiUrl": zod.string().nullish(),
+  "savedPostsPublic": zod.boolean()
 }),
   "membersCount": zod.number(),
   "isMember": zod.boolean(),
@@ -1893,7 +1988,8 @@ export const UpdateGroupResponse = zod.object({
   "createdAt": zod.string(),
   "profileBadgeEmojiUrl": zod.string().nullish(),
   "postStampEmojiUrl": zod.string().nullish(),
-  "nameDisplayEmojiUrl": zod.string().nullish()
+  "nameDisplayEmojiUrl": zod.string().nullish(),
+  "savedPostsPublic": zod.boolean()
 }),
   "membersCount": zod.number(),
   "isMember": zod.boolean(),
@@ -1976,7 +2072,8 @@ export const GetGroupPostsResponse = zod.object({
   "createdAt": zod.string(),
   "profileBadgeEmojiUrl": zod.string().nullish(),
   "postStampEmojiUrl": zod.string().nullish(),
-  "nameDisplayEmojiUrl": zod.string().nullish()
+  "nameDisplayEmojiUrl": zod.string().nullish(),
+  "savedPostsPublic": zod.boolean()
 }),
   "content": zod.string().nullish(),
   "mediaUrls": zod.array(zod.string()).optional(),
@@ -2034,7 +2131,8 @@ export const CreateGroupPostResponse = zod.object({
   "createdAt": zod.string(),
   "profileBadgeEmojiUrl": zod.string().nullish(),
   "postStampEmojiUrl": zod.string().nullish(),
-  "nameDisplayEmojiUrl": zod.string().nullish()
+  "nameDisplayEmojiUrl": zod.string().nullish(),
+  "savedPostsPublic": zod.boolean()
 }),
   "content": zod.string().nullish(),
   "mediaUrls": zod.array(zod.string()).optional(),
@@ -2085,7 +2183,8 @@ export const GetGroupMembersResponse = zod.object({
   "createdAt": zod.string(),
   "profileBadgeEmojiUrl": zod.string().nullish(),
   "postStampEmojiUrl": zod.string().nullish(),
-  "nameDisplayEmojiUrl": zod.string().nullish()
+  "nameDisplayEmojiUrl": zod.string().nullish(),
+  "savedPostsPublic": zod.boolean()
 })),
   "nextCursor": zod.string().nullish()
 })

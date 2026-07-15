@@ -351,6 +351,36 @@ paths:
               schema:
                 $ref: "#/components/schemas/PostPage"
 
+  /users/{username}/saved-posts:
+    get:
+      operationId: getUserSavedPosts
+      tags: [users]
+      summary: Get a user's saved posts, if they've made their favorites public
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Saved posts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostPage"
+        "403":
+          description: This user's favorites are private
+
   /posts/private:
     get:
       operationId: getPrivatePosts
@@ -1501,7 +1531,9 @@ components:
           type: ["string", "null"]
         nameDisplayEmojiUrl:
           type: ["string", "null"]
-      required: [id, clerkId, username, followersCount, followingCount, postsCount, isFollowing, isBlocked, isMe, onboardingComplete, createdAt]
+        savedPostsPublic:
+          type: boolean
+      required: [id, clerkId, username, followersCount, followingCount, postsCount, isFollowing, isBlocked, isMe, onboardingComplete, createdAt, savedPostsPublic]
 
     UserUpdate:
       type: object
@@ -1895,7 +1927,9 @@ components:
         language:
           type: string
           enum: ["ar", "en"]
-      required: [id, userId, theme, accentColor, language]
+        savedPostsPublic:
+          type: boolean
+      required: [id, userId, theme, accentColor, language, savedPostsPublic]
 
     SettingsUpdate:
       type: object
@@ -1909,6 +1943,8 @@ components:
         language:
           type: string
           enum: ["ar", "en"]
+        savedPostsPublic:
+          type: boolean
 
     BlockResult:
       type: object

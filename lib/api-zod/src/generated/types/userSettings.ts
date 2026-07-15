@@ -15,4 +15,5 @@ export interface UserSettings {
   theme: UserSettingsTheme;
   accentColor: UserSettingsAccentColor;
   language: UserSettingsLanguage;
+  savedPostsPublic: boolean;
 }

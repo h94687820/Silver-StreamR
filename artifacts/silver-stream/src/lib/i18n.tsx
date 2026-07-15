@@ -131,6 +131,13 @@ const translations = {
     account_password_mismatch: "Passwords do not match.",
     account_password_error: "Could not update password. Please try again.",
     account_cancel: "Cancel",
+    // Saved posts page
+    saved_title: "Saved",
+    saved_public_toggle: "Public favorites",
+    saved_public_on_desc: "Other users can see your saved posts",
+    saved_public_off_desc: "Only you can see your saved posts",
+    saved_empty: "No saved posts yet",
+    saved_empty_desc: "Posts you save will appear here",
     // Common
     loading: "Loading...",
     save: "Save",
@@ -265,6 +272,13 @@ const translations = {
     account_password_mismatch: "كلمتا المرور غير متطابقتين.",
     account_password_error: "تعذّر تحديث كلمة المرور. حاول مرة أخرى.",
     account_cancel: "إلغاء",
+    // Saved posts page
+    saved_title: "المحفوظات",
+    saved_public_toggle: "عام",
+    saved_public_on_desc: "المستخدمون الآخرون يمكنهم رؤية مفضلاتك",
+    saved_public_off_desc: "أنت فقط من يمكنه رؤية مفضلاتك",
+    saved_empty: "لا توجد منشورات محفوظة بعد",
+    saved_empty_desc: "المنشورات التي تحفظها ستظهر هنا",
     // Common
     loading: "جارٍ التحميل...",
     save: "حفظ",

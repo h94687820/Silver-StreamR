@@ -13,4 +13,5 @@ export interface SettingsUpdate {
   theme?: SettingsUpdateTheme;
   accentColor?: SettingsUpdateAccentColor;
   language?: SettingsUpdateLanguage;
+  savedPostsPublic?: boolean;
 }

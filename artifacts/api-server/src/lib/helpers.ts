@@ -1,5 +1,5 @@
 import { db } from "@workspace/db";
-import { usersTable, followsTable, reactionsTable, savedPostsTable, postsTable, notificationsTable, blocksTable, customEmojisTable } from "@workspace/db";
+import { usersTable, followsTable, reactionsTable, savedPostsTable, postsTable, notificationsTable, blocksTable, customEmojisTable, userSettingsTable } from "@workspace/db";
 import { eq, and, inArray } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
@@ -67,6 +67,10 @@ export async function getUserProfile(targetId: string, viewerId?: string) {
     isBlocked = block.length > 0;
   }
 
+  const settings = await db.select({ savedPostsPublic: userSettingsTable.savedPostsPublic })
+    .from(userSettingsTable).where(eq(userSettingsTable.userId, targetId)).limit(1);
+  const savedPostsPublic = settings[0]?.savedPostsPublic ?? false;
+
   // Resolve active emoji URLs
   const emojiIds = [user.profileBadgeEmojiId, user.postStampEmojiId, user.nameDisplayEmojiId].filter(Boolean) as string[];
   let profileBadgeEmojiUrl: string | null = null;
@@ -91,6 +95,7 @@ export async function getUserProfile(targetId: string, viewerId?: string) {
     bio: user.bio ?? null,
     avatarUrl: user.avatarUrl ?? null,
     coverUrl: user.coverUrl ?? null,
+    savedPostsPublic,
     followersCount: user.followersCount,
     followingCount: user.followingCount,
     postsCount: user.postsCount,

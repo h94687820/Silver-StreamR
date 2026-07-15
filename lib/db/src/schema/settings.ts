@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean } from "drizzle-orm/pg-core";
 import { usersTable } from "./users";
 
 export const userSettingsTable = pgTable("user_settings", {
@@ -7,6 +7,7 @@ export const userSettingsTable = pgTable("user_settings", {
   theme: text("theme").notNull().default("auto"), // "auto" | "light" | "dark"
   accentColor: text("accent_color").notNull().default("blue"),
   language: text("language").notNull().default("ar"),
+  savedPostsPublic: boolean("saved_posts_public").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

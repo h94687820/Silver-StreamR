@@ -48,6 +48,7 @@ import type {
   GetPrivatePostsParams,
   GetSavedPostsParams,
   GetUserPostsParams,
+  GetUserSavedPostsParams,
   GetVideoFeedParams,
   Group,
   GroupInput,
@@ -1289,6 +1290,95 @@ export function useGetSavedPosts<TData = Awaited<ReturnType<typeof getSavedPosts
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getGetSavedPostsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetUserSavedPostsUrl = (username: string,
+    params?: GetUserSavedPostsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/users/${username}/saved-posts?${stringifiedParams}` : `/api/users/${username}/saved-posts`
+}
+
+/**
+ * @summary Get a user's saved posts, if they've made their favorites public
+ */
+export const getUserSavedPosts = async (username: string,
+    params?: GetUserSavedPostsParams, options?: RequestInit): Promise<PostPage> => {
+
+  return customFetch<PostPage>(getGetUserSavedPostsUrl(username,params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetUserSavedPostsQueryKey = (username: string,
+    params?: GetUserSavedPostsParams,) => {
+    return [
+    `/api/users/${username}/saved-posts`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetUserSavedPostsQueryOptions = <TData = Awaited<ReturnType<typeof getUserSavedPosts>>, TError = ErrorType<void>>(username: string,
+    params?: GetUserSavedPostsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getUserSavedPosts>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetUserSavedPostsQueryKey(username,params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getUserSavedPosts>>> = ({ signal }) => getUserSavedPosts(username,params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: username !== null && username !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getUserSavedPosts>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetUserSavedPostsQueryResult = NonNullable<Awaited<ReturnType<typeof getUserSavedPosts>>>
+export type GetUserSavedPostsQueryError = ErrorType<void>
+
+
+/**
+ * @summary Get a user's saved posts, if they've made their favorites public
+ */
+
+export function useGetUserSavedPosts<TData = Awaited<ReturnType<typeof getUserSavedPosts>>, TError = ErrorType<void>>(
+ username: string,
+    params?: GetUserSavedPostsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getUserSavedPosts>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetUserSavedPostsQueryOptions(username,params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

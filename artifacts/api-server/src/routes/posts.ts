@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
-import { postsTable, usersTable, savedPostsTable, followsTable, reactionsTable, groupMembersTable } from "@workspace/db";
+import { postsTable, usersTable, savedPostsTable, followsTable, reactionsTable, groupMembersTable, userSettingsTable } from "@workspace/db";
 import { eq, and, desc, lt, inArray, or, sql } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { requireAuth, requireOnboarding } from "../lib/auth";
@@ -106,6 +106,36 @@ router.get("/posts/saved", requireAuth, requireOnboarding, async (req, res) => {
       .where(eq(savedPostsTable.userId, userId))
       .orderBy(desc(savedPostsTable.savedAt)).limit(limit);
     const items = await Promise.all(saved.map(s => enrichPost(s.post, userId)));
+    res.json({ items, nextCursor: null });
+  } catch (err) {
+    req.log.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// GET /users/:username/saved-posts
+router.get("/users/:username/saved-posts", requireAuth, requireOnboarding, async (req, res) => {
+  try {
+    const viewerId = (req as any).user.id;
+    const targetUser = await db.select().from(usersTable)
+      .where(eq(usersTable.username, req.params.username.toLowerCase())).limit(1);
+    if (!targetUser[0]) { res.status(404).json({ error: "User not found" }); return; }
+    const targetId = targetUser[0].id;
+
+    if (targetId !== viewerId) {
+      const settings = await db.select().from(userSettingsTable).where(eq(userSettingsTable.userId, targetId)).limit(1);
+      if (!settings[0]?.savedPostsPublic) {
+        res.status(403).json({ error: "This user's favorites are private" });
+        return;
+      }
+    }
+
+    const limit = Math.min(Number(req.query.limit) || 20, 50);
+    const saved = await db.select({ post: postsTable }).from(savedPostsTable)
+      .innerJoin(postsTable, eq(savedPostsTable.postId, postsTable.id))
+      .where(eq(savedPostsTable.userId, targetId))
+      .orderBy(desc(savedPostsTable.savedAt)).limit(limit);
+    const items = await Promise.all(saved.map(s => enrichPost(s.post, viewerId)));
     res.json({ items, nextCursor: null });
   } catch (err) {
     req.log.error(err);

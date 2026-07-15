@@ -28,7 +28,7 @@ router.get("/settings", requireAuth, requireOnboarding, async (req, res) => {
 router.patch("/settings", requireAuth, requireOnboarding, async (req, res) => {
   try {
     const userId = (req as any).user.id;
-    const { theme, accentColor, language } = req.body;
+    const { theme, accentColor, language, savedPostsPublic } = req.body;
     let settings = await db.select().from(userSettingsTable).where(eq(userSettingsTable.userId, userId)).limit(1);
     if (!settings[0]) {
       await db.insert(userSettingsTable).values({ id: randomUUID(), userId, theme: "auto", accentColor: "blue", language: "ar" });
@@ -37,6 +37,7 @@ router.patch("/settings", requireAuth, requireOnboarding, async (req, res) => {
       ...(theme ? { theme } : {}),
       ...(accentColor ? { accentColor } : {}),
       ...(language ? { language } : {}),
+      ...(savedPostsPublic !== undefined ? { savedPostsPublic } : {}),
     }).where(eq(userSettingsTable.userId, userId));
     settings = await db.select().from(userSettingsTable).where(eq(userSettingsTable.userId, userId)).limit(1);
     res.json(settings[0]);

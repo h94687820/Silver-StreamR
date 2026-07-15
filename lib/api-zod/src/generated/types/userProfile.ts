@@ -32,4 +32,5 @@ export interface UserProfile {
   postStampEmojiUrl?: string | null;
   /** @nullable */
   nameDisplayEmojiUrl?: string | null;
+  savedPostsPublic: boolean;
 }

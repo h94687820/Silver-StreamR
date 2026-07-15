@@ -1,5 +1,5 @@
 import { useRoute, Link } from "wouter";
-import { useGetUserByUsername, useGetUserPosts, useFollowUser, useUnfollowUser, useBlockUser, useUnblockUser, useGetMe, getGetUserByUsernameQueryKey, getGetUserPostsQueryKey } from "@workspace/api-client-react";
+import { useGetUserByUsername, useGetUserPosts, useFollowUser, useUnfollowUser, useBlockUser, useUnblockUser, useGetMe, getGetUserByUsernameQueryKey, getGetUserPostsQueryKey, useGetSavedPosts, useGetUserSavedPosts, getGetSavedPostsQueryKey, getGetUserSavedPostsQueryKey } from "@workspace/api-client-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { PostCard } from "@/components/post-card";
@@ -11,6 +11,61 @@ import { EditProfileDialog } from "@/components/edit-profile-dialog";
 import { useTranslation } from "@/lib/i18n";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+
+function SavedPostsTab({ username, isMe }: { username: string; isMe: boolean }) {
+  const { data: me } = useGetMe();
+  const { t } = useTranslation();
+
+  // Own saved posts (always accessible)
+  const { data: mySaved, isLoading: myLoading } = useGetSavedPosts(undefined, {
+    query: { enabled: isMe, queryKey: getGetSavedPostsQueryKey() }
+  });
+
+  // Another user's public saved posts
+  const { data: otherSaved, isLoading: otherLoading } = useGetUserSavedPosts(username, undefined, {
+    query: { enabled: !isMe, queryKey: getGetUserSavedPostsQueryKey(username) }
+  });
+
+  const posts = isMe ? mySaved?.items : otherSaved?.items;
+  const isLoading = isMe ? myLoading : otherLoading;
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4 mt-4">
+        {[1, 2].map(i => (
+          <div key={i} className="space-y-3">
+            <div className="flex items-center gap-3">
+              <Skeleton className="w-10 h-10 rounded-full" />
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-3 w-20" />
+              </div>
+            </div>
+            <Skeleton className="h-48 w-full rounded-xl" />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (!posts || posts.length === 0) {
+    return (
+      <div className="py-12 text-center text-muted-foreground bg-secondary/20 rounded-2xl border border-border/50 mt-4">
+        <p>{t("saved_empty")}</p>
+        <p className="text-sm mt-1">{t("saved_empty_desc")}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-0 mt-4">
+      {posts.map(post => (
+        <PostCard key={post.id} post={post} currentUserId={me?.id} />
+      ))}
+    </div>
+  );
+}
 
 export default function Profile() {
   const [match, params] = useRoute("/profile/:username");
@@ -64,6 +119,9 @@ export default function Profile() {
       }
     }
   };
+
+  // Show saved tab if it's the current user OR if the other user has public favorites
+  const showSavedTab = isMe || !!(profile as any)?.savedPostsPublic;
 
   if (isLoading) return <div className="p-8 text-center">{t("profile_loading")}</div>;
   if (!profile) return <div className="p-8 text-center text-destructive">{t("profile_not_found")}</div>;
@@ -189,7 +247,7 @@ export default function Profile() {
             <Video className="w-4 h-4" />
             <span className="text-sm font-semibold uppercase tracking-wider hidden sm:inline">{t("profile_tab_reels")}</span>
           </button>
-          {isMe && (
+          {showSavedTab && (
             <button 
               onClick={() => setTab("saved")}
               className={`flex-1 flex items-center justify-center gap-2 py-3 border-b-2 transition-colors ${tab === "saved" ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
@@ -220,10 +278,8 @@ export default function Profile() {
               {t("profile_reels_soon")}
             </div>
           )}
-          {tab === "saved" && isMe && (
-            <div className="py-12 text-center text-muted-foreground bg-secondary/20 rounded-2xl border border-border/50">
-              {t("profile_tab_saved")}
-            </div>
+          {tab === "saved" && showSavedTab && (
+            <SavedPostsTab username={targetUsername} isMe={isMe} />
           )}
         </div>
       </div>

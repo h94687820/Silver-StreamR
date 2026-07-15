@@ -35,6 +35,7 @@ export interface UserProfile {
   postStampEmojiUrl?: string | null;
   /** @nullable */
   nameDisplayEmojiUrl?: string | null;
+  savedPostsPublic: boolean;
 }
 
 export interface UserUpdate {
@@ -359,6 +360,7 @@ export interface UserSettings {
   theme: UserSettingsTheme;
   accentColor: UserSettingsAccentColor;
   language: UserSettingsLanguage;
+  savedPostsPublic: boolean;
 }
 
 export type SettingsUpdateTheme = typeof SettingsUpdateTheme[keyof typeof SettingsUpdateTheme];
@@ -394,6 +396,7 @@ export interface SettingsUpdate {
   theme?: SettingsUpdateTheme;
   accentColor?: SettingsUpdateAccentColor;
   language?: SettingsUpdateLanguage;
+  savedPostsPublic?: boolean;
 }
 
 export interface BlockResult {
@@ -516,6 +519,11 @@ limit?: number;
 };
 
 export type GetSavedPostsParams = {
+cursor?: string;
+limit?: number;
+};
+
+export type GetUserSavedPostsParams = {
 cursor?: string;
 limit?: number;
 };

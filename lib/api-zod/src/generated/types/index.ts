@@ -35,6 +35,7 @@ export * from './getNotificationsParams';
 export * from './getPrivatePostsParams';
 export * from './getSavedPostsParams';
 export * from './getUserPostsParams';
+export * from './getUserSavedPostsParams';
 export * from './getVideoFeedParams';
 export * from './group';
 export * from './groupInput';
