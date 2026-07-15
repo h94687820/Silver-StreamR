@@ -49,7 +49,7 @@ export default function Notifications() {
 
   return (
     <div className="w-full">
-      <div className="flex items-center justify-between px-4 py-2.5 border-b border-border/50 bg-background/95 backdrop-blur-xl sticky top-14 z-30">
+      <div className="flex items-center justify-between px-4 py-2.5 border-b border-border/50 bg-background/95 backdrop-blur-xl sticky top-0 z-30">
         <h1 className="text-lg font-bold">{t("notifications_title")}</h1>
         <Button variant="ghost" size="sm" onClick={handleMarkAllRead} className="text-primary hover:text-primary/80 text-xs h-8" disabled={markReadMutation.isPending}>
           <CheckCircle2 className="w-3.5 h-3.5 me-1.5" />

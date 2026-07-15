@@ -55,7 +55,7 @@ function MainLayout({ children }: { children: React.ReactNode }) {
       <SideNav username={me?.username} />
       <div className="min-h-[100dvh] w-full max-w-md mx-auto lg:mx-0 lg:max-w-2xl bg-background relative flex flex-col sm:border-x sm:border-border sm:shadow-2xl lg:shadow-none lg:border-x lg:border-border/50">
         <TopBar />
-        <main className="flex-1 pb-20 lg:pb-8 w-full overflow-x-hidden overflow-y-visible">
+        <main className="flex-1 pb-20 lg:pb-8 w-full overflow-x-hidden overflow-y-auto">
           {children}
         </main>
         <BottomNav username={me?.username} />

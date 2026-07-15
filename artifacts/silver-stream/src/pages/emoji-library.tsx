@@ -88,7 +88,7 @@ export default function EmojiLibrary() {
   return (
     <div className="w-full pb-10">
       {/* Header */}
-      <div className="px-4 py-3 border-b border-border/50 sticky top-14 z-30 bg-background/95 backdrop-blur-xl">
+      <div className="px-4 py-3 border-b border-border/50 sticky top-0 z-30 bg-background/95 backdrop-blur-xl">
         <h1 className="text-lg font-bold">{t("emoji_library_title")}</h1>
         <p className="text-xs text-muted-foreground mt-0.5">{t("emoji_library_subtitle")}</p>
       </div>

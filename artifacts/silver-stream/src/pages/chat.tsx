@@ -11,7 +11,7 @@ export default function ChatList() {
 
   return (
     <div className="w-full min-h-[100dvh]">
-      <div className="sticky top-14 z-30 bg-background/95 backdrop-blur-xl border-b border-border/50 p-4">
+      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-xl border-b border-border/50 p-4">
         <h1 className="text-2xl font-bold">Messages</h1>
       </div>
 

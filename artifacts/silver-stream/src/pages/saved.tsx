@@ -12,7 +12,7 @@ export default function Saved() {
 
   return (
     <div className="w-full min-h-[100dvh] bg-background">
-      <div className="sticky top-14 z-30 bg-background/95 backdrop-blur-xl border-b border-border/50 p-4">
+      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-xl border-b border-border/50 p-4">
         <h1 className="text-2xl font-bold">Saved Posts</h1>
       </div>
 

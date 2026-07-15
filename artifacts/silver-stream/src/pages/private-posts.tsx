@@ -12,7 +12,7 @@ export default function PrivatePosts() {
 
   return (
     <div className="w-full min-h-[100dvh] bg-background">
-      <div className="sticky top-14 z-30 bg-background/95 backdrop-blur-xl border-b border-border/50 p-4 flex items-center gap-3">
+      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-xl border-b border-border/50 p-4 flex items-center gap-3">
         <Link href="/settings" className="p-1 -ml-1 rounded-full hover:bg-secondary/50 transition-colors">
           <ChevronLeft className="w-5 h-5" />
         </Link>

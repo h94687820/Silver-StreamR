@@ -16,7 +16,7 @@ export default function Search() {
 
   return (
     <div className="w-full min-h-screen">
-      <div className="sticky top-14 z-30 bg-background/95 backdrop-blur-xl border-b border-border/50 p-4 space-y-3">
+      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-xl border-b border-border/50 p-4 space-y-3">
         <div className="relative flex items-center gap-2">
           <div className="relative flex-1">
             <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />

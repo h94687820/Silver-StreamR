@@ -31,7 +31,7 @@ export default function Followers() {
 
   return (
     <div className="w-full">
-      <div className="px-4 py-3 border-b border-border/50 sticky top-14 z-30 bg-background/95 backdrop-blur-xl">
+      <div className="px-4 py-3 border-b border-border/50 sticky top-0 z-30 bg-background/95 backdrop-blur-xl">
         <h1 className="text-lg font-bold">{t("followers_title")}</h1>
       </div>
 

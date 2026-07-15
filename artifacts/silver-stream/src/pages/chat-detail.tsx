@@ -43,7 +43,7 @@ export default function ChatDetail() {
 
   return (
     <div className="flex flex-col h-[calc(100dvh-56px)] bg-background">
-      <div className="sticky top-14 z-30 bg-background/95 backdrop-blur-xl border-b border-border/50 p-3 flex items-center gap-3">
+      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-xl border-b border-border/50 p-3 flex items-center gap-3">
         <Link href="/chat" className="p-2 -ml-2 rounded-full hover:bg-secondary">
           <ArrowLeft className="w-5 h-5" />
         </Link>

@@ -90,7 +90,7 @@ export default function Groups() {
 
   return (
     <div className="w-full min-h-screen">
-      <div className="sticky top-14 z-30 bg-background/95 backdrop-blur-xl border-b border-border/50 p-4 space-y-4">
+      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-xl border-b border-border/50 p-4 space-y-4">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">Groups</h1>
           <Dialog open={createOpen} onOpenChange={setCreateOpen}>

@@ -236,7 +236,7 @@ export default function PostDetail() {
   return (
     <div className="flex flex-col min-h-[calc(100dvh-56px)] bg-background">
       {/* Header */}
-      <div className="sticky top-14 z-30 bg-background/95 backdrop-blur-xl border-b border-border/50 p-3 flex items-center gap-3">
+      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-xl border-b border-border/50 p-3 flex items-center gap-3">
         <Link href="/feed" className="p-2 -ml-2 rtl:-ml-0 rtl:-mr-2 rounded-full hover:bg-secondary">
           <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
         </Link>
