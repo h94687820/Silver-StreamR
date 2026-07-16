@@ -167,6 +167,26 @@ CREATE TABLE IF NOT EXISTS user_settings (
   updated_at INTEGER NOT NULL
 );
 
+-- ── Dev Portal: جدول البلاغات ───────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS reports (
+  id TEXT PRIMARY KEY,
+  reporter_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  target_type TEXT NOT NULL,
+  target_id TEXT NOT NULL,
+  post_id TEXT REFERENCES posts(id) ON DELETE SET NULL,
+  comment_id TEXT REFERENCES comments(id) ON DELETE SET NULL,
+  reason TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending',
+  reviewed_by TEXT,
+  reviewed_at INTEGER,
+  created_at INTEGER NOT NULL
+);
+
+-- ── Dev Portal: الحذف الناعم (Soft Delete) ──────────────────────────────────
+-- تشغيل مرة واحدة فقط على قاعدة بيانات موجودة:
+-- wrangler d1 execute silver-stream-db --command="ALTER TABLE posts ADD COLUMN deleted_at INTEGER;"
+-- wrangler d1 execute silver-stream-db --command="ALTER TABLE comments ADD COLUMN deleted_at INTEGER;"
+
 -- Indexes للأداء
 CREATE INDEX IF NOT EXISTS idx_posts_author ON posts(author_id);
 CREATE INDEX IF NOT EXISTS idx_posts_created ON posts(created_at DESC);
@@ -174,3 +194,4 @@ CREATE INDEX IF NOT EXISTS idx_follows_following ON follows(following_id);
 CREATE INDEX IF NOT EXISTS idx_notifications_recipient ON notifications(recipient_id, is_read);
 CREATE INDEX IF NOT EXISTS idx_messages_conversation ON messages(conversation_id, created_at);
 CREATE INDEX IF NOT EXISTS idx_stories_author ON stories(author_id, expires_at);
+CREATE INDEX IF NOT EXISTS idx_reports_status ON reports(status, created_at DESC);

@@ -18,6 +18,7 @@ import storageRouter from "./routes/storage-route";
 import storiesRouter from "./routes/stories";
 import groupsRouter from "./routes/groups";
 import emojisRouter from "./routes/emojis";
+import devPortalRouter from "./routes/dev-portal";
 
 const app = new Hono<HonoEnv>();
 
@@ -26,7 +27,7 @@ app.use(
   "*",
   cors({
     origin: "*",
-    allowHeaders: ["Authorization", "Content-Type", "Accept"],
+    allowHeaders: ["Authorization", "Content-Type", "Accept", "X-Dev-Portal-Key"],
     allowMethods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
     maxAge: 86400,
   }),
@@ -75,6 +76,9 @@ app.route("/api", storageRouter);
 app.route("/api", storiesRouter);
 app.route("/api", groupsRouter);
 app.route("/api", emojisRouter);
+
+// ── Dev Portal (محمي بـ X-Dev-Portal-Key، خارج نطاق /api) ──────────────────
+app.route("/", devPortalRouter);
 
 // ── 404 catch-all ───────────────────────────────────────────────────────────
 app.notFound((c) => c.json({ error: "Not found" }, 404));

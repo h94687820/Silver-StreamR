@@ -9,6 +9,7 @@ export const commentsTable = sqliteTable("comments", {
   authorId: text("author_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
   parentId: text("parent_id").references((): AnySQLiteColumn => commentsTable.id, { onDelete: "cascade" }),
   content: text("content").notNull(),
+  deletedAt: integer("deleted_at", { mode: "timestamp_ms" }),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull().$defaultFn(() => new Date()),
   updatedAt: integer("updated_at", { mode: "timestamp_ms" }),
 });
