@@ -126,6 +126,7 @@ function ClerkAuthBridge() {
 function ClerkProviderWithRoutes() {
   const [, setLocation] = useLocation();
   const clerkAppearance = {
+    cssLayerName: "clerk",
     variables: {
       colorPrimary: "#1A1A1A",
       fontFamily: "Tajawal, Inter, sans-serif",
