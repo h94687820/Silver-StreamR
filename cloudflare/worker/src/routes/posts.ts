@@ -11,12 +11,13 @@ import {
   groupMembersTable,
   userSettingsTable,
 } from "../schema";
-import { eq, and, desc, lt, inArray, or, sql } from "drizzle-orm";
+import { eq, and, desc, lt, inArray, or, sql, isNull } from "drizzle-orm";
 
 const router = new Hono<HonoEnv>();
 
 // Inline onboarding check helper
 async function checkOnboarding(db: ReturnType<typeof createDb>, clerkId: string) {
+  if (clerkId === "admin") return { id: "admin", onboardingComplete: true, acceptedTerms: true } as any;
   const user = await getOrCreateUser(db, clerkId);
   if (!user.onboardingComplete) return null;
   return user;
@@ -27,6 +28,7 @@ router.get("/posts", async (c) => {
   try {
     const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
+    const isAdmin = c.get("isAdmin");
     const user = await checkOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
 
@@ -34,13 +36,28 @@ router.get("/posts", async (c) => {
     const cursor = c.req.query("cursor");
     const userId = user.id;
 
+    if (isAdmin) {
+      // المشرف: يرى كل المنشورات بما فيها المحذوفة
+      const conditions: any[] = [];
+      if (cursor) conditions.push(lt(postsTable.createdAt, new Date(cursor)));
+      const posts = await db
+        .select()
+        .from(postsTable)
+        .where(conditions.length ? and(...conditions) : undefined)
+        .orderBy(desc(postsTable.createdAt))
+        .limit(limit + 1);
+      const hasMore = posts.length > limit;
+      const items = await Promise.all(posts.slice(0, limit).map((p) => enrichPost(db, p, userId)));
+      return c.json({ items, nextCursor: hasMore ? posts[limit - 1].createdAt.toISOString() : null });
+    }
+
     const following = await db
       .select({ followingId: followsTable.followingId })
       .from(followsTable)
       .where(eq(followsTable.followerId, userId));
     const followingIds = following.map((f) => f.followingId);
 
-    const conditions: ReturnType<typeof eq>[] = [];
+    const conditions: ReturnType<typeof eq>[] = [isNull(postsTable.deletedAt) as any];
     if (followingIds.length > 0) {
       conditions.push(
         or(
@@ -128,12 +145,14 @@ router.get("/posts/videos", async (c) => {
   try {
     const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
+    const isAdmin = c.get("isAdmin");
     const user = await checkOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
 
     const limit = Math.min(Number(c.req.query("limit")) || 20, 50);
     const cursor = c.req.query("cursor");
     const conditions: any[] = [eq(postsTable.mediaType, "video"), eq(postsTable.isPrivate, false)];
+    if (!isAdmin) conditions.push(isNull(postsTable.deletedAt));
     if (cursor) conditions.push(lt(postsTable.createdAt, new Date(cursor)));
 
     const posts = await db
@@ -158,15 +177,19 @@ router.get("/posts/saved", async (c) => {
   try {
     const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
+    const isAdmin = c.get("isAdmin");
     const user = await checkOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
 
     const limit = Math.min(Number(c.req.query("limit")) || 20, 50);
+    const savedConditions: any[] = [eq(savedPostsTable.userId, user.id)];
+    if (!isAdmin) savedConditions.push(isNull(postsTable.deletedAt));
+
     const saved = await db
       .select({ post: postsTable })
       .from(savedPostsTable)
       .innerJoin(postsTable, eq(savedPostsTable.postId, postsTable.id))
-      .where(eq(savedPostsTable.userId, user.id))
+      .where(and(...savedConditions))
       .orderBy(desc(savedPostsTable.savedAt))
       .limit(limit);
     const items = await Promise.all(saved.map((s) => enrichPost(db, s.post, user.id)));
@@ -181,14 +204,18 @@ router.get("/posts/private", async (c) => {
   try {
     const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
+    const isAdmin = c.get("isAdmin");
     const user = await checkOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
 
     const limit = Math.min(Number(c.req.query("limit")) || 20, 50);
+    const conditions: any[] = [eq(postsTable.authorId, user.id), eq(postsTable.isPrivate, true)];
+    if (!isAdmin) conditions.push(isNull(postsTable.deletedAt));
+
     const posts = await db
       .select()
       .from(postsTable)
-      .where(and(eq(postsTable.authorId, user.id), eq(postsTable.isPrivate, true)))
+      .where(and(...conditions))
       .orderBy(desc(postsTable.createdAt))
       .limit(limit);
     const items = await Promise.all(posts.map((p) => enrichPost(db, p, user.id)));
@@ -203,13 +230,16 @@ router.get("/posts/:postId", async (c) => {
   try {
     const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
+    const isAdmin = c.get("isAdmin");
     const post = await db
       .select()
       .from(postsTable)
       .where(eq(postsTable.id, c.req.param("postId")))
       .limit(1);
     if (!post[0]) return c.json({ error: "Not found" }, 404);
-    if (post[0].isPrivate && post[0].authorId !== clerkId)
+    // المشرف يرى المحذوف، غيره لا
+    if (!isAdmin && post[0].deletedAt) return c.json({ error: "Not found" }, 404);
+    if (post[0].isPrivate && post[0].authorId !== clerkId && !isAdmin)
       return c.json({ error: "Forbidden" }, 403);
     return c.json(await enrichPost(db, post[0], clerkId));
   } catch {
@@ -229,7 +259,7 @@ router.patch("/posts/:postId", async (c) => {
     const postId = c.req.param("postId");
     const post = await db.select().from(postsTable).where(eq(postsTable.id, postId)).limit(1);
     if (!post[0]) return c.json({ error: "Not found" }, 404);
-    if (post[0].authorId !== user.id) return c.json({ error: "Forbidden" }, 403);
+    if (post[0].authorId !== user.id && !c.get("isAdmin")) return c.json({ error: "Forbidden" }, 403);
 
     const [updated] = await db
       .update(postsTable)
@@ -246,24 +276,30 @@ router.patch("/posts/:postId", async (c) => {
   }
 });
 
-// DELETE /posts/:postId
+// DELETE /posts/:postId  — soft delete
 router.delete("/posts/:postId", async (c) => {
   try {
     const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
+    const isAdmin = c.get("isAdmin");
     const user = await checkOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
 
     const postId = c.req.param("postId");
     const post = await db.select().from(postsTable).where(eq(postsTable.id, postId)).limit(1);
     if (!post[0]) return c.json({ error: "Not found" }, 404);
-    if (post[0].authorId !== user.id) return c.json({ error: "Forbidden" }, 403);
+    if (post[0].authorId !== user.id && !isAdmin) return c.json({ error: "Forbidden" }, 403);
 
-    await db.delete(postsTable).where(eq(postsTable.id, postId));
+    // Soft delete
+    await db
+      .update(postsTable)
+      .set({ deletedAt: new Date() })
+      .where(eq(postsTable.id, postId));
+
     await db
       .update(usersTable)
       .set({ postsCount: sql`GREATEST(${usersTable.postsCount} - 1, 0)` })
-      .where(eq(usersTable.id, user.id));
+      .where(eq(usersTable.id, post[0].authorId));
     return c.json({ success: true });
   } catch {
     return c.json({ error: "Server error" }, 500);
@@ -315,6 +351,7 @@ router.get("/users/:username/saved-posts", async (c) => {
   try {
     const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
+    const isAdmin = c.get("isAdmin");
     const user = await checkOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
 
@@ -326,7 +363,7 @@ router.get("/users/:username/saved-posts", async (c) => {
     if (!targetUser[0]) return c.json({ error: "User not found" }, 404);
 
     const targetId = targetUser[0].id;
-    if (targetId !== user.id) {
+    if (targetId !== user.id && !isAdmin) {
       const settings = await db
         .select()
         .from(userSettingsTable)
@@ -337,11 +374,14 @@ router.get("/users/:username/saved-posts", async (c) => {
     }
 
     const limit = Math.min(Number(c.req.query("limit")) || 20, 50);
+    const conditions: any[] = [eq(savedPostsTable.userId, targetId)];
+    if (!isAdmin) conditions.push(isNull(postsTable.deletedAt));
+
     const saved = await db
       .select({ post: postsTable })
       .from(savedPostsTable)
       .innerJoin(postsTable, eq(savedPostsTable.postId, postsTable.id))
-      .where(eq(savedPostsTable.userId, targetId))
+      .where(and(...conditions))
       .orderBy(desc(savedPostsTable.savedAt))
       .limit(limit);
     const items = await Promise.all(saved.map((s) => enrichPost(db, s.post, user.id)));
@@ -356,6 +396,7 @@ router.get("/users/:username/posts", async (c) => {
   try {
     const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
+    const isAdmin = c.get("isAdmin");
     const limit = Math.min(Number(c.req.query("limit")) || 20, 50);
     const users = await db
       .select()
@@ -366,7 +407,8 @@ router.get("/users/:username/posts", async (c) => {
 
     const isOwner = users[0].id === clerkId;
     const conditions: any[] = [eq(postsTable.authorId, users[0].id)];
-    if (!isOwner) conditions.push(eq(postsTable.isPrivate, false));
+    if (!isOwner && !isAdmin) conditions.push(eq(postsTable.isPrivate, false));
+    if (!isAdmin) conditions.push(isNull(postsTable.deletedAt));
 
     const posts = await db
       .select()

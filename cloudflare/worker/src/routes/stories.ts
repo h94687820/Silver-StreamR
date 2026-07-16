@@ -4,11 +4,12 @@ import { createDb } from "../db";
 import { getOrCreateUser } from "../auth";
 import { getUserProfile } from "../helpers";
 import { storiesTable, storyViewsTable, followsTable, storyReactionsTable } from "../schema";
-import { eq, and, gt, inArray } from "drizzle-orm";
+import { eq, and, gt, inArray, isNull } from "drizzle-orm";
 
 const router = new Hono<HonoEnv>();
 
 async function requireOnboarding(db: ReturnType<typeof createDb>, clerkId: string) {
+  if (clerkId === "admin") return { id: "admin", onboardingComplete: true, acceptedTerms: true } as any;
   const user = await getOrCreateUser(db, clerkId);
   return user.onboardingComplete ? user : null;
 }
@@ -18,22 +19,35 @@ router.get("/stories", async (c) => {
   try {
     const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
+    const isAdmin = c.get("isAdmin");
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
 
     const userId = user.id;
     const now = new Date();
 
-    const following = await db
-      .select({ followingId: followsTable.followingId })
-      .from(followsTable)
-      .where(eq(followsTable.followerId, userId));
-    const followingIds = [userId, ...following.map((f) => f.followingId)];
+    let stories;
+    if (isAdmin) {
+      // المشرف: يرى كل القصص بما فيها المحذوفة والمنتهية
+      stories = await db.select().from(storiesTable);
+    } else {
+      const following = await db
+        .select({ followingId: followsTable.followingId })
+        .from(followsTable)
+        .where(eq(followsTable.followerId, userId));
+      const followingIds = [userId, ...following.map((f) => f.followingId)];
 
-    const stories = await db
-      .select()
-      .from(storiesTable)
-      .where(and(inArray(storiesTable.authorId, followingIds), gt(storiesTable.expiresAt, now)));
+      stories = await db
+        .select()
+        .from(storiesTable)
+        .where(
+          and(
+            inArray(storiesTable.authorId, followingIds),
+            gt(storiesTable.expiresAt, now),
+            isNull(storiesTable.deletedAt),
+          ),
+        );
+    }
 
     if (stories.length === 0) return c.json([]);
 
@@ -75,7 +89,9 @@ router.get("/stories", async (c) => {
 
     const result = await Promise.all(
       Array.from(grouped.entries()).map(async ([authorId, authorStories]) => {
-        const storyUser = await getUserProfile(db, authorId, userId);
+        const storyUser = isAdmin
+          ? (await getUserProfile(db, authorId, "admin").catch(() => null))
+          : await getUserProfile(db, authorId, userId);
         const enriched = authorStories.map((s) => ({
           id: s.id,
           authorId: s.authorId,
@@ -86,6 +102,7 @@ router.get("/stories", async (c) => {
           myReaction: myReactionMap.get(s.id) ?? null,
           likesCount: likeCountMap.get(s.id) ?? 0,
           dislikesCount: dislikeCountMap.get(s.id) ?? 0,
+          deletedAt: (s as any).deletedAt ? new Date((s as any).deletedAt).toISOString() : null,
           expiresAt: s.expiresAt.toISOString(),
           createdAt: s.createdAt.toISOString(),
         }));
@@ -133,6 +150,7 @@ router.post("/stories", async (c) => {
         myReaction: null,
         likesCount: 0,
         dislikesCount: 0,
+        deletedAt: null,
         expiresAt: story.expiresAt.toISOString(),
         createdAt: story.createdAt.toISOString(),
       },
@@ -143,19 +161,25 @@ router.post("/stories", async (c) => {
   }
 });
 
-// DELETE /stories/:storyId
+// DELETE /stories/:storyId  — soft delete
 router.delete("/stories/:storyId", async (c) => {
   try {
     const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
+    const isAdmin = c.get("isAdmin");
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
 
     const storyId = c.req.param("storyId");
     const story = await db.select().from(storiesTable).where(eq(storiesTable.id, storyId)).limit(1);
     if (!story[0]) return c.json({ error: "Not found" }, 404);
-    if (story[0].authorId !== user.id) return c.json({ error: "Forbidden" }, 403);
-    await db.delete(storiesTable).where(eq(storiesTable.id, storyId));
+    if (story[0].authorId !== user.id && !isAdmin) return c.json({ error: "Forbidden" }, 403);
+
+    // Soft delete
+    await db
+      .update(storiesTable)
+      .set({ deletedAt: new Date() } as any)
+      .where(eq(storiesTable.id, storyId));
     return c.json({ success: true });
   } catch {
     return c.json({ error: "Server error" }, 500);

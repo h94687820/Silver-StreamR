@@ -7,6 +7,7 @@ export const storiesTable = sqliteTable("stories", {
   mediaUrl: text("media_url").notNull(),
   mediaType: text("media_type").notNull(),
   trackingId: text("tracking_id"),
+  deletedAt: integer("deleted_at", { mode: "timestamp_ms" }),
   expiresAt: integer("expires_at", { mode: "timestamp_ms" }).notNull(),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull().$defaultFn(() => new Date()),
 });

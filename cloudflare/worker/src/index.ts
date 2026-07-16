@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import type { HonoEnv } from "./types";
-import { getClerkIdFromHeader } from "./auth";
+import { getClerkIdFromHeader, isAdminKey } from "./auth";
 
 import clerkProxy from "./routes/clerk-proxy";
 import usersRouter from "./routes/users";
@@ -20,6 +20,7 @@ import groupsRouter from "./routes/groups";
 import emojisRouter from "./routes/emojis";
 import devPortalRouter from "./routes/dev-portal";
 import reportsRouter from "./routes/reports";
+import adminRouter from "./routes/admin";
 
 const app = new Hono<HonoEnv>();
 
@@ -28,7 +29,7 @@ app.use(
   "*",
   cors({
     origin: "*",
-    allowHeaders: ["Authorization", "Content-Type", "Accept", "X-Dev-Portal-Key"],
+    allowHeaders: ["Authorization", "Content-Type", "Accept", "X-Dev-Portal-Key", "X-Admin-Key"],
     allowMethods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
     maxAge: 86400,
   }),
@@ -53,12 +54,23 @@ app.use("/api/*", async (c, next) => {
     return;
   }
 
+  // ── فحص مفتاح المشرف ────────────────────────────────────────────────────
+  const adminKey = c.req.header("X-Admin-Key");
+  if (isAdminKey(adminKey)) {
+    c.set("clerkId", "admin");
+    c.set("isAdmin", true);
+    await next();
+    return;
+  }
+
+  // ── مصادقة Clerk العادية ─────────────────────────────────────────────────
   const authHeader = c.req.header("Authorization");
   const clerkId = await getClerkIdFromHeader(authHeader, c.env.CLERK_SECRET_KEY);
   if (!clerkId) {
     return c.json({ error: "Unauthorized" }, 401);
   }
   c.set("clerkId", clerkId);
+  c.set("isAdmin", false);
   await next();
 });
 
@@ -80,6 +92,9 @@ app.route("/api", emojisRouter);
 
 // ── Reports (authenticated) ──────────────────────────────────────────────────
 app.route("/api", reportsRouter);
+
+// ── Admin routes (X-Admin-Key مطلوب) ────────────────────────────────────────
+app.route("/api", adminRouter);
 
 // ── Dev Portal (محمي بـ X-Dev-Portal-Key، خارج نطاق /api) ──────────────────
 app.route("/", devPortalRouter);

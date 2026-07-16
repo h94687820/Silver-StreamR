@@ -182,10 +182,12 @@ CREATE TABLE IF NOT EXISTS reports (
   created_at INTEGER NOT NULL
 );
 
--- ── Dev Portal: الحذف الناعم (Soft Delete) ──────────────────────────────────
+-- ── الحذف الناعم (Soft Delete) ───────────────────────────────────────────────
 -- تشغيل مرة واحدة فقط على قاعدة بيانات موجودة:
 -- wrangler d1 execute silver-stream-db --command="ALTER TABLE posts ADD COLUMN deleted_at INTEGER;"
 -- wrangler d1 execute silver-stream-db --command="ALTER TABLE comments ADD COLUMN deleted_at INTEGER;"
+-- wrangler d1 execute silver-stream-db --command="ALTER TABLE stories ADD COLUMN deleted_at INTEGER;"
+-- wrangler d1 execute silver-stream-db --command="ALTER TABLE groups ADD COLUMN deleted_at INTEGER;"
 
 -- Indexes للأداء
 CREATE INDEX IF NOT EXISTS idx_posts_author ON posts(author_id);

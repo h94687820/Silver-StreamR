@@ -9,6 +9,7 @@ import { eq, and, isNull, inArray, sql } from "drizzle-orm";
 const router = new Hono<HonoEnv>();
 
 async function requireOnboarding(db: ReturnType<typeof createDb>, clerkId: string) {
+  if (clerkId === "admin") return { id: "admin", onboardingComplete: true, acceptedTerms: true } as any;
   const user = await getOrCreateUser(db, clerkId);
   return user.onboardingComplete ? user : null;
 }
@@ -18,14 +19,18 @@ router.get("/posts/:postId/comments", async (c) => {
   try {
     const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
+    const isAdmin = c.get("isAdmin");
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
 
     const postId = c.req.param("postId");
+    const conditions: any[] = [eq(commentsTable.postId, postId), isNull(commentsTable.parentId)];
+    if (!isAdmin) conditions.push(isNull(commentsTable.deletedAt));
+
     const comments = await db
       .select()
       .from(commentsTable)
-      .where(and(eq(commentsTable.postId, postId), isNull(commentsTable.parentId)))
+      .where(and(...conditions))
       .orderBy(commentsTable.createdAt);
 
     if (comments.length === 0) return c.json({ items: [], nextCursor: null });
@@ -47,6 +52,7 @@ router.get("/posts/:postId/comments", async (c) => {
         content: cm.content,
         parentId: null,
         repliesCount: replyCountMap.get(cm.id) ?? 0,
+        deletedAt: cm.deletedAt ? cm.deletedAt.toISOString() : null,
         createdAt: cm.createdAt.toISOString(),
         updatedAt: cm.updatedAt?.toISOString() ?? null,
       })),
@@ -101,6 +107,7 @@ router.post("/posts/:postId/comments", async (c) => {
         content,
         parentId: null,
         repliesCount: 0,
+        deletedAt: null,
         createdAt: new Date().toISOString(),
         updatedAt: null,
       },
@@ -116,14 +123,18 @@ router.get("/comments/:commentId/replies", async (c) => {
   try {
     const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
+    const isAdmin = c.get("isAdmin");
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
 
     const commentId = c.req.param("commentId");
+    const conditions: any[] = [eq(commentsTable.parentId, commentId)];
+    if (!isAdmin) conditions.push(isNull(commentsTable.deletedAt));
+
     const replies = await db
       .select()
       .from(commentsTable)
-      .where(eq(commentsTable.parentId, commentId))
+      .where(and(...conditions))
       .orderBy(commentsTable.createdAt);
 
     const enriched = await Promise.all(
@@ -135,6 +146,7 @@ router.get("/comments/:commentId/replies", async (c) => {
         content: r.content,
         parentId: r.parentId,
         repliesCount: 0,
+        deletedAt: r.deletedAt ? r.deletedAt.toISOString() : null,
         createdAt: r.createdAt.toISOString(),
         updatedAt: r.updatedAt?.toISOString() ?? null,
       })),
@@ -200,6 +212,7 @@ router.post("/comments/:commentId/replies", async (c) => {
         content,
         parentId: parentCommentId,
         repliesCount: 0,
+        deletedAt: null,
         createdAt: new Date().toISOString(),
         updatedAt: null,
       },
@@ -228,7 +241,7 @@ router.patch("/comments/:commentId", async (c) => {
       .where(eq(commentsTable.id, commentId))
       .limit(1);
     if (!comment[0]) return c.json({ error: "Not found" }, 404);
-    if (comment[0].authorId !== user.id) return c.json({ error: "Forbidden" }, 403);
+    if (comment[0].authorId !== user.id && !c.get("isAdmin")) return c.json({ error: "Forbidden" }, 403);
 
     const [updated] = await db
       .update(commentsTable)
@@ -252,6 +265,7 @@ router.patch("/comments/:commentId", async (c) => {
       content: updated.content,
       parentId: updated.parentId ?? null,
       repliesCount: 0,
+      deletedAt: updated.deletedAt ? updated.deletedAt.toISOString() : null,
       createdAt: updated.createdAt.toISOString(),
       updatedAt: updated.updatedAt?.toISOString() ?? null,
     });
@@ -260,11 +274,12 @@ router.patch("/comments/:commentId", async (c) => {
   }
 });
 
-// DELETE /comments/:commentId
+// DELETE /comments/:commentId  — soft delete
 router.delete("/comments/:commentId", async (c) => {
   try {
     const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
+    const isAdmin = c.get("isAdmin");
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
 
@@ -275,14 +290,18 @@ router.delete("/comments/:commentId", async (c) => {
       .where(eq(commentsTable.id, commentId))
       .limit(1);
     if (!comment[0]) return c.json({ error: "Not found" }, 404);
-    if (comment[0].authorId !== user.id) return c.json({ error: "Forbidden" }, 403);
+    if (comment[0].authorId !== user.id && !isAdmin) return c.json({ error: "Forbidden" }, 403);
 
-    await db.delete(commentsTable).where(eq(commentsTable.id, commentId));
+    // Soft delete
+    await db
+      .update(commentsTable)
+      .set({ deletedAt: new Date() })
+      .where(eq(commentsTable.id, commentId));
 
     if (!comment[0].parentId) {
       await db
         .update(postsTable)
-        .set({ commentsCount: sql`${postsTable.commentsCount} - 1` })
+        .set({ commentsCount: sql`GREATEST(${postsTable.commentsCount} - 1, 0)` })
         .where(eq(postsTable.id, comment[0].postId));
     }
 
