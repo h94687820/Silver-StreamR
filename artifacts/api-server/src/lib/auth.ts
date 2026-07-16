@@ -5,12 +5,41 @@ import { usersTable, userSettingsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
+const ADMIN_CLERK_ID = "__admin__";
+
+/**
+ * Returns true if the request carries a valid ADMIN_API_KEY.
+ * Accepts the key via:
+ *   - Header:  x-admin-key: <key>
+ *   - Header:  Authorization: Bearer <key>
+ */
+function hasAdminKey(req: Request): boolean {
+  const adminKey = process.env.ADMIN_API_KEY;
+  if (!adminKey) return false;
+
+  const xAdminKey = req.headers["x-admin-key"];
+  if (xAdminKey === adminKey) return true;
+
+  const authHeader = req.headers["authorization"];
+  if (authHeader?.startsWith("Bearer ") && authHeader.slice(7) === adminKey) return true;
+
+  return false;
+}
+
 export async function requireAuth<
   P = Record<string, string>,
   ResBody = any,
   ReqBody = any,
   ReqQuery = any,
 >(req: Request<P, ResBody, ReqBody, ReqQuery>, res: Response<any>, next: NextFunction) {
+  // Admin API key bypasses Clerk auth entirely
+  if (hasAdminKey(req)) {
+    (req as any).clerkId = ADMIN_CLERK_ID;
+    (req as any).isAdmin = true;
+    next();
+    return;
+  }
+
   const auth = getAuth(req as any);
   const clerkId = auth?.userId;
   if (!clerkId) {
@@ -52,6 +81,12 @@ export async function requireOnboarding<
   ReqBody = any,
   ReqQuery = any,
 >(req: Request<P, ResBody, ReqBody, ReqQuery>, res: Response<any>, next: NextFunction) {
+  // Admin key bypasses onboarding check
+  if ((req as any).isAdmin) {
+    next();
+    return;
+  }
+
   const clerkId = (req as any).clerkId;
   const user = await getOrCreateUser(clerkId);
   if (!user.onboardingComplete) {
