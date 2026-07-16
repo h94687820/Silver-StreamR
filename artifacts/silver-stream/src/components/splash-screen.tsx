@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 
 const SPLASH_KEY = "silver_stream_splash_shown";
 
+// Match the outer dark ring of the eagle-splash.png
+const BG = "#0d0f15";
+
 export function SplashScreen({ onDone }: { onDone: () => void }) {
   const [phase, setPhase] = useState<"in" | "hold" | "out">("in");
 
@@ -25,58 +28,57 @@ export function SplashScreen({ onDone }: { onDone: () => void }) {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        background: "linear-gradient(170deg, #13192b 0%, #1b2540 55%, #13192b 100%)",
+        background: BG,
         transition: "opacity 0.75s ease",
         opacity: phase === "out" ? 0 : 1,
         pointerEvents: phase === "out" ? "none" : "all",
       }}
     >
-      {/* Radial glow behind eagle */}
+      {/* Subtle radial glow */}
       <div
         style={{
           position: "absolute",
-          width: 340,
-          height: 340,
+          width: 420,
+          height: 420,
           borderRadius: "50%",
           background:
-            "radial-gradient(ellipse, rgba(130,158,225,0.10) 0%, transparent 70%)",
+            "radial-gradient(ellipse, rgba(160,180,230,0.08) 0%, transparent 70%)",
           animation: "glowPulse 3s ease-in-out infinite",
           pointerEvents: "none",
         }}
       />
 
-      {/* Eagle image with build-up animation */}
+      {/* Eagle image */}
       <div
         style={{
           position: "relative",
-          width: 220,
-          height: 220,
+          width: 280,
+          height: 280,
+          borderRadius: "30%",
+          overflow: "hidden",
           animation: "eagleReveal 2s cubic-bezier(0.22,1,0.36,1) forwards",
         }}
       >
-        {/* The eagle image — clip reveals it from left to right */}
         <img
-          src={`${import.meta.env.BASE_URL}eagle-logo.jpeg`}
+          src={`${import.meta.env.BASE_URL}eagle-splash.png`}
           alt="Eagle"
           style={{
             width: "100%",
             height: "100%",
-            objectFit: "contain",
-            borderRadius: 32,
+            objectFit: "cover",
             animation: "eagleFloat 4s ease-in-out 2s infinite",
           }}
         />
 
-        {/* Silver shimmer overlay that sweeps across */}
+        {/* Silver shimmer sweep */}
         <div
           style={{
             position: "absolute",
             inset: 0,
-            borderRadius: 32,
             background:
-              "linear-gradient(115deg, transparent 30%, rgba(200,215,255,0.18) 50%, transparent 70%)",
+              "linear-gradient(115deg, transparent 30%, rgba(200,215,255,0.15) 50%, transparent 70%)",
             backgroundSize: "250% 100%",
-            animation: "shimmerSweep 2.5s ease 0.8s infinite",
+            animation: "shimmerSweep 2.8s ease 1s infinite",
             pointerEvents: "none",
             mixBlendMode: "screen",
           }}
@@ -86,10 +88,10 @@ export function SplashScreen({ onDone }: { onDone: () => void }) {
       {/* App name */}
       <p
         style={{
-          marginTop: 22,
-          color: "rgba(195,212,248,0.80)",
+          marginTop: 20,
+          color: "rgba(195,210,248,0.75)",
           fontSize: 11,
-          letterSpacing: "0.28em",
+          letterSpacing: "0.30em",
           fontFamily: "Inter, sans-serif",
           fontWeight: 500,
           textTransform: "uppercase",
@@ -117,12 +119,12 @@ export function SplashScreen({ onDone }: { onDone: () => void }) {
             height: 1,
             margin: "0 auto 14px",
             background:
-              "linear-gradient(90deg, transparent, rgba(160,185,238,0.5), transparent)",
+              "linear-gradient(90deg, transparent, rgba(160,185,238,0.45), transparent)",
           }}
         />
         <p
           style={{
-            color: "rgba(155,180,228,0.62)",
+            color: "rgba(155,178,228,0.58)",
             fontSize: 12,
             letterSpacing: "0.06em",
             fontFamily: "Inter, sans-serif",
@@ -138,25 +140,25 @@ export function SplashScreen({ onDone }: { onDone: () => void }) {
 
       <style>{`
         @keyframes eagleReveal {
-          0%   { opacity: 0; transform: scale(0.5) translateY(22px); filter: blur(16px) brightness(1.4); }
-          40%  { opacity: 0.85; filter: blur(3px) brightness(1.2); }
+          0%   { opacity: 0; transform: scale(0.55) translateY(20px); filter: blur(14px) brightness(1.3); }
+          40%  { opacity: 0.9; filter: blur(2px) brightness(1.15); }
           70%  { transform: scale(1.04) translateY(-3px); }
           100% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0) brightness(1); }
         }
         @keyframes eagleFloat {
           0%,100% { transform: translateY(0px); }
-          50%     { transform: translateY(-7px); }
+          50%     { transform: translateY(-8px); }
         }
         @keyframes shimmerSweep {
           0%   { background-position: 200% 0; }
           100% { background-position: -200% 0; }
         }
         @keyframes glowPulse {
-          0%,100% { opacity: 0.6; transform: scale(0.95); }
-          50%     { opacity: 1;   transform: scale(1.08); }
+          0%,100% { opacity: 0.5; transform: scale(0.93); }
+          50%     { opacity: 1;   transform: scale(1.07); }
         }
         @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(9px); }
+          from { opacity: 0; transform: translateY(10px); }
           to   { opacity: 1; transform: translateY(0); }
         }
       `}</style>
