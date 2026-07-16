@@ -1,5 +1,6 @@
-import { Switch, Route, Redirect, useLocation } from "wouter";
+import { Switch, Route, Redirect, useLocation, Router as WouterRouter } from "wouter";
 import { ClerkProvider, SignIn, SignUp, useClerk, useUser, useAuth } from "@clerk/react";
+import { publishableKeyFromHost } from "@clerk/react/internal";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { useEffect, useRef } from "react";
@@ -36,8 +37,15 @@ import Following from "@/pages/following";
 import BlockedUsers from "@/pages/blocked-users";
 import EmojiLibrary from "@/pages/emoji-library";
 
-const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY as string;
+// REQUIRED — resolves the key from hostname so the same build serves multiple Clerk custom domains.
+const clerkPubKey = publishableKeyFromHost(
+  window.location.hostname,
+  import.meta.env.VITE_CLERK_PUBLISHABLE_KEY,
+);
+
+// REQUIRED — empty in dev (intentional), auto-set in prod. Must be unconditional.
 const clerkProxyUrl = import.meta.env.VITE_CLERK_PROXY_URL;
+
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 function stripBase(path: string): string {
@@ -115,7 +123,7 @@ function ClerkAuthBridge() {
   return null;
 }
 
-function App() {
+function ClerkProviderWithRoutes() {
   const [, setLocation] = useLocation();
   const clerkAppearance = {
     variables: {
@@ -142,7 +150,7 @@ function App() {
   return (
     <ClerkProvider
       publishableKey={clerkPubKey}
-      {...(clerkProxyUrl ? { proxyUrl: clerkProxyUrl } : {})}
+      proxyUrl={clerkProxyUrl}
       appearance={clerkAppearance}
       signInUrl={`${basePath}/sign-in`}
       signUpUrl={`${basePath}/sign-up`}
@@ -156,11 +164,13 @@ function App() {
             <Route path="/" component={HomeRedirect} />
             <Route path="/sign-in/*?">
               <div className="flex min-h-[100dvh] items-center justify-center bg-background px-4">
-                <SignIn routing="virtual" signUpUrl={`${basePath}/sign-in`} />
+                <SignIn routing="path" path={`${basePath}/sign-in`} signUpUrl={`${basePath}/sign-up`} />
               </div>
             </Route>
             <Route path="/sign-up/*?">
-              <Redirect to="/sign-in" />
+              <div className="flex min-h-[100dvh] items-center justify-center bg-background px-4">
+                <SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in`} />
+              </div>
             </Route>
             <Route path="/onboarding" component={() => (
               <PageTransition><Onboarding /></PageTransition>
@@ -197,6 +207,14 @@ function App() {
         </ThemeProvider>
       </QueryClientProvider>
     </ClerkProvider>
+  );
+}
+
+function App() {
+  return (
+    <WouterRouter base={basePath}>
+      <ClerkProviderWithRoutes />
+    </WouterRouter>
   );
 }
 
