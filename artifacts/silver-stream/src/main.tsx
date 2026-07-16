@@ -4,9 +4,10 @@ import { registerSW } from 'virtual:pwa-register';
 import App from './App';
 import './index.css';
 
-// When deployed on Cloudflare Pages, VITE_API_URL points to the Worker.
-// In local dev (and same-origin deploys) this is left empty → relative /api/... paths work.
-const apiUrl = import.meta.env.VITE_API_URL;
+// When deployed on Cloudflare Pages, the Worker is on a separate domain.
+// In local dev the API server runs on the same origin so relative paths work.
+const apiUrl = import.meta.env.VITE_API_URL
+  ?? (import.meta.env.PROD ? "https://silver-stream-api.mcfoxy.workers.dev" : "");
 if (apiUrl) {
   setBaseUrl(apiUrl.replace(/\/$/, ''));
 }
