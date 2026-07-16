@@ -1,11 +1,11 @@
 import { Switch, Route, Redirect, useLocation } from "wouter";
-import { ClerkProvider, SignIn, SignUp, Show, useClerk, useUser } from "@clerk/react";
+import { ClerkProvider, SignIn, SignUp, Show, useClerk, useUser, useAuth } from "@clerk/react";
 import { publishableKeyFromHost } from "@clerk/react/internal";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { useEffect, useRef } from "react";
 import { ThemeProvider } from "@/components/theme-provider";
-import { useGetMe, getGetMeQueryKey } from "@workspace/api-client-react";
+import { useGetMe, getGetMeQueryKey, setAuthTokenGetter } from "@workspace/api-client-react";
 
 // Layouts
 import { BottomNav } from "@/components/bottom-nav";
@@ -106,6 +106,16 @@ function HomeRedirect() {
   return <Landing />;
 }
 
+// يربط Clerk بالـ API client — يضع توكن Bearer في كل طلب
+function ClerkAuthBridge() {
+  const { getToken } = useAuth();
+  useEffect(() => {
+    setAuthTokenGetter(() => getToken());
+    return () => setAuthTokenGetter(null);
+  }, [getToken]);
+  return null;
+}
+
 function App() {
   const [, setLocation] = useLocation();
   const clerkAppearance = {
@@ -140,6 +150,7 @@ function App() {
       routerPush={(to) => setLocation(stripBase(to))}
       routerReplace={(to) => setLocation(stripBase(to), { replace: true })}
     >
+      <ClerkAuthBridge />
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
           <Switch>
