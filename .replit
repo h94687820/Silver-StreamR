@@ -23,3 +23,11 @@ timeoutMs = 20000
 
 [userenv.shared]
 VITE_CLERK_PROXY_URL = "https://silver-stream.pages.dev/api/__clerk"
+
+[[ports]]
+localPort = 8080
+externalPort = 8080
+
+[[ports]]
+localPort = 19651
+externalPort = 80
