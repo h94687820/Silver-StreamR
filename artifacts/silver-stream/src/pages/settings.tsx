@@ -178,8 +178,8 @@ export default function Settings() {
 
         <div className="text-center pt-8 pb-4 text-xs text-muted-foreground space-y-1">
           <p className="font-medium">Silver Stream</p>
-          <p className="text-accent font-semibold">V0.5.1 Beta</p>
-          <p className="text-muted-foreground/70">Beta Gold Edition</p>
+          <p className="text-accent font-semibold">V0.6</p>
+          <p className="text-muted-foreground/70">Eagle Edition</p>
           <p>Created by WhiteWase</p>
         </div>
 
