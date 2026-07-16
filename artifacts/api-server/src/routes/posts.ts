@@ -5,20 +5,26 @@ import { eq, and, desc, lt, inArray, or, sql } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { requireAuth, requireOnboarding } from "../lib/auth";
 import { enrichPost, notifyMentions, extractHashtags } from "../lib/helpers";
+import { rankPosts } from "../lib/recommendation";
 
 const router = Router();
 
-// GET /posts (feed)
+// GET /posts (personalised feed)
 router.get("/posts", requireAuth, requireOnboarding, async (req, res) => {
   try {
     const userId = (req as any).user.id;
     const limit = Math.min(Number(req.query.limit) || 20, 50);
-    const cursor = req.query.cursor as string | undefined;
+    // offset-based cursor for ranked feed (string encodes a plain integer)
+    const offset = req.query.cursor ? parseInt(req.query.cursor as string, 10) || 0 : 0;
 
     // Get following IDs
     const following = await db.select({ followingId: followsTable.followingId })
       .from(followsTable).where(eq(followsTable.followerId, userId));
     const followingIds = following.map(f => f.followingId);
+
+    // Fetch a larger candidate pool so the ranker has room to work.
+    // Pool = limit × 6, capped at 300, starting from the global offset.
+    const poolSize = Math.min(limit * 6, 300);
 
     const conditions = [
       or(
@@ -27,16 +33,21 @@ router.get("/posts", requireAuth, requireOnboarding, async (req, res) => {
         eq(postsTable.isPrivate, false)
       )!
     ];
-    if (cursor) conditions.push(lt(postsTable.createdAt, new Date(cursor)));
 
-    const posts = await db.select().from(postsTable)
+    const pool = await db.select().from(postsTable)
       .where(and(...conditions))
       .orderBy(desc(postsTable.createdAt))
-      .limit(limit + 1);
+      .limit(poolSize)
+      .offset(offset);
 
-    const hasMore = posts.length > limit;
-    const items = await Promise.all(posts.slice(0, limit).map(p => enrichPost(p, userId)));
-    const nextCursor = hasMore ? posts[limit - 1].createdAt.toISOString() : null;
+    // Rank the candidate pool by personal interest score.
+    const ranked = await rankPosts(userId, pool);
+
+    const page = ranked.slice(0, limit);
+    const hasMore = ranked.length > limit || pool.length === poolSize;
+    const nextCursor = hasMore ? String(offset + poolSize) : null;
+
+    const items = await Promise.all(page.map(p => enrichPost(p, userId)));
     res.json({ items, nextCursor });
   } catch (err) {
     req.log.error(err);

@@ -11,3 +11,4 @@ export * from "./settings";
 export * from "./groups";
 export * from "./blocks";
 export * from "./custom-emojis";
+export * from "./userInteractions";

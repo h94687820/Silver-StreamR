@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { useTrackInteraction } from "@/hooks/use-track-interaction";
 import { formatDistanceToNow } from "date-fns";
 import { 
   Heart, 
@@ -49,8 +50,37 @@ function syncQueries(queryClient: ReturnType<typeof useQueryClient>, post: Post)
 
 export function PostCard({ post, currentUserId }: PostCardProps) {
   const queryClient = useQueryClient();
+  const track = useTrackInteraction();
+  const cardRef = useRef<HTMLDivElement>(null);
+  const viewTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isOwner = currentUserId === post.authorId;
   const [showMenu, setShowMenu] = useState(false);
+
+  // ── View tracking via IntersectionObserver ────────────────────────────
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          viewTimerRef.current = setTimeout(() => {
+            track(post.id, "view");
+          }, 2000); // 2 s visible = counted as a view
+        } else {
+          if (viewTimerRef.current) {
+            clearTimeout(viewTimerRef.current);
+            viewTimerRef.current = null;
+          }
+        }
+      },
+      { threshold: 0.5 },
+    );
+    observer.observe(el);
+    return () => {
+      observer.disconnect();
+      if (viewTimerRef.current) clearTimeout(viewTimerRef.current);
+    };
+  }, [post.id, track]);
 
   // Local optimistic overrides so likes/dislikes/saves reflect instantly on
   // click instead of waiting on the mutation + cache-invalidation round trip.
@@ -95,6 +125,7 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
     if (wasLiked) {
       removeReactionMutation.mutate({ postId: post.id }, { onSuccess, onError });
     } else {
+      track(post.id, "like");
       reactMutation.mutate({ postId: post.id, data: { type: 'like' } }, { onSuccess, onError });
     }
   };
@@ -117,6 +148,7 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
     if (wasDisliked) {
       removeReactionMutation.mutate({ postId: post.id }, { onSuccess, onError });
     } else {
+      track(post.id, "dislike");
       reactMutation.mutate({ postId: post.id, data: { type: 'dislike' } }, { onSuccess, onError });
     }
   };
@@ -131,6 +163,7 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
     if (prev.isSaved) {
       unsaveMutation.mutate({ postId: post.id }, { onSuccess, onError });
     } else {
+      track(post.id, "save");
       saveMutation.mutate({ postId: post.id }, { onSuccess, onError });
     }
   };
@@ -173,7 +206,7 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
   };
 
   return (
-    <div className="bg-card border-b border-border/50 py-4 px-4 sm:px-0 sm:border sm:rounded-2xl sm:my-4">
+    <div ref={cardRef} className="bg-card border-b border-border/50 py-4 px-4 sm:px-0 sm:border sm:rounded-2xl sm:my-4">
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <Link href={`/profile/${post.author.username}`} className="flex items-center gap-3">

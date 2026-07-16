@@ -14,6 +14,7 @@ import storageRouter from "./storage";
 import groupsRouter from "./groups";
 import blocksRouter from "./blocks";
 import emojisRouter from "./emojis";
+import interactionsRouter from "./interactions";
 
 const router: IRouter = Router();
 
@@ -32,5 +33,6 @@ router.use(storageRouter);
 router.use(groupsRouter);
 router.use(blocksRouter);
 router.use(emojisRouter);
+router.use(interactionsRouter);
 
 export default router;
