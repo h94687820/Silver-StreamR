@@ -1,9 +1,9 @@
 /**
  * POST /storage/uploads
  *
- * رفع ملف مباشرة إلى Cloudflare R2.
- * يرسل العميل الـ binary body مع Content-Type للملف.
- * يُعيد { objectPath } — الرابط العام للملف المرفوع.
+ * رفع ملف إلى FORGE Storage.
+ * العميل يرسل الـ binary body مع Content-Type للملف.
+ * يُعيد { objectPath } — الرابط العام للملف.
  */
 import { Hono } from "hono";
 import type { HonoEnv } from "../types";
@@ -22,8 +22,8 @@ router.post("/storage/uploads", async (c) => {
     }
 
     const objectPath = await uploadFile(
-      c.env.STORAGE,
-      c.env.STORAGE_PUBLIC_URL,
+      c.env.FORGE_BASE_URL,
+      c.env.FORGE_API_KEY,
       body,
       contentType,
     );

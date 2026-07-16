@@ -4,25 +4,18 @@ compatibility_date = "2025-01-01"
 compatibility_flags = ["nodejs_compat"]
 
 # ─── Cloudflare D1 (قاعدة البيانات) ───────────────────────────────────────────
-# بعد إنشاء الـ database عبر: wrangler d1 create silver-stream-db
-# انسخ الـ database_id هنا
 [[d1_databases]]
 binding = "DB"
 database_name = "silver-stream-db"
 database_id = "0ffc8340-f67f-426f-a187-21ed4522934f"
 
-# ─── Cloudflare R2 (تخزين الملفات) ────────────────────────────────────────────
-# فعّل R2 من لوحة Cloudflare أولاً، ثم أزل التعليق عن السطور التالية:
-# [[r2_buckets]]
-# binding = "STORAGE"
-# bucket_name = "silver-stream-storage"
-
-# ─── متغيرات عادية (غير سرية) ─────────────────────────────────────────────────
+# ─── متغيرات عادية ────────────────────────────────────────────────────────────
 [vars]
-STORAGE_PUBLIC_URL = "https://pub-REPLACE.r2.dev"
+FORGE_BASE_URL = "https://baas-platform.mcfoxy.workers.dev"
 
 # ─── أسرار — تُضاف عبر: wrangler secret put SECRET_NAME ──────────────────────
-# CLERK_SECRET_KEY        = "sk_..."
-# CLERK_PUBLISHABLE_KEY   = "pk_..."
+# FORGE_API_KEY         = "..."   (مفتاح مشروع FORGE)
+# CLERK_SECRET_KEY      = "sk_..."
+# CLERK_PUBLISHABLE_KEY = "pk_..."
 
 # أضف [[routes]] فقط عند ربط domain مخصص لاحقاً

@@ -1,10 +1,10 @@
 export type Bindings = {
-  /** Cloudflare D1 database binding — اسم الـ binding في wrangler.toml هو "DB" */
+  /** Cloudflare D1 database binding */
   DB: D1Database;
-  /** Cloudflare R2 bucket binding — اسم الـ binding في wrangler.toml هو "STORAGE" */
-  STORAGE: R2Bucket;
-  /** رابط الملفات العام (CDN أو R2 public URL) */
-  STORAGE_PUBLIC_URL: string;
+  /** رابط قاعدة FORGE لخدمة التخزين */
+  FORGE_BASE_URL: string;
+  /** FORGE API Key — سر يُضاف عبر wrangler secret put */
+  FORGE_API_KEY: string;
   /** Clerk secret key لتحقق الـ JWT */
   CLERK_SECRET_KEY: string;
   CLERK_PUBLISHABLE_KEY: string;
