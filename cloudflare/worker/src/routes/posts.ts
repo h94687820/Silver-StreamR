@@ -100,6 +100,7 @@ router.post("/posts", async (c) => {
       .insert(postsTable)
       .values({
         id: crypto.randomUUID(),
+        trackingId: crypto.randomUUID(),
         authorId: userId,
         groupId: groupId || null,
         content: content || null,

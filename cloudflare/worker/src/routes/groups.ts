@@ -88,6 +88,7 @@ router.post("/groups", async (c) => {
       .insert(groupsTable)
       .values({
         id: groupId,
+        trackingId: crypto.randomUUID(),
         name: String(name).trim(),
         description: description || null,
         avatarUrl: avatarUrl || null,
@@ -253,6 +254,7 @@ router.post("/groups/:groupId/posts", async (c) => {
       .insert(postsTable)
       .values({
         id: crypto.randomUUID(),
+        trackingId: crypto.randomUUID(),
         authorId: user.id,
         groupId,
         content: content || null,

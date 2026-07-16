@@ -6,6 +6,7 @@ export const storiesTable = pgTable("stories", {
   authorId: text("author_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
   mediaUrl: text("media_url").notNull(),
   mediaType: text("media_type").notNull(), // "image" | "video"
+  trackingId: text("tracking_id"),
   expiresAt: timestamp("expires_at").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });

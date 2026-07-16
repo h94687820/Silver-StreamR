@@ -7,6 +7,7 @@ export const groupsTable = sqliteTable("groups", {
   description: text("description"),
   avatarUrl: text("avatar_url"),
   ownerId: text("owner_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
+  trackingId: text("tracking_id"),
   membersCount: integer("members_count").notNull().default(1),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull().$defaultFn(() => new Date()),
 });

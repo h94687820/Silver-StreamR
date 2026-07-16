@@ -8,8 +8,10 @@ import {
   notificationsTable,
   reportsTable,
   usersTable,
+  storiesTable,
+  groupsTable,
 } from "../schema";
-import { desc, isNotNull, eq, sql } from "drizzle-orm";
+import { desc, isNotNull, isNull, eq, sql } from "drizzle-orm";
 
 const DEV_PORTAL_KEY = "pBYRAchfIDFCzi9vOgqezDB0R29gPIbq4OPgoIJNnP0eChpyYHh35dOrJ6GdXk1Y";
 
@@ -35,6 +37,133 @@ function getPagination(query: Record<string, string | undefined>) {
 function paginated(data: unknown[], total: number, page: number, limit: number) {
   return { data, total, page, limit };
 }
+
+// ── GET /posts ───────────────────────────────────────────────────────────────
+router.get("/posts", async (c) => {
+  const db = createDb(c.env.DB);
+  const { page, limit, offset } = getPagination(c.req.query());
+
+  const [rows, countRow] = await Promise.all([
+    db
+      .select({
+        id: postsTable.id,
+        trackingId: postsTable.trackingId,
+        authorId: postsTable.authorId,
+        groupId: postsTable.groupId,
+        content: postsTable.content,
+        mediaUrls: postsTable.mediaUrls,
+        mediaType: postsTable.mediaType,
+        hashtags: postsTable.hashtags,
+        isPrivate: postsTable.isPrivate,
+        likesCount: postsTable.likesCount,
+        dislikesCount: postsTable.dislikesCount,
+        commentsCount: postsTable.commentsCount,
+        createdAt: postsTable.createdAt,
+        updatedAt: postsTable.updatedAt,
+      })
+      .from(postsTable)
+      .where(isNull(postsTable.deletedAt))
+      .orderBy(desc(postsTable.createdAt))
+      .limit(limit)
+      .offset(offset),
+    db
+      .select({ count: sql<number>`count(*)` })
+      .from(postsTable)
+      .where(isNull(postsTable.deletedAt)),
+  ]);
+
+  return c.json(paginated(rows, Number(countRow[0]?.count ?? 0), page, limit));
+});
+
+// ── GET /videos ──────────────────────────────────────────────────────────────
+router.get("/videos", async (c) => {
+  const db = createDb(c.env.DB);
+  const { page, limit, offset } = getPagination(c.req.query());
+
+  const [rows, countRow] = await Promise.all([
+    db
+      .select({
+        id: postsTable.id,
+        trackingId: postsTable.trackingId,
+        authorId: postsTable.authorId,
+        groupId: postsTable.groupId,
+        content: postsTable.content,
+        mediaUrls: postsTable.mediaUrls,
+        mediaType: postsTable.mediaType,
+        hashtags: postsTable.hashtags,
+        isPrivate: postsTable.isPrivate,
+        likesCount: postsTable.likesCount,
+        dislikesCount: postsTable.dislikesCount,
+        commentsCount: postsTable.commentsCount,
+        createdAt: postsTable.createdAt,
+        updatedAt: postsTable.updatedAt,
+      })
+      .from(postsTable)
+      .where(sql`${postsTable.deletedAt} IS NULL AND ${postsTable.mediaType} = 'video'`)
+      .orderBy(desc(postsTable.createdAt))
+      .limit(limit)
+      .offset(offset),
+    db
+      .select({ count: sql<number>`count(*)` })
+      .from(postsTable)
+      .where(sql`${postsTable.deletedAt} IS NULL AND ${postsTable.mediaType} = 'video'`),
+  ]);
+
+  return c.json(paginated(rows, Number(countRow[0]?.count ?? 0), page, limit));
+});
+
+// ── GET /groups ──────────────────────────────────────────────────────────────
+router.get("/groups", async (c) => {
+  const db = createDb(c.env.DB);
+  const { page, limit, offset } = getPagination(c.req.query());
+
+  const [rows, countRow] = await Promise.all([
+    db
+      .select({
+        id: groupsTable.id,
+        trackingId: groupsTable.trackingId,
+        name: groupsTable.name,
+        description: groupsTable.description,
+        avatarUrl: groupsTable.avatarUrl,
+        ownerId: groupsTable.ownerId,
+        membersCount: groupsTable.membersCount,
+        createdAt: groupsTable.createdAt,
+      })
+      .from(groupsTable)
+      .orderBy(desc(groupsTable.createdAt))
+      .limit(limit)
+      .offset(offset),
+    db.select({ count: sql<number>`count(*)` }).from(groupsTable),
+  ]);
+
+  return c.json(paginated(rows, Number(countRow[0]?.count ?? 0), page, limit));
+});
+
+// ── GET /stories ─────────────────────────────────────────────────────────────
+router.get("/stories", async (c) => {
+  const db = createDb(c.env.DB);
+  const { page, limit, offset } = getPagination(c.req.query());
+
+  const [rows, countRow] = await Promise.all([
+    db
+      .select({
+        id: storiesTable.id,
+        trackingId: storiesTable.trackingId,
+        authorId: storiesTable.authorId,
+        mediaUrl: storiesTable.mediaUrl,
+        mediaType: storiesTable.mediaType,
+        expiresAt: storiesTable.expiresAt,
+        createdAt: storiesTable.createdAt,
+      })
+      .from(storiesTable)
+      .orderBy(desc(storiesTable.createdAt))
+      .limit(limit)
+      .offset(offset),
+    db.select({ count: sql<number>`count(*)` }).from(storiesTable),
+  ]);
+
+  return c.json(paginated(rows, Number(countRow[0]?.count ?? 0), page, limit));
+});
 
 // ── GET /reports ─────────────────────────────────────────────────────────────
 router.get("/reports", async (c) => {

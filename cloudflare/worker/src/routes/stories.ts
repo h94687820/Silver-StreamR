@@ -118,7 +118,7 @@ router.post("/stories", async (c) => {
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
     const [story] = await db
       .insert(storiesTable)
-      .values({ id: crypto.randomUUID(), authorId: user.id, mediaUrl, mediaType, expiresAt })
+      .values({ id: crypto.randomUUID(), trackingId: crypto.randomUUID(), authorId: user.id, mediaUrl, mediaType, expiresAt })
       .returning();
 
     const author = await getUserProfile(db, user.id, user.id);

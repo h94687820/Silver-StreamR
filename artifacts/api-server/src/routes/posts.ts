@@ -70,6 +70,7 @@ router.post("/posts", requireAuth, requireOnboarding, async (req, res) => {
 
     const post = await db.insert(postsTable).values({
       id: randomUUID(),
+      trackingId: randomUUID(),
       authorId: userId,
       groupId: groupId || null,
       content: content || null,

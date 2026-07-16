@@ -70,6 +70,7 @@ router.post("/groups", requireAuth, requireOnboarding, async (req, res) => {
     const groupId = randomUUID();
     const [group] = await db.insert(groupsTable).values({
       id: groupId,
+      trackingId: randomUUID(),
       name: String(name).trim(),
       description: description || null,
       avatarUrl: avatarUrl || null,
@@ -182,6 +183,7 @@ router.post("/groups/:groupId/posts", requireAuth, requireOnboarding, async (req
 
     const [post] = await db.insert(postsTable).values({
       id: randomUUID(),
+      trackingId: randomUUID(),
       authorId: userId,
       groupId: req.params.groupId,
       content: content || null,

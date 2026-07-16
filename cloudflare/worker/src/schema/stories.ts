@@ -6,6 +6,7 @@ export const storiesTable = sqliteTable("stories", {
   authorId: text("author_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
   mediaUrl: text("media_url").notNull(),
   mediaType: text("media_type").notNull(),
+  trackingId: text("tracking_id"),
   expiresAt: integer("expires_at", { mode: "timestamp_ms" }).notNull(),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull().$defaultFn(() => new Date()),
 });

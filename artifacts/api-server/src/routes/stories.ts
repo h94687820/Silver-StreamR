@@ -86,7 +86,7 @@ router.post("/stories", requireAuth, requireOnboarding, async (req, res) => {
     if (!mediaUrl || !mediaType) { res.status(400).json({ error: "mediaUrl and mediaType required" }); return; }
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
     const [story] = await db.insert(storiesTable).values({
-      id: randomUUID(), authorId: userId, mediaUrl, mediaType, expiresAt,
+      id: randomUUID(), trackingId: randomUUID(), authorId: userId, mediaUrl, mediaType, expiresAt,
     }).returning();
     const author = await getUserProfile(userId, userId);
     res.status(201).json({
