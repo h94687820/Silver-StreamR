@@ -1,11 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useLocation } from "wouter";
 import { useCheckUsername, useCompleteOnboarding, getGetMeQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useDebounce } from "@/lib/use-debounce"; // Will create this utility
+import { useDebounce } from "@/lib/use-debounce";
+import { TermsButton } from "@/components/terms-modal";
 
 export default function Onboarding() {
   const [, setLocation] = useLocation();
@@ -86,22 +87,20 @@ export default function Onboarding() {
             />
           </div>
 
-          <div className="p-4 bg-secondary/30 rounded-xl border border-border/50 text-xs text-muted-foreground space-y-2">
-            <p className="font-medium text-foreground">Silver Stream — Terms of Service & Privacy Policy</p>
-            <p>This platform is owned and operated by WhiteWase. YouTube: https://youtube.com/@whitewase?si=33-wgad8O3-VSyd-</p>
-            <p>By using Silver Stream, you agree to: 1. Not post harmful content. 2. Respect others' privacy. 3. Content visibility depends on your settings. 4. We do not sell your data. 5. You may delete your account from settings.</p>
-            <p>(Beta Version — Features may change.)</p>
-          </div>
+          {/* Terms button — opens full modal */}
+          <TermsButton />
 
           <div className="flex items-start gap-3">
-            <Checkbox 
-              id="terms" 
-              checked={acceptedTerms} 
-              onCheckedChange={(c) => setAcceptedTerms(c as boolean)} 
+            <Checkbox
+              id="terms"
+              checked={acceptedTerms}
+              onCheckedChange={(c) => setAcceptedTerms(c as boolean)}
               className="mt-1"
             />
             <label htmlFor="terms" className="text-sm text-foreground leading-tight cursor-pointer">
-              I agree to the Terms of Service and Privacy Policy
+              {(navigator.language || "").startsWith("ar")
+                ? "لقد قرأت الشروط وأوافق عليها"
+                : "I have read and agree to the Terms of Service"}
             </label>
           </div>
 
