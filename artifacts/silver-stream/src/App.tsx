@@ -3,8 +3,9 @@ import { ClerkProvider, SignIn, SignUp, useClerk, useUser, useAuth } from "@cler
 import { publishableKeyFromHost } from "@clerk/react/internal";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { ThemeProvider } from "@/components/theme-provider";
+import { SplashScreen, useShouldShowSplash } from "@/components/splash-screen";
 import { useGetMe, getGetMeQueryKey, setAuthTokenGetter } from "@workspace/api-client-react";
 
 // Layouts
@@ -212,10 +213,19 @@ function ClerkProviderWithRoutes() {
 }
 
 function App() {
+  const shouldShow = useShouldShowSplash();
+  const [splashDone, setSplashDone] = useState(!shouldShow);
+  const handleSplashDone = useCallback(() => setSplashDone(true), []);
+
   return (
-    <WouterRouter base={basePath}>
-      <ClerkProviderWithRoutes />
-    </WouterRouter>
+    <>
+      {!splashDone && <SplashScreen onDone={handleSplashDone} />}
+      <div style={{ opacity: splashDone ? 1 : 0, transition: "opacity 0.4s ease" }}>
+        <WouterRouter base={basePath}>
+          <ClerkProviderWithRoutes />
+        </WouterRouter>
+      </div>
+    </>
   );
 }
 
