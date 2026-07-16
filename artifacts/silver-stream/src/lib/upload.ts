@@ -1,3 +1,5 @@
+import { getAuthToken } from "@workspace/api-client-react";
+
 /**
  * uploadFile — uploads a File through the API server (no direct GCS CORS issues).
  *
@@ -6,9 +8,14 @@
  *   `/api/storage${objectPath}`
  */
 export async function uploadFile(file: File): Promise<string> {
+  const token = await getAuthToken();
+  const authHeaders: Record<string, string> = token
+    ? { Authorization: `Bearer ${token}` }
+    : {};
+
   const res = await fetch("/api/storage/uploads", {
     method: "POST",
-    headers: { "Content-Type": file.type },
+    headers: { "Content-Type": file.type, ...authHeaders },
     body: file,
     credentials: "include",
   });
