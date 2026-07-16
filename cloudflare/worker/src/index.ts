@@ -3,6 +3,7 @@ import { cors } from "hono/cors";
 import type { HonoEnv } from "./types";
 import { getClerkIdFromHeader } from "./auth";
 
+import clerkProxy from "./routes/clerk-proxy";
 import usersRouter from "./routes/users";
 import postsRouter from "./routes/posts";
 import commentsRouter from "./routes/comments";
@@ -34,11 +35,18 @@ app.use(
 // ── Health ──────────────────────────────────────────────────────────────────
 app.get("/api/healthz", (c) => c.json({ status: "ok" }));
 
-// ── Auth middleware  (all /api/* except healthz + check-username) ───────────
+// ── Clerk FAPI proxy (must be before auth middleware) ───────────────────────
+app.route("/api/__clerk", clerkProxy);
+
+// ── Auth middleware  (all /api/* except healthz + check-username + clerk proxy) ──
 app.use("/api/*", async (c, next) => {
-  // Skip auth for a narrow public set
+  // Skip auth for public routes and Clerk proxy
   const path = new URL(c.req.url).pathname;
-  if (path === "/api/healthz" || path === "/api/users/check-username") {
+  if (
+    path === "/api/healthz" ||
+    path === "/api/users/check-username" ||
+    path.startsWith("/api/__clerk")
+  ) {
     await next();
     return;
   }

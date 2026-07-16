@@ -8,6 +8,8 @@ export type Bindings = {
   /** Clerk secret key لتحقق الـ JWT */
   CLERK_SECRET_KEY: string;
   CLERK_PUBLISHABLE_KEY: string;
+  /** Clerk Frontend API URL — derived from VITE_CLERK_PUBLISHABLE_KEY */
+  CLERK_FAPI: string;
 };
 
 export type Variables = {

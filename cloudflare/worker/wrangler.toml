@@ -12,6 +12,8 @@ database_id = "0ffc8340-f67f-426f-a187-21ed4522934f"
 # ─── متغيرات عادية ────────────────────────────────────────────────────────────
 [vars]
 FORGE_BASE_URL = "https://baas-platform.mcfoxy.workers.dev"
+# Clerk FAPI — derived from VITE_CLERK_PUBLISHABLE_KEY (pk_test_dml0YWwtZm94...  → vital-fox-43)
+CLERK_FAPI = "https://vital-fox-43.clerk.accounts.dev"
 
 # ─── أسرار — تُضاف عبر: wrangler secret put SECRET_NAME ──────────────────────
 # FORGE_API_KEY         = "..."   (مفتاح مشروع FORGE)
