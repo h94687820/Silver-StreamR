@@ -9,23 +9,20 @@ compatibility_flags = ["nodejs_compat"]
 [[d1_databases]]
 binding = "DB"
 database_name = "silver-stream-db"
-database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+database_id = "0ffc8340-f67f-426f-a187-21ed4522934f"
 
 # ─── Cloudflare R2 (تخزين الملفات) ────────────────────────────────────────────
-# بعد إنشاء الـ bucket عبر: wrangler r2 bucket create silver-stream-storage
-[[r2_buckets]]
-binding = "STORAGE"
-bucket_name = "silver-stream-storage"
+# فعّل R2 من لوحة Cloudflare أولاً، ثم أزل التعليق عن السطور التالية:
+# [[r2_buckets]]
+# binding = "STORAGE"
+# bucket_name = "silver-stream-storage"
 
 # ─── متغيرات عادية (غير سرية) ─────────────────────────────────────────────────
 [vars]
-# رابط R2 العام — عدّله بعد تفعيل Custom Domain أو Public Access على الـ bucket
 STORAGE_PUBLIC_URL = "https://pub-REPLACE.r2.dev"
 
 # ─── أسرار — تُضاف عبر: wrangler secret put SECRET_NAME ──────────────────────
 # CLERK_SECRET_KEY        = "sk_..."
 # CLERK_PUBLISHABLE_KEY   = "pk_..."
 
-[[routes]]
-pattern = "/api/*"
-zone_name = ""
+# أضف [[routes]] فقط عند ربط domain مخصص لاحقاً
