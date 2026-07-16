@@ -11,8 +11,10 @@ import {
   Trash2,
   Lock,
   Globe,
-  Edit2
+  Edit2,
+  Flag
 } from "lucide-react";
+import { ReportDialog } from "@/components/report-dialog";
 import { Link } from "wouter";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -55,6 +57,7 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
   const viewTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isOwner = currentUserId === post.authorId;
   const [showMenu, setShowMenu] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
 
   // ── View tracking via IntersectionObserver ────────────────────────────
   useEffect(() => {
@@ -261,6 +264,11 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
                   </button>
                 </>
               )}
+              {!isOwner && (
+                <button onClick={() => { setShowMenu(false); setReportOpen(true); }} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-destructive hover:bg-destructive/10 transition-colors">
+                  <Flag className="w-4 h-4" /> Report Post
+                </button>
+              )}
               <button onClick={() => { setShowMenu(false); navigator.share?.({ url: `${window.location.origin}/post/${post.id}` }); }} className="w-full flex items-center gap-3 px-4 py-3 text-sm hover:bg-secondary transition-colors">
                 <Share2 className="w-4 h-4" /> Share Link
               </button>
@@ -268,6 +276,15 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
           )}
         </div>
       </div>
+
+      <ReportDialog
+        open={reportOpen}
+        onOpenChange={setReportOpen}
+        mode="specific"
+        targetType="post"
+        targetId={post.id}
+        targetUsername={post.author.username}
+      />
 
       {/* Content */}
       <div className="mb-3">

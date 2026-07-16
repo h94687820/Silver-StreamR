@@ -17,7 +17,8 @@ import { PostCard } from "@/components/post-card";
 import { MentionTextarea } from "@/components/mention-textarea";
 import { MentionText } from "@/components/mention-text";
 import { EditGroupDialog } from "@/components/edit-group-dialog";
-import { Crown, Users, Trash2, Pencil, Send, ImagePlus, Video, X } from "lucide-react";
+import { Crown, Users, Trash2, Pencil, Send, ImagePlus, Video, X, Flag } from "lucide-react";
+import { ReportDialog } from "@/components/report-dialog";
 
 export default function GroupDetail() {
   const [, params] = useRoute("/groups/:groupId");
@@ -27,6 +28,7 @@ export default function GroupDetail() {
 
   const [tab, setTab] = useState<"posts" | "members">("posts");
   const [editOpen, setEditOpen] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
   const [postContent, setPostContent] = useState("");
   const [postFile, setPostFile] = useState<File | null>(null);
   const [postPreview, setPostPreview] = useState<string | null>(null);
@@ -154,12 +156,23 @@ export default function GroupDetail() {
             Delete Group
           </Button>
         ) : (
-          <Button
-            onClick={group.isMember ? handleLeave : handleJoin}
-            className={`w-full rounded-xl ${group.isMember ? "bg-secondary text-foreground hover:bg-destructive/10 hover:text-destructive" : "silver-shimmer"}`}
-          >
-            {group.isMember ? "Leave Group" : "Join Group"}
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              onClick={group.isMember ? handleLeave : handleJoin}
+              className={`flex-1 rounded-xl ${group.isMember ? "bg-secondary text-foreground hover:bg-destructive/10 hover:text-destructive" : "silver-shimmer"}`}
+            >
+              {group.isMember ? "Leave Group" : "Join Group"}
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="rounded-xl border-destructive/30 text-destructive hover:bg-destructive/10 shrink-0"
+              onClick={() => setReportOpen(true)}
+              title="Report Group"
+            >
+              <Flag className="w-4 h-4" />
+            </Button>
+          </div>
         )}
 
         <div className="flex bg-secondary p-1 rounded-lg">
@@ -284,6 +297,14 @@ export default function GroupDetail() {
       {group.isOwner && (
         <EditGroupDialog open={editOpen} onOpenChange={setEditOpen} group={group} />
       )}
+      <ReportDialog
+        open={reportOpen}
+        onOpenChange={setReportOpen}
+        mode="specific"
+        targetType="group"
+        targetId={group.id}
+        targetUsername={group.owner.username}
+      />
     </div>
   );
 }

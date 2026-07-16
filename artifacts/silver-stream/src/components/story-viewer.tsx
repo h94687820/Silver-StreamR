@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { X, Heart, ThumbsDown, Share2 } from "lucide-react";
+import { X, Heart, ThumbsDown, Share2, Flag } from "lucide-react";
+import { ReportDialog } from "@/components/report-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatDistanceToNow } from "date-fns";
 import type { StoryGroup, Story } from "@workspace/api-client-react";
@@ -27,6 +28,7 @@ export function StoryViewer({ groups, initialGroupIndex, onClose }: StoryViewerP
   const [paused, setPaused] = useState(false);
   const [reactions, setReactions] = useState<Record<string, string | null>>({});
   const [sharing, setSharing] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const progressKey = useRef(0);
 
@@ -194,6 +196,9 @@ export function StoryViewer({ groups, initialGroupIndex, onClose }: StoryViewerP
               )}
             </div>
           </button>
+          <button onClick={() => { setPaused(true); setReportOpen(true); }} className="text-white/80 hover:text-white p-1">
+            <Flag className="w-4 h-4" />
+          </button>
           <button onClick={onClose} className="text-white/80 hover:text-white p-1">
             <X className="w-5 h-5" />
           </button>
@@ -295,7 +300,7 @@ export function StoryViewer({ groups, initialGroupIndex, onClose }: StoryViewerP
       <button
         onClick={handleShare}
         className={cn(
-          "absolute bottom-24 right-5 flex flex-col items-center gap-1 transition-all duration-200 z-20",
+          "absolute bottom-24 end-5 flex flex-col items-center gap-1 transition-all duration-200 z-20",
         )}
       >
         <div className="w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all duration-200">
@@ -305,6 +310,14 @@ export function StoryViewer({ groups, initialGroupIndex, onClose }: StoryViewerP
           {sharing ? "Copied!" : "Share"}
         </span>
       </button>
+    <ReportDialog
+        open={reportOpen}
+        onOpenChange={(v) => { setReportOpen(v); if (!v) setPaused(false); }}
+        mode="specific"
+        targetType="story"
+        targetId={story.id}
+        targetUsername={currentGroup.user.username}
+      />
     </div>
   );
 }

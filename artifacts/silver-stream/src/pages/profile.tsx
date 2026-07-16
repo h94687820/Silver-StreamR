@@ -4,14 +4,15 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { PostCard } from "@/components/post-card";
 import { MentionText } from "@/components/mention-text";
-import { Grid, Video, Bookmark, Edit3, ShieldOff, Shield } from "lucide-react";
+import { Grid, Video, Bookmark, Edit3, ShieldOff, Shield, Flag } from "lucide-react";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { EditProfileDialog } from "@/components/edit-profile-dialog";
 import { useTranslation } from "@/lib/i18n";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ReportDialog } from "@/components/report-dialog";
 
 function SavedPostsTab({ username, isMe }: { username: string; isMe: boolean }) {
   const { data: me } = useGetMe();
@@ -86,6 +87,7 @@ export default function Profile() {
 
   const [tab, setTab] = useState<"posts" | "reels" | "saved">("posts");
   const [editOpen, setEditOpen] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
   const queryClient = useQueryClient();
   const followMutation = useFollowUser();
   const unfollowMutation = useUnfollowUser();
@@ -180,6 +182,13 @@ export default function Profile() {
                       ) : (
                         <><ShieldOff className="w-4 h-4 me-2" />{t("profile_block")}</>
                       )}
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={() => setReportOpen(true)}
+                      className="text-destructive focus:text-destructive"
+                    >
+                      <Flag className="w-4 h-4 me-2" />{t("report_user")}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -287,6 +296,14 @@ export default function Profile() {
       {isMe && (
         <EditProfileDialog open={editOpen} onOpenChange={setEditOpen} profile={profile} />
       )}
+      <ReportDialog
+        open={reportOpen}
+        onOpenChange={setReportOpen}
+        mode="specific"
+        targetType="user"
+        targetId={profile.id}
+        targetUsername={profile.username}
+      />
     </div>
   );
 }

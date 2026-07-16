@@ -4,7 +4,9 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/components/theme-provider";
 import { useTranslation } from "@/lib/i18n";
-import { LogOut, Trash2, Moon, Sun, Monitor, Palette, Globe, ChevronRight, Lock, Users, UserX, UserCheck, Smile, KeyRound } from "lucide-react";
+import { LogOut, Trash2, Moon, Sun, Monitor, Palette, Globe, ChevronRight, Lock, Users, UserX, UserCheck, Smile, KeyRound, Flag } from "lucide-react";
+import { useState } from "react";
+import { ReportDialog } from "@/components/report-dialog";
 
 export default function Settings() {
   const { signOut } = useClerk();
@@ -12,6 +14,7 @@ export default function Settings() {
   const { t } = useTranslation();
   const { data: me } = useGetMe();
   const deleteMutation = useDeleteAccount();
+  const [generalReportOpen, setGeneralReportOpen] = useState(false);
 
   const handleLogout = () => signOut();
 
@@ -162,6 +165,20 @@ export default function Settings() {
           </div>
         </section>
 
+        {/* Support Section */}
+        <section>
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 px-2">{t("settings_support")}</h2>
+          <div className="bg-card border border-border/50 rounded-2xl overflow-hidden divide-y divide-border/50">
+            <button onClick={() => setGeneralReportOpen(true)} className="w-full p-4 flex items-center justify-between hover:bg-secondary/50 transition-colors">
+              <div className="flex items-center gap-3 text-foreground">
+                <Flag className="w-5 h-5 text-muted-foreground" />
+                <span className="font-medium">{t("settings_report_app")}</span>
+              </div>
+              <ChevronRight className="w-4 h-4 text-muted-foreground" />
+            </button>
+          </div>
+        </section>
+
         {/* Danger Zone */}
         <section className="pt-4">
           <div className="bg-card border border-border/50 rounded-2xl overflow-hidden divide-y divide-border/50">
@@ -175,6 +192,13 @@ export default function Settings() {
             </button>
           </div>
         </section>
+
+        <ReportDialog
+          open={generalReportOpen}
+          onOpenChange={setGeneralReportOpen}
+          mode="general"
+          targetType="user"
+        />
 
         <div className="text-center pt-8 pb-4 text-xs text-muted-foreground space-y-1">
           <p className="font-medium">Silver Stream</p>

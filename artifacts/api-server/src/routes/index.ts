@@ -15,6 +15,7 @@ import groupsRouter from "./groups";
 import blocksRouter from "./blocks";
 import emojisRouter from "./emojis";
 import interactionsRouter from "./interactions";
+import reportsRouter from "./reports";
 
 const router: IRouter = Router();
 
@@ -34,5 +35,6 @@ router.use(groupsRouter);
 router.use(blocksRouter);
 router.use(emojisRouter);
 router.use(interactionsRouter);
+router.use(reportsRouter);
 
 export default router;

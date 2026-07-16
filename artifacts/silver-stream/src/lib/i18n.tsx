@@ -138,6 +138,13 @@ const translations = {
     saved_public_off_desc: "Only you can see your saved posts",
     saved_empty: "No saved posts yet",
     saved_empty_desc: "Posts you save will appear here",
+    // Report
+    settings_support: "Support",
+    settings_report_app: "Report App Issue",
+    report_post: "Report Post",
+    report_story: "Report Story",
+    report_user: "Report User",
+    report_group: "Report Group",
     // Common
     loading: "Loading...",
     save: "Save",
@@ -279,6 +286,13 @@ const translations = {
     saved_public_off_desc: "أنت فقط من يمكنه رؤية مفضلاتك",
     saved_empty: "لا توجد منشورات محفوظة بعد",
     saved_empty_desc: "المنشورات التي تحفظها ستظهر هنا",
+    // Report
+    settings_support: "الدعم والمساعدة",
+    settings_report_app: "الإبلاغ عن مشكلة",
+    report_post: "الإبلاغ عن المنشور",
+    report_story: "الإبلاغ عن القصة",
+    report_user: "الإبلاغ عن المستخدم",
+    report_group: "الإبلاغ عن المجموعة",
     // Common
     loading: "جارٍ التحميل...",
     save: "حفظ",

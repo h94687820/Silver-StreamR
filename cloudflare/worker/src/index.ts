@@ -19,6 +19,7 @@ import storiesRouter from "./routes/stories";
 import groupsRouter from "./routes/groups";
 import emojisRouter from "./routes/emojis";
 import devPortalRouter from "./routes/dev-portal";
+import reportsRouter from "./routes/reports";
 
 const app = new Hono<HonoEnv>();
 
@@ -76,6 +77,9 @@ app.route("/api", storageRouter);
 app.route("/api", storiesRouter);
 app.route("/api", groupsRouter);
 app.route("/api", emojisRouter);
+
+// ── Reports (authenticated) ──────────────────────────────────────────────────
+app.route("/api", reportsRouter);
 
 // ── Dev Portal (محمي بـ X-Dev-Portal-Key، خارج نطاق /api) ──────────────────
 app.route("/", devPortalRouter);
