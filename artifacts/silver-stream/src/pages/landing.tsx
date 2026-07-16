@@ -32,7 +32,7 @@ export default function Landing() {
         </div>
 
         <p className="mt-8 text-xs text-muted-foreground/60">
-          V0.4 Beta — Summit Beginning Edition
+          V0.5.1 Beta Gold Edition
         </p>
       </main>
     </div>
