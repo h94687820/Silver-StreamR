@@ -2,6 +2,7 @@ import { createRoot } from 'react-dom/client';
 import { setBaseUrl } from '@workspace/api-client-react';
 import { registerSW } from 'virtual:pwa-register';
 import App from './App';
+import { ErrorBoundary } from './components/error-boundary';
 import './index.css';
 
 // When deployed on Cloudflare Pages, the Worker is on a separate domain.
@@ -24,4 +25,8 @@ if (import.meta.env.PROD) {
   });
 }
 
-createRoot(document.getElementById('root')!).render(<App />);
+createRoot(document.getElementById('root')!).render(
+  <ErrorBoundary>
+    <App />
+  </ErrorBoundary>
+);
