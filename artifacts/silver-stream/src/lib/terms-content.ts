@@ -14,7 +14,7 @@ export interface TermsDoc {
 export const termsAr: TermsDoc = {
   heading: "شروط الاستخدام وسياسة الخصوصية",
   subtitle: "يُرجى قراءة هذه الشروط بعناية قبل استخدام المنصة.",
-  version: "الإصدار 0.7 — Interest Edition",
+  version: "الإصدار 0.8 — Laws Edition",
   sections: [
     {
       title: "١. البيانات التي نجمعها",
@@ -99,7 +99,7 @@ export const termsAr: TermsDoc = {
 export const termsEn: TermsDoc = {
   heading: "Terms of Service & Privacy Policy",
   subtitle: "Please read these terms carefully before using the platform.",
-  version: "Version 0.7 — Interest Edition",
+  version: "Version 0.8 — Laws Edition",
   sections: [
     {
       title: "1. Data We Collect",

@@ -73,7 +73,7 @@ export default defineConfig({
             purpose: 'maskable',
           },
         ],
-        version: '0.7',
+        version: '0.8',
         categories: ['social', 'entertainment'],
         lang: 'ar',
         dir: 'rtl',
