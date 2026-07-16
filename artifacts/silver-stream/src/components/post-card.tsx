@@ -30,6 +30,7 @@ import {
   getGetPrivatePostsQueryKey,
   getGetPostQueryKey,
   getGetUserPostsQueryKey,
+  getGetUserByUsernameQueryKey,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -135,11 +136,34 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
   };
 
   const handleDelete = () => {
-    if (confirm("Delete this post?")) {
-      deleteMutation.mutate({ postId: post.id }, {
-        onSuccess: () => syncQueries(queryClient, post)
-      });
-    }
+    if (!confirm("Delete this post?")) return;
+
+    const username = post.author.username;
+    const postsKey = getGetUserPostsQueryKey(username);
+    const profileKey = getGetUserByUsernameQueryKey(username);
+
+    // ── Optimistic: remove post from list immediately ─────────────────────
+    const prevPosts = queryClient.getQueryData(postsKey);
+    queryClient.setQueryData(postsKey, (old: any) => {
+      if (!old) return old;
+      return { ...old, items: old.items.filter((p: any) => p.id !== post.id) };
+    });
+
+    // ── Optimistic: decrement postsCount in profile ───────────────────────
+    const prevProfile = queryClient.getQueryData(profileKey);
+    queryClient.setQueryData(profileKey, (old: any) => {
+      if (!old) return old;
+      return { ...old, postsCount: Math.max(0, (old.postsCount ?? 1) - 1) };
+    });
+
+    deleteMutation.mutate({ postId: post.id }, {
+      onSuccess: () => syncQueries(queryClient, post),
+      onError: () => {
+        // Roll back optimistic updates on failure
+        queryClient.setQueryData(postsKey, prevPosts);
+        queryClient.setQueryData(profileKey, prevProfile);
+      },
+    });
   };
 
   const togglePrivacy = () => {
