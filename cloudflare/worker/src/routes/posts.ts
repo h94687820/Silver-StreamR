@@ -17,7 +17,7 @@ const router = new Hono<HonoEnv>();
 
 // Inline onboarding check helper
 async function checkOnboarding(db: ReturnType<typeof createDb>, clerkId: string) {
-  if (clerkId === "admin") return { id: "admin", onboardingComplete: true, acceptedTerms: true } as any;
+  if (clerkId === "admin" || clerkId === "delete-viewer") return { id: clerkId, onboardingComplete: true, acceptedTerms: true } as any;
   const user = await getOrCreateUser(db, clerkId);
   if (!user.onboardingComplete) return null;
   return user;
@@ -28,7 +28,7 @@ router.get("/posts", async (c) => {
   try {
     const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
-    const isAdmin = c.get("isAdmin");
+    const canSeeDeleted = c.get("canSeeDeleted");
     const user = await checkOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
 
@@ -36,8 +36,8 @@ router.get("/posts", async (c) => {
     const cursor = c.req.query("cursor");
     const userId = user.id;
 
-    if (isAdmin) {
-      // المشرف: يرى كل المنشورات بما فيها المحذوفة
+    if (canSeeDeleted && (clerkId === "admin" || clerkId === "delete-viewer")) {
+      // مفتاح الحذف/المشرف: يرى كل المنشورات بما فيها المحذوفة
       const conditions: any[] = [];
       if (cursor) conditions.push(lt(postsTable.createdAt, new Date(cursor)));
       const posts = await db
@@ -145,14 +145,14 @@ router.get("/posts/videos", async (c) => {
   try {
     const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
-    const isAdmin = c.get("isAdmin");
+    const isAdmin = c.get("isAdmin"); const canSeeDeleted = c.get("canSeeDeleted");
     const user = await checkOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
 
     const limit = Math.min(Number(c.req.query("limit")) || 20, 50);
     const cursor = c.req.query("cursor");
     const conditions: any[] = [eq(postsTable.mediaType, "video"), eq(postsTable.isPrivate, false)];
-    if (!isAdmin) conditions.push(isNull(postsTable.deletedAt));
+    if (!canSeeDeleted) conditions.push(isNull(postsTable.deletedAt));
     if (cursor) conditions.push(lt(postsTable.createdAt, new Date(cursor)));
 
     const posts = await db
@@ -177,13 +177,13 @@ router.get("/posts/saved", async (c) => {
   try {
     const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
-    const isAdmin = c.get("isAdmin");
+    const isAdmin = c.get("isAdmin"); const canSeeDeleted = c.get("canSeeDeleted");
     const user = await checkOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
 
     const limit = Math.min(Number(c.req.query("limit")) || 20, 50);
     const savedConditions: any[] = [eq(savedPostsTable.userId, user.id)];
-    if (!isAdmin) savedConditions.push(isNull(postsTable.deletedAt));
+    if (!canSeeDeleted) savedConditions.push(isNull(postsTable.deletedAt));
 
     const saved = await db
       .select({ post: postsTable })
@@ -204,13 +204,13 @@ router.get("/posts/private", async (c) => {
   try {
     const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
-    const isAdmin = c.get("isAdmin");
+    const isAdmin = c.get("isAdmin"); const canSeeDeleted = c.get("canSeeDeleted");
     const user = await checkOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
 
     const limit = Math.min(Number(c.req.query("limit")) || 20, 50);
     const conditions: any[] = [eq(postsTable.authorId, user.id), eq(postsTable.isPrivate, true)];
-    if (!isAdmin) conditions.push(isNull(postsTable.deletedAt));
+    if (!canSeeDeleted) conditions.push(isNull(postsTable.deletedAt));
 
     const posts = await db
       .select()
@@ -230,7 +230,7 @@ router.get("/posts/:postId", async (c) => {
   try {
     const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
-    const isAdmin = c.get("isAdmin");
+    const isAdmin = c.get("isAdmin"); const canSeeDeleted = c.get("canSeeDeleted");
     const post = await db
       .select()
       .from(postsTable)
@@ -238,7 +238,7 @@ router.get("/posts/:postId", async (c) => {
       .limit(1);
     if (!post[0]) return c.json({ error: "Not found" }, 404);
     // المشرف يرى المحذوف، غيره لا
-    if (!isAdmin && post[0].deletedAt) return c.json({ error: "Not found" }, 404);
+    if (!canSeeDeleted && post[0].deletedAt) return c.json({ error: "Not found" }, 404);
     if (post[0].isPrivate && post[0].authorId !== clerkId && !isAdmin)
       return c.json({ error: "Forbidden" }, 403);
     return c.json(await enrichPost(db, post[0], clerkId));
@@ -281,7 +281,7 @@ router.delete("/posts/:postId", async (c) => {
   try {
     const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
-    const isAdmin = c.get("isAdmin");
+    const isAdmin = c.get("isAdmin"); const canSeeDeleted = c.get("canSeeDeleted");
     const user = await checkOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
 
@@ -351,7 +351,7 @@ router.get("/users/:username/saved-posts", async (c) => {
   try {
     const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
-    const isAdmin = c.get("isAdmin");
+    const isAdmin = c.get("isAdmin"); const canSeeDeleted = c.get("canSeeDeleted");
     const user = await checkOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
 
@@ -375,7 +375,7 @@ router.get("/users/:username/saved-posts", async (c) => {
 
     const limit = Math.min(Number(c.req.query("limit")) || 20, 50);
     const conditions: any[] = [eq(savedPostsTable.userId, targetId)];
-    if (!isAdmin) conditions.push(isNull(postsTable.deletedAt));
+    if (!canSeeDeleted) conditions.push(isNull(postsTable.deletedAt));
 
     const saved = await db
       .select({ post: postsTable })
@@ -396,7 +396,7 @@ router.get("/users/:username/posts", async (c) => {
   try {
     const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
-    const isAdmin = c.get("isAdmin");
+    const isAdmin = c.get("isAdmin"); const canSeeDeleted = c.get("canSeeDeleted");
     const limit = Math.min(Number(c.req.query("limit")) || 20, 50);
     const users = await db
       .select()
@@ -408,7 +408,7 @@ router.get("/users/:username/posts", async (c) => {
     const isOwner = users[0].id === clerkId;
     const conditions: any[] = [eq(postsTable.authorId, users[0].id)];
     if (!isOwner && !isAdmin) conditions.push(eq(postsTable.isPrivate, false));
-    if (!isAdmin) conditions.push(isNull(postsTable.deletedAt));
+    if (!canSeeDeleted) conditions.push(isNull(postsTable.deletedAt));
 
     const posts = await db
       .select()

@@ -8,6 +8,7 @@ export type Bindings = {
 };
 export type Variables = {
   clerkId: string;
-  isAdmin: boolean;
+  isAdmin: boolean;      // مفتاح المشرف الكامل pBYRAchf...
+  canSeeDeleted: boolean; // مفتاح الحذف أو المشرف — يرى المحذوف
 };
 export type HonoEnv = { Bindings: Bindings; Variables: Variables; };

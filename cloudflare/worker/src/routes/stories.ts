@@ -9,7 +9,7 @@ import { eq, and, gt, inArray, isNull } from "drizzle-orm";
 const router = new Hono<HonoEnv>();
 
 async function requireOnboarding(db: ReturnType<typeof createDb>, clerkId: string) {
-  if (clerkId === "admin") return { id: "admin", onboardingComplete: true, acceptedTerms: true } as any;
+  if (clerkId === "admin" || clerkId === "delete-viewer") return { id: clerkId, onboardingComplete: true, acceptedTerms: true } as any;
   const user = await getOrCreateUser(db, clerkId);
   return user.onboardingComplete ? user : null;
 }
@@ -19,7 +19,7 @@ router.get("/stories", async (c) => {
   try {
     const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
-    const isAdmin = c.get("isAdmin");
+    const isAdmin = c.get("isAdmin"); const canSeeDeleted = c.get("canSeeDeleted");
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
 
@@ -27,7 +27,7 @@ router.get("/stories", async (c) => {
     const now = new Date();
 
     let stories;
-    if (isAdmin) {
+    if (canSeeDeleted) {
       // المشرف: يرى كل القصص بما فيها المحذوفة والمنتهية
       stories = await db.select().from(storiesTable);
     } else {
@@ -89,7 +89,7 @@ router.get("/stories", async (c) => {
 
     const result = await Promise.all(
       Array.from(grouped.entries()).map(async ([authorId, authorStories]) => {
-        const storyUser = isAdmin
+        const storyUser = canSeeDeleted
           ? (await getUserProfile(db, authorId, "admin").catch(() => null))
           : await getUserProfile(db, authorId, userId);
         const enriched = authorStories.map((s) => ({
@@ -166,7 +166,7 @@ router.delete("/stories/:storyId", async (c) => {
   try {
     const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
-    const isAdmin = c.get("isAdmin");
+    const isAdmin = c.get("isAdmin"); const canSeeDeleted = c.get("canSeeDeleted");
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
 

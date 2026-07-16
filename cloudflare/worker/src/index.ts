@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import type { HonoEnv } from "./types";
-import { getClerkIdFromHeader, isAdminKey } from "./auth";
+import { getClerkIdFromHeader, isAdminKey, canViewDeleted } from "./auth";
 
 import clerkProxy from "./routes/clerk-proxy";
 import usersRouter from "./routes/users";
@@ -41,9 +41,8 @@ app.get("/api/healthz", (c) => c.json({ status: "ok" }));
 // ── Clerk FAPI proxy (must be before auth middleware) ───────────────────────
 app.route("/api/__clerk", clerkProxy);
 
-// ── Auth middleware  (all /api/* except healthz + check-username + clerk proxy) ──
+// ── Auth middleware ──────────────────────────────────────────────────────────
 app.use("/api/*", async (c, next) => {
-  // Skip auth for public routes and Clerk proxy
   const path = new URL(c.req.url).pathname;
   if (
     path === "/api/healthz" ||
@@ -54,23 +53,30 @@ app.use("/api/*", async (c, next) => {
     return;
   }
 
-  // ── فحص مفتاح المشرف ────────────────────────────────────────────────────
   const adminKey = c.req.header("X-Admin-Key");
+
+  // ── مفتاح المشرف الكامل: وصول شامل ─────────────────────────────────────
   if (isAdminKey(adminKey)) {
     c.set("clerkId", "admin");
     c.set("isAdmin", true);
+    c.set("canSeeDeleted", true);
     await next();
     return;
   }
 
-  // ── مصادقة Clerk العادية ─────────────────────────────────────────────────
+  // ── مفتاح الحذف: يرى المحذوف فقط، يحتاج Clerk للباقي ───────────────────
+  const hasDeleteKey = canViewDeleted(adminKey); // يشمل مفتاح الحذف فقط هنا
+
   const authHeader = c.req.header("Authorization");
   const clerkId = await getClerkIdFromHeader(authHeader, c.env.CLERK_SECRET_KEY);
-  if (!clerkId) {
+
+  if (!clerkId && !hasDeleteKey) {
     return c.json({ error: "Unauthorized" }, 401);
   }
-  c.set("clerkId", clerkId);
+
+  c.set("clerkId", clerkId ?? "delete-viewer");
   c.set("isAdmin", false);
+  c.set("canSeeDeleted", hasDeleteKey);
   await next();
 });
 
@@ -89,17 +95,15 @@ app.route("/api", storageRouter);
 app.route("/api", storiesRouter);
 app.route("/api", groupsRouter);
 app.route("/api", emojisRouter);
-
-// ── Reports (authenticated) ──────────────────────────────────────────────────
 app.route("/api", reportsRouter);
 
-// ── Admin routes (X-Admin-Key مطلوب) ────────────────────────────────────────
+// ── Admin routes (مفتاح المشرف الكامل فقط) ──────────────────────────────────
 app.route("/api", adminRouter);
 
-// ── Dev Portal (محمي بـ X-Dev-Portal-Key، خارج نطاق /api) ──────────────────
+// ── Dev Portal ───────────────────────────────────────────────────────────────
 app.route("/", devPortalRouter);
 
-// ── 404 catch-all ───────────────────────────────────────────────────────────
+// ── 404 ──────────────────────────────────────────────────────────────────────
 app.notFound((c) => c.json({ error: "Not found" }, 404));
 
 export default app;

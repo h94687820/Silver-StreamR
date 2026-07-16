@@ -19,13 +19,13 @@ router.get("/posts/:postId/comments", async (c) => {
   try {
     const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
-    const isAdmin = c.get("isAdmin");
+    const isAdmin = c.get("isAdmin"); const canSeeDeleted = c.get("canSeeDeleted");
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
 
     const postId = c.req.param("postId");
     const conditions: any[] = [eq(commentsTable.postId, postId), isNull(commentsTable.parentId)];
-    if (!isAdmin) conditions.push(isNull(commentsTable.deletedAt));
+    if (!canSeeDeleted) conditions.push(isNull(commentsTable.deletedAt));
 
     const comments = await db
       .select()
@@ -123,13 +123,13 @@ router.get("/comments/:commentId/replies", async (c) => {
   try {
     const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
-    const isAdmin = c.get("isAdmin");
+    const isAdmin = c.get("isAdmin"); const canSeeDeleted = c.get("canSeeDeleted");
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
 
     const commentId = c.req.param("commentId");
     const conditions: any[] = [eq(commentsTable.parentId, commentId)];
-    if (!isAdmin) conditions.push(isNull(commentsTable.deletedAt));
+    if (!canSeeDeleted) conditions.push(isNull(commentsTable.deletedAt));
 
     const replies = await db
       .select()
@@ -279,7 +279,7 @@ router.delete("/comments/:commentId", async (c) => {
   try {
     const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
-    const isAdmin = c.get("isAdmin");
+    const isAdmin = c.get("isAdmin"); const canSeeDeleted = c.get("canSeeDeleted");
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
 

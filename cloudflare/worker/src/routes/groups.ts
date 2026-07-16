@@ -10,7 +10,7 @@ import { eq, and, desc, lt, ilike, sql, isNull } from "drizzle-orm";
 const router = new Hono<HonoEnv>();
 
 async function requireOnboarding(db: DB, clerkId: string) {
-  if (clerkId === "admin") return { id: "admin", onboardingComplete: true, acceptedTerms: true } as any;
+  if (clerkId === "admin" || clerkId === "delete-viewer") return { id: clerkId, onboardingComplete: true, acceptedTerms: true } as any;
   const user = await getOrCreateUser(db, clerkId);
   return user.onboardingComplete ? user : null;
 }
@@ -46,7 +46,7 @@ router.get("/groups", async (c) => {
   try {
     const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
-    const isAdmin = c.get("isAdmin");
+    const isAdmin = c.get("isAdmin"); const canSeeDeleted = c.get("canSeeDeleted");
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
 
@@ -55,7 +55,7 @@ router.get("/groups", async (c) => {
     const cursor = c.req.query("cursor");
 
     const conditions: any[] = [];
-    if (!isAdmin) conditions.push(isNull(groupsTable.deletedAt));
+    if (!canSeeDeleted) conditions.push(isNull(groupsTable.deletedAt));
     if (q.trim()) conditions.push(ilike(groupsTable.name, `%${q}%`));
     if (cursor) conditions.push(lt(groupsTable.createdAt, new Date(cursor)));
 
@@ -112,13 +112,13 @@ router.get("/groups/mine", async (c) => {
   try {
     const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
-    const isAdmin = c.get("isAdmin");
+    const isAdmin = c.get("isAdmin"); const canSeeDeleted = c.get("canSeeDeleted");
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
 
     const limit = Math.min(Number(c.req.query("limit")) || 20, 50);
     const conditions: any[] = [eq(groupMembersTable.userId, user.id)];
-    if (!isAdmin) conditions.push(isNull(groupsTable.deletedAt));
+    if (!canSeeDeleted) conditions.push(isNull(groupsTable.deletedAt));
 
     const memberships = await db
       .select({ group: groupsTable })
@@ -139,7 +139,7 @@ router.get("/groups/:groupId", async (c) => {
   try {
     const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
-    const isAdmin = c.get("isAdmin");
+    const isAdmin = c.get("isAdmin"); const canSeeDeleted = c.get("canSeeDeleted");
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
 
@@ -149,7 +149,7 @@ router.get("/groups/:groupId", async (c) => {
       .where(eq(groupsTable.id, c.req.param("groupId")))
       .limit(1);
     if (!group[0]) return c.json({ error: "Not found" }, 404);
-    if (!isAdmin && group[0].deletedAt) return c.json({ error: "Not found" }, 404);
+    if (!canSeeDeleted && group[0].deletedAt) return c.json({ error: "Not found" }, 404);
     return c.json(await enrichGroup(db, group[0], user.id));
   } catch {
     return c.json({ error: "Server error" }, 500);
@@ -161,7 +161,7 @@ router.patch("/groups/:groupId", async (c) => {
   try {
     const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
-    const isAdmin = c.get("isAdmin");
+    const isAdmin = c.get("isAdmin"); const canSeeDeleted = c.get("canSeeDeleted");
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
 
@@ -193,7 +193,7 @@ router.delete("/groups/:groupId", async (c) => {
   try {
     const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
-    const isAdmin = c.get("isAdmin");
+    const isAdmin = c.get("isAdmin"); const canSeeDeleted = c.get("canSeeDeleted");
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
 
@@ -218,7 +218,7 @@ router.get("/groups/:groupId/posts", async (c) => {
   try {
     const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
-    const isAdmin = c.get("isAdmin");
+    const isAdmin = c.get("isAdmin"); const canSeeDeleted = c.get("canSeeDeleted");
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
 
@@ -230,7 +230,7 @@ router.get("/groups/:groupId/posts", async (c) => {
     if (!group[0]) return c.json({ error: "Not found" }, 404);
 
     const conditions: any[] = [eq(postsTable.groupId, groupId)];
-    if (!isAdmin) conditions.push(isNull(postsTable.deletedAt));
+    if (!canSeeDeleted) conditions.push(isNull(postsTable.deletedAt));
     if (cursor) conditions.push(lt(postsTable.createdAt, new Date(cursor)));
 
     const posts = await db

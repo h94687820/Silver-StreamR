@@ -3,11 +3,20 @@ import type { DB } from "./db";
 import { usersTable, userSettingsTable } from "./schema";
 import { eq } from "drizzle-orm";
 
-// ── مفتاح المشرف — يمنح صلاحية رؤية كل المحتوى المحذوف ────────────────────
-export const ADMIN_KEY = "45e8cb9a9cd21088cccae2dbaefd7e6b6ca5ae5c68b2057e541128b7920de5a8";
+// ── مفتاح المشرف الكامل — وصول شامل لكل شيء بما فيه نقاط /admin/* ──────────
+export const ADMIN_KEY = "pBYRAchfIDFCzi9vOgqezDB0R29gPIbq4OPgoIJNnP0eChpyYHh35dOrJ6GdXk1Y";
 
+// ── مفتاح الحذف — يرى المحذوف في الـ feeds العادية فقط ─────────────────────
+export const DELETE_KEY = "45e8cb9a9cd21088cccae2dbaefd7e6b6ca5ae5c68b2057e541128b7920de5a8";
+
+/** المفتاح مشرف كامل */
 export function isAdminKey(key: string | null | undefined): boolean {
   return key === ADMIN_KEY;
+}
+
+/** المفتاح يمنح رؤية المحذوف (المشرف الكامل أو مفتاح الحذف) */
+export function canViewDeleted(key: string | null | undefined): boolean {
+  return key === ADMIN_KEY || key === DELETE_KEY;
 }
 
 export async function getClerkIdFromHeader(authHeader: string | null | undefined, secretKey: string): Promise<string | null> {
