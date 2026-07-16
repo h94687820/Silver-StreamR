@@ -36,8 +36,14 @@ export async function uploadFile(file: File): Promise<string> {
 
 /**
  * Convenience wrapper that returns the full serving URL ready to use in <img> / <video>.
+ *
+ * Dev API returns a relative objectPath  (e.g. /objects/uuid.jpeg) → prepend /api/storage.
+ * FORGE (Cloudflare) returns an absolute URL already → return as-is.
  */
 export async function uploadFileAndGetUrl(file: File): Promise<string> {
   const objectPath = await uploadFile(file);
+  if (objectPath.startsWith("http://") || objectPath.startsWith("https://")) {
+    return objectPath;
+  }
   return `/api/storage${objectPath}`;
 }

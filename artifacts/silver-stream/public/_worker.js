@@ -9,6 +9,15 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
+    // ── إصلاح URLs المكسورة المخزنة في DB: /api/storagehttps://... ──────────
+    // يحدث عندما uploadFileAndGetUrl كان يضيف /api/storage قبل الـ URL الكامل من FORGE
+    if (url.pathname.startsWith('/api/storage') && !url.pathname.startsWith('/api/storage/')) {
+      const embedded = url.pathname.slice('/api/storage'.length);
+      if (embedded.startsWith('https://') || embedded.startsWith('http://')) {
+        return Response.redirect(embedded, 302);
+      }
+    }
+
     // ── توجيه كل /api/* إلى الـ Worker ─────────────────────────────────────
     if (url.pathname.startsWith('/api/')) {
       if (env.API) {
