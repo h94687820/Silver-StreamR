@@ -28,7 +28,9 @@ Without this, CSS layer order is reordered in prod builds → Clerk UI invisible
 
 ## Deploy workflow
 ```bash
-pnpm build
-cp -r functions dist/public/functions
-wrangler pages deploy dist/public --project-name=silver-stream --branch=main
+PORT=3000 BASE_PATH="/" pnpm --filter @workspace/silver-stream run build
+cp -r artifacts/silver-stream/functions artifacts/silver-stream/dist/public/functions
+npx wrangler pages deploy artifacts/silver-stream/dist/public --project-name silver-stream --branch=main --commit-dirty=true
 ```
+
+**Critical:** The `functions/` directory MUST be copied into `dist/public/` before deploying. Without this step, Pages Functions are not uploaded and all `/api/*` POST requests return 405 from Cloudflare's static file handler.
