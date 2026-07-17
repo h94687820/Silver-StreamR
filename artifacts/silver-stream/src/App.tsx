@@ -41,10 +41,13 @@ import EmojiLibrary from "@/pages/emoji-library";
 const clerkPubKey =
   import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
-// على Cloudflare Pages يكون VITE_CLERK_PROXY_URL = "https://silver-stream.pages.dev/api/__clerk"
-// وهو ضروري لتهيئة dev-browser على النطاقات غير localhost.
-// على Replit dev لا تُضبط هذه القيمة فيعمل Clerk بالاتصال المباشر.
-const clerkProxyUrl = import.meta.env.VITE_CLERK_PROXY_URL || undefined;
+// في بيئة التطوير (Replit dev) لا يوجد Pages Function، نتصل بـ Clerk مباشرةً.
+// في الإنتاج (Cloudflare Pages) يجب أن يكون الـ proxy على نفس الـ origin حتى تعمل
+// ملفات تعريف الارتباط (cookies). نحسب الرابط من window.location.origin وقت التشغيل
+// لأن نشر الـ preview يختلف نطاقه عن production — لا يمكن تثبيت رابط واحد.
+const clerkProxyUrl = import.meta.env.PROD
+  ? `${window.location.origin}/api/__clerk`
+  : undefined;
 
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
 
