@@ -41,13 +41,10 @@ import EmojiLibrary from "@/pages/emoji-library";
 const clerkPubKey =
   import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
-// في بيئة التطوير (Replit dev) لا يوجد Pages Function، نتصل بـ Clerk مباشرةً.
-// في الإنتاج (Cloudflare Pages) يجب أن يكون الـ proxy على نفس الـ origin حتى تعمل
-// ملفات تعريف الارتباط (cookies). نحسب الرابط من window.location.origin وقت التشغيل
-// لأن نشر الـ preview يختلف نطاقه عن production — لا يمكن تثبيت رابط واحد.
-const clerkProxyUrl = import.meta.env.PROD
-  ? `${window.location.origin}/api/__clerk`
-  : undefined;
+// Clerk v6 dev instances يستخدم handshake مباشر (redirect → FAPI → back) ولا يحتاج proxy.
+// الـ proxy كان يُعيد 405 على /v1/dev_browser لأن Clerk v6 غيّر هذا المسار.
+// نترك undefined دائماً؛ Clerk يُهيّئ الـ dev browser عبر redirect عادي.
+const clerkProxyUrl = undefined;
 
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
 
