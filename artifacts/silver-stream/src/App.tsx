@@ -39,8 +39,7 @@ import EmojiLibrary from "@/pages/emoji-library";
 
 // استخدم المفتاح مباشرة من env — publishableKeyFromHost كانت لـ Replit-managed فقط
 const clerkPubKey =
-  import.meta.env.VITE_CLERK_PUBLISHABLE_KEY ||
-  "pk_test_Ym9zcy1jaGlwbXVuay0xOS5jbGVyay5hY2NvdW50cy5kZXYk";
+  import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
 // فارغ في بيئة التطوير (مقصود)، يُضبط تلقائياً في الإنتاج.
 // لا تضع شرطاً على القيمة — الفراغ في dev مقصود، والقيمة تُضبط في prod.
