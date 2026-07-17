@@ -20,8 +20,54 @@ Clerk's proxy feature requires a Production instance (`pk_live_...`) with the pr
 const clerkProxyUrl = undefined; // دائماً undefined مع pk_test_
 ```
 
-Also: always guard `routerPush`/`routerReplace` with an external-URL check so Clerk's cross-origin redirects (e.g. dev_browser flow) work via `window.location` not `history.pushState`:
+## routerPush same-origin fix (Cloudflare Pages blank screen during sign-up)
+
+Always guard `routerPush`/`routerReplace` with a same-origin check FIRST, then cross-origin:
+
 ```ts
-routerPush: (to) => to.startsWith("http") ? (window.location.href = to) : setLocation(stripBase(to)),
-routerReplace: (to) => to.startsWith("http") ? window.location.replace(to) : setLocation(stripBase(to), { replace: true }),
+routerPush: (to) => {
+  if (to.startsWith("http")) {
+    try {
+      const url = new URL(to);
+      if (url.origin === window.location.origin) {
+        // Same-origin absolute URL — use SPA navigation to avoid full page reload.
+        // Full reloads on Cloudflare Pages (with service worker) break Clerk's
+        // in-progress sign-up/sign-in state → blank screen on email step.
+        setLocation(stripBase(url.pathname + url.search + url.hash));
+        return;
+      }
+    } catch {}
+    window.location.href = to;   // cross-origin (e.g. dev_browser flow)
+  } else {
+    setLocation(stripBase(to));
+  }
+},
+routerReplace: (to) => {
+  if (to.startsWith("http")) {
+    try {
+      const url = new URL(to);
+      if (url.origin === window.location.origin) {
+        setLocation(stripBase(url.pathname + url.search + url.hash), { replace: true });
+        return;
+      }
+    } catch {}
+    window.location.replace(to);
+  } else {
+    setLocation(stripBase(to), { replace: true });
+  }
+},
 ```
+
+**Why the blank screen on Cloudflare but not Replit:**
+- Replit uses the dev server (`PROD=false`) → no service worker registered.
+- Cloudflare Pages is production build → service worker is active.
+- When Clerk calls `routerPush("https://same-origin.com/sign-up/verify-email-address")`, the old code did `window.location.href = to` → full page reload. The service worker may serve stale/cached index.html, breaking Clerk's in-progress sign-up session.
+- Fix: detect same-origin absolute URLs and use `setLocation` (SPA nav) instead.
+
+## afterSignUpUrl / afterSignInUrl
+Always set both to `"/"` (or `${basePath}/`) in ClerkProvider props so Clerk always redirects to a known route after auth:
+```ts
+afterSignInUrl: `${basePath}/`,
+afterSignUpUrl: `${basePath}/`,
+```
+Without this, Clerk may redirect to its own dashboard or an undefined URL on some environments.

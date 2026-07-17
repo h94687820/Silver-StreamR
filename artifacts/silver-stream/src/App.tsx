@@ -188,10 +188,23 @@ function ClerkProviderWithRoutes() {
     appearance: clerkAppearance,
     signInUrl: `${basePath}/sign-in`,
     signUpUrl: `${basePath}/sign-up`,
+    afterSignInUrl: `${basePath}/`,
+    afterSignUpUrl: `${basePath}/`,
     routerPush: (to: string) => {
-      // Clerk يمرر أحياناً URLs كاملة (مثل redirect لمصادقة dev browser)
-      // history.pushState يرفض cross-origin URLs بـ SecurityError → استخدم window.location
+      // Clerk يمرر أحياناً URLs كاملة — تحقق من الأصل أولاً:
+      // - نفس الأصل (same-origin): استخدم SPA navigation لتجنب إعادة تحميل الصفحة
+      //   (إعادة التحميل الكاملة تكسر حالة Clerk في Cloudflare Pages بسبب service worker)
+      // - أصل خارجي (cross-origin): استخدم window.location لأن history.pushState يرفضه بـ SecurityError
       if (to.startsWith("http://") || to.startsWith("https://")) {
+        try {
+          const url = new URL(to);
+          if (url.origin === window.location.origin) {
+            setLocation(stripBase(url.pathname + url.search + url.hash));
+            return;
+          }
+        } catch {
+          // fall through to window.location
+        }
         window.location.href = to;
       } else {
         setLocation(stripBase(to));
@@ -199,6 +212,15 @@ function ClerkProviderWithRoutes() {
     },
     routerReplace: (to: string) => {
       if (to.startsWith("http://") || to.startsWith("https://")) {
+        try {
+          const url = new URL(to);
+          if (url.origin === window.location.origin) {
+            setLocation(stripBase(url.pathname + url.search + url.hash), { replace: true });
+            return;
+          }
+        } catch {
+          // fall through to window.location
+        }
         window.location.replace(to);
       } else {
         setLocation(stripBase(to), { replace: true });
@@ -209,6 +231,7 @@ function ClerkProviderWithRoutes() {
 
   return (
     <ClerkProvider
+      publishableKey={clerkPubKey}
       {...clerkProps}
     >
       <ClerkAuthBridge />
