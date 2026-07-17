@@ -44,9 +44,11 @@ const clerkPubKey =
 
 // فارغ في بيئة التطوير (مقصود)، يُضبط تلقائياً في الإنتاج.
 // لا تضع شرطاً على القيمة — الفراغ في dev مقصود، والقيمة تُضبط في prod.
-// في الإنتاج (Cloudflare Pages): استخدم الـ proxy دائماً عبر Pages Function
-// في التطوير (Replit): لا تستخدم الـ proxy — Clerk يعمل مباشرة مع localhost
-const clerkProxyUrl = import.meta.env.PROD ? "/api/__clerk" : undefined;
+// مفاتيح pk_test_ (Development instance) لا تدعم proxy مطلقاً —
+// Clerk يرفض أي طلب عبر proxy مخصص بخطأ host_invalid.
+// Dev instances تسمح بالاتصال المباشر من أي origin تلقائياً، لذا لا حاجة للـ proxy.
+// الـ proxy (proxyUrl) مخصص فقط لـ pk_live_ مع نطاق مُتحقَّق في Clerk Dashboard.
+const clerkProxyUrl = undefined;
 
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
 
