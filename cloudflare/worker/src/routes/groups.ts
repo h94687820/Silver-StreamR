@@ -10,7 +10,12 @@ import { eq, and, desc, lt, ilike, sql, isNull } from "drizzle-orm";
 const router = new Hono<HonoEnv>();
 
 async function requireOnboarding(db: DB, clerkId: string) {
-  if (clerkId === "admin" || clerkId === "delete-viewer") return { id: clerkId, onboardingComplete: true, acceptedTerms: true } as any;
+  if (
+    clerkId === "admin" ||
+    clerkId === "delete-viewer" ||
+    clerkId === "stories-viewer" ||
+    clerkId === "groups-viewer"
+  ) return { id: clerkId, onboardingComplete: true, acceptedTerms: true } as any;
   const user = await getOrCreateUser(db, clerkId);
   return user.onboardingComplete ? user : null;
 }

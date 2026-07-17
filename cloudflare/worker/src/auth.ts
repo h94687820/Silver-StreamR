@@ -29,6 +29,16 @@ export function isVideosKey(key: string | null | undefined, envKey: string | und
   return !!envKey && key === envKey;
 }
 
+/** مفتاح قراءة القصص الكاملة — يُقارَن بقيمة env.STORIES_API_KEY */
+export function isStoriesKey(key: string | null | undefined, envKey: string | undefined): boolean {
+  return !!envKey && key === envKey;
+}
+
+/** مفتاح قراءة المجموعات الكاملة — يُقارَن بقيمة env.GROUPS_API_KEY */
+export function isGroupsKey(key: string | null | undefined, envKey: string | undefined): boolean {
+  return !!envKey && key === envKey;
+}
+
 export async function getClerkIdFromHeader(authHeader: string | null | undefined, secretKey: string): Promise<string | null> {
   if (!authHeader?.startsWith("Bearer ")) return null;
   const token = authHeader.slice(7);

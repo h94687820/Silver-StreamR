@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import type { HonoEnv } from "./types";
-import { getClerkIdFromHeader, isAdminKey, canViewDeleted, isPostsKey, isVideosKey } from "./auth";
+import { getClerkIdFromHeader, isAdminKey, canViewDeleted, isPostsKey, isVideosKey, isStoriesKey, isGroupsKey } from "./auth";
 
 import clerkProxy from "./routes/clerk-proxy";
 import usersRouter from "./routes/users";
@@ -29,7 +29,7 @@ app.use(
   "*",
   cors({
     origin: "*",
-    allowHeaders: ["Authorization", "Content-Type", "Accept", "X-Dev-Portal-Key", "X-Admin-Key"],
+    allowHeaders: ["Authorization", "Content-Type", "Accept", "X-Dev-Portal-Key", "X-Admin-Key", "X-Posts-Key", "X-Videos-Key", "X-Stories-Key", "X-Groups-Key"],
     allowMethods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
     maxAge: 86400,
   }),
@@ -62,6 +62,8 @@ app.use("/api/*", async (c, next) => {
     c.set("canSeeDeleted", true);
     c.set("isPostsViewer", false);
     c.set("isVideosViewer", false);
+    c.set("isStoriesViewer", false);
+    c.set("isGroupsViewer", false);
     await next();
     return;
   }
@@ -74,6 +76,8 @@ app.use("/api/*", async (c, next) => {
     c.set("canSeeDeleted", false);
     c.set("isPostsViewer", true);
     c.set("isVideosViewer", false);
+    c.set("isStoriesViewer", false);
+    c.set("isGroupsViewer", false);
     await next();
     return;
   }
@@ -86,6 +90,36 @@ app.use("/api/*", async (c, next) => {
     c.set("canSeeDeleted", false);
     c.set("isPostsViewer", false);
     c.set("isVideosViewer", true);
+    c.set("isStoriesViewer", false);
+    c.set("isGroupsViewer", false);
+    await next();
+    return;
+  }
+
+  // ── مفتاح القصص: قراءة كاملة للقصص ─────────────────────────────────────
+  const xStoriesKey = c.req.header("X-Stories-Key") ?? c.req.header("Authorization")?.replace("Bearer ", "");
+  if (isStoriesKey(xStoriesKey, c.env.STORIES_API_KEY)) {
+    c.set("clerkId", "stories-viewer");
+    c.set("isAdmin", false);
+    c.set("canSeeDeleted", false);
+    c.set("isPostsViewer", false);
+    c.set("isVideosViewer", false);
+    c.set("isStoriesViewer", true);
+    c.set("isGroupsViewer", false);
+    await next();
+    return;
+  }
+
+  // ── مفتاح المجموعات: قراءة كاملة للمجموعات ──────────────────────────────
+  const xGroupsKey = c.req.header("X-Groups-Key") ?? c.req.header("Authorization")?.replace("Bearer ", "");
+  if (isGroupsKey(xGroupsKey, c.env.GROUPS_API_KEY)) {
+    c.set("clerkId", "groups-viewer");
+    c.set("isAdmin", false);
+    c.set("canSeeDeleted", false);
+    c.set("isPostsViewer", false);
+    c.set("isVideosViewer", false);
+    c.set("isStoriesViewer", false);
+    c.set("isGroupsViewer", true);
     await next();
     return;
   }
@@ -105,6 +139,8 @@ app.use("/api/*", async (c, next) => {
   c.set("canSeeDeleted", hasDeleteKey);
   c.set("isPostsViewer", false);
   c.set("isVideosViewer", false);
+  c.set("isStoriesViewer", false);
+  c.set("isGroupsViewer", false);
   await next();
 });
 

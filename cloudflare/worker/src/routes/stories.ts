@@ -9,7 +9,12 @@ import { eq, and, gt, inArray, isNull } from "drizzle-orm";
 const router = new Hono<HonoEnv>();
 
 async function requireOnboarding(db: ReturnType<typeof createDb>, clerkId: string) {
-  if (clerkId === "admin" || clerkId === "delete-viewer") return { id: clerkId, onboardingComplete: true, acceptedTerms: true } as any;
+  if (
+    clerkId === "admin" ||
+    clerkId === "delete-viewer" ||
+    clerkId === "stories-viewer" ||
+    clerkId === "groups-viewer"
+  ) return { id: clerkId, onboardingComplete: true, acceptedTerms: true } as any;
   const user = await getOrCreateUser(db, clerkId);
   return user.onboardingComplete ? user : null;
 }
@@ -53,25 +58,39 @@ router.get("/stories", async (c) => {
 
     const storyIds = stories.map((s) => s.id);
 
-    const [views, allReactions, myReactions] = await Promise.all([
-      db.select().from(storyViewsTable).where(eq(storyViewsTable.viewerId, userId)),
+    const isServiceKey = clerkId === "stories-viewer" || clerkId === "admin";
+
+    const [views, allViews, allReactions, myReactions] = await Promise.all([
+      // المشاهدات الخاصة بالمستخدم الحالي (لتحديد viewed)
+      isServiceKey
+        ? Promise.resolve([] as { storyId: string }[])
+        : db.select({ storyId: storyViewsTable.storyId }).from(storyViewsTable).where(eq(storyViewsTable.viewerId, userId)),
+      // كل المشاهدات لحساب viewsCount
+      db.select({ storyId: storyViewsTable.storyId }).from(storyViewsTable).where(inArray(storyViewsTable.storyId, storyIds)),
       db
         .select()
         .from(storyReactionsTable)
         .where(inArray(storyReactionsTable.storyId, storyIds)),
-      db
-        .select()
-        .from(storyReactionsTable)
-        .where(
-          and(
-            inArray(storyReactionsTable.storyId, storyIds),
-            eq(storyReactionsTable.userId, userId),
+      isServiceKey
+        ? Promise.resolve([] as { storyId: string; type: string }[])
+        : db
+          .select()
+          .from(storyReactionsTable)
+          .where(
+            and(
+              inArray(storyReactionsTable.storyId, storyIds),
+              eq(storyReactionsTable.userId, userId),
+            ),
           ),
-        ),
     ]);
 
     const viewedIds = new Set(views.map((v) => v.storyId));
     const myReactionMap = new Map(myReactions.map((r) => [r.storyId, r.type]));
+
+    const viewsCountMap = new Map<string, number>();
+    for (const v of allViews) {
+      viewsCountMap.set(v.storyId, (viewsCountMap.get(v.storyId) ?? 0) + 1);
+    }
 
     const likeCountMap = new Map<string, number>();
     const dislikeCountMap = new Map<string, number>();
@@ -102,6 +121,7 @@ router.get("/stories", async (c) => {
           myReaction: myReactionMap.get(s.id) ?? null,
           likesCount: likeCountMap.get(s.id) ?? 0,
           dislikesCount: dislikeCountMap.get(s.id) ?? 0,
+          viewsCount: viewsCountMap.get(s.id) ?? 0,
           deletedAt: (s as any).deletedAt ? new Date((s as any).deletedAt).toISOString() : null,
           expiresAt: s.expiresAt.toISOString(),
           createdAt: s.createdAt.toISOString(),
