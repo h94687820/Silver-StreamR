@@ -44,8 +44,12 @@ const clerkPubKey = publishableKeyFromHost(
   import.meta.env.VITE_CLERK_PUBLISHABLE_KEY,
 );
 
-// REQUIRED — empty in dev (intentional), auto-set in prod. Must be unconditional.
-const clerkProxyUrl = import.meta.env.VITE_CLERK_PROXY_URL;
+// فارغ في بيئة التطوير (مقصود)، يُضبط تلقائياً في الإنتاج.
+// نتجاهل أي قيمة لا تبدأ بـ http أو /
+const _rawProxyUrl = import.meta.env.VITE_CLERK_PROXY_URL;
+const clerkProxyUrl = (_rawProxyUrl && (String(_rawProxyUrl).startsWith("http") || String(_rawProxyUrl).startsWith("/")))
+  ? _rawProxyUrl
+  : undefined;
 
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
 
