@@ -45,11 +45,8 @@ const clerkPubKey = publishableKeyFromHost(
 );
 
 // فارغ في بيئة التطوير (مقصود)، يُضبط تلقائياً في الإنتاج.
-// نتجاهل أي قيمة لا تبدأ بـ http أو /
-const _rawProxyUrl = import.meta.env.VITE_CLERK_PROXY_URL;
-const clerkProxyUrl = (_rawProxyUrl && (String(_rawProxyUrl).startsWith("http") || String(_rawProxyUrl).startsWith("/")))
-  ? _rawProxyUrl
-  : undefined;
+// لا تضع شرطاً على القيمة — الفراغ في dev مقصود، والقيمة تُضبط في prod.
+const clerkProxyUrl = import.meta.env.VITE_CLERK_PROXY_URL;
 
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
 
