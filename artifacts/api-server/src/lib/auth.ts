@@ -26,6 +26,37 @@ function hasAdminKey(req: Request): boolean {
   return false;
 }
 
+/**
+ * Returns true if the request carries a valid FORGE_API_KEY (developer read-only key).
+ * Accepts the key via:
+ *   - Header:  x-forge-key: <key>
+ *   - Header:  Authorization: Bearer <key>
+ */
+export function hasForgeKey(req: Request): boolean {
+  const forgeKey = process.env.FORGE_API_KEY;
+  if (!forgeKey) return false;
+
+  const xForgeKey = req.headers["x-forge-key"];
+  if (xForgeKey === forgeKey) return true;
+
+  const authHeader = req.headers["authorization"];
+  if (authHeader?.startsWith("Bearer ") && authHeader.slice(7) === forgeKey) return true;
+
+  return false;
+}
+
+/**
+ * Middleware: allows only requests with a valid FORGE_API_KEY.
+ * Does not grant admin privileges — read-only developer access.
+ */
+export function requireForgeKey(req: Request, res: Response, next: NextFunction) {
+  if (hasForgeKey(req)) {
+    next();
+    return;
+  }
+  res.status(401).json({ error: "Unauthorized: valid Forge key required" });
+}
+
 export async function requireAuth<
   P = Record<string, string>,
   ResBody = any,

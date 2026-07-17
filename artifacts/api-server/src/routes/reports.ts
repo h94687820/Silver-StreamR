@@ -1,7 +1,8 @@
 import { Router } from "express";
-import { requireAuth } from "../lib/auth";
+import { requireAuth, requireForgeKey } from "../lib/auth";
 import { db } from "@workspace/db";
 import { reportsTable } from "@workspace/db";
+import { desc } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
 const router = Router();
@@ -58,6 +59,38 @@ router.post("/api/reports", requireAuth, async (req, res) => {
   } catch (err) {
     req.log.error(err, "Failed to create report");
     res.status(500).json({ error: "Failed to submit report" });
+  }
+});
+
+// GET /api/reports/forge — developer read-only access to all reports (requires FORGE_API_KEY)
+router.get("/api/reports/forge", requireForgeKey, async (req, res) => {
+  try {
+    const limit = Math.min(parseInt((req.query as any).limit as string) || 50, 200);
+    const offset = parseInt((req.query as any).offset as string) || 0;
+
+    const reports = await db
+      .select({
+        id: reportsTable.id,
+        reporterId: reportsTable.reporterId,
+        mode: reportsTable.mode,
+        targetType: reportsTable.targetType,
+        targetId: reportsTable.targetId,
+        targetUsername: reportsTable.targetUsername,
+        reportType: reportsTable.reportType,
+        description: reportsTable.description,
+        screenshotUrl: reportsTable.screenshotUrl,
+        status: reportsTable.status,
+        createdAt: reportsTable.createdAt,
+      })
+      .from(reportsTable)
+      .orderBy(desc(reportsTable.createdAt))
+      .limit(limit)
+      .offset(offset);
+
+    res.json({ reports, limit, offset, count: reports.length });
+  } catch (err) {
+    req.log.error(err, "Failed to fetch reports for forge key");
+    res.status(500).json({ error: "Failed to fetch reports" });
   }
 });
 
