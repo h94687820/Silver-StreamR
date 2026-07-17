@@ -10,6 +10,8 @@ export const reportsTable = sqliteTable("reports", {
   targetUsername: text("target_username"),
   reportType: text("report_type").notNull().default(""),
   description: text("description").notNull().default(""),
+  // عمود قديم — لا يزال NOT NULL في D1 لذا يجب تمريره
+  reason: text("reason").notNull().default(""),
   screenshotUrl: text("screenshot_url"),
   status: text("status").notNull().default("pending"), // 'pending' | 'reviewed' | 'dismissed'
   reviewedBy: text("reviewed_by"),
