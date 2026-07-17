@@ -182,6 +182,20 @@ function ClerkProviderWithRoutes() {
   const clerkProps: Record<string, any> = {
     publishableKey: clerkPubKey,
     appearance: clerkAppearance,
+    localization: {
+      signIn: {
+        start: {
+          title: "تسجيل الدخول إلى Silver Stream",
+          subtitle: "أهلاً بك، يُرجى تسجيل الدخول للمتابعة",
+        },
+      },
+      signUp: {
+        start: {
+          title: "إنشاء حساب في Silver Stream",
+          subtitle: "أهلاً بك، يُرجى إنشاء حساب للمتابعة",
+        },
+      },
+    },
     signInUrl: `${basePath}/sign-in`,
     signUpUrl: `${basePath}/sign-up`,
     afterSignInUrl: `${basePath}/`,
