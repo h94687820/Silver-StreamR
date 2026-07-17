@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import type { HonoEnv } from "../types";
 import { createDb } from "../db";
 import { reportsTable } from "../schema";
+import { getOrCreateUser } from "../auth";
 import { randomUUID } from "crypto";
 
 const router = new Hono<HonoEnv>();
@@ -27,6 +28,10 @@ router.post("/reports", async (c) => {
     if (!mode || !["general", "specific"].includes(mode)) return c.json({ error: "Invalid mode" }, 400);
 
     const db = createDb(c.env.DB);
+
+    // تأكد من وجود المستخدم في D1 قبل الإدراج (تجنباً لخطأ المفتاح الخارجي)
+    await getOrCreateUser(db, clerkId);
+
     const [report] = await db.insert(reportsTable).values({
       id: randomUUID(),
       reporterId: clerkId,
@@ -43,7 +48,9 @@ router.post("/reports", async (c) => {
 
     return c.json(report, 201);
   } catch (err) {
-    return c.json({ error: "Failed to submit report" }, 500);
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("Failed to submit report:", message);
+    return c.json({ error: "Failed to submit report", detail: message }, 500);
   }
 });
 
