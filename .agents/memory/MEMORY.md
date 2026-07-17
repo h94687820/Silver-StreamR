@@ -8,3 +8,4 @@
 - [Cloudflare Worker structure](cloudflare-worker-structure.md) — Hono API Worker lives in cloudflare/worker/; uses neon-http DB, Clerk verifyToken, aws4fetch for S3.
 - [Cloudflare Pages + Clerk proxy](cloudflare-pages-clerk-proxy.md) — Proxy must be a Pages Function (same domain), not a cross-origin Worker; Worker secrets drift from Replit secrets.
 - [Clerk routerPush cross-origin redirect](clerk-routerpush-external-url.md) — With proxyUrl set, Clerk passes full http URLs to routerPush; wouter's setLocation throws SecurityError → sign-in blanks out. Fix: detect http/https and use window.location instead.
+- [Clerk v6 + Cloudflare Pages login fix](clerk-v6-cloudflare-login.md) — Three-layer bug: routerPush reload + SW, stale Clerk keys, proxy breaks Clerk v6 dev browser. Full diagnosis in login-fix.md.
