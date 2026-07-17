@@ -5,10 +5,14 @@ export type Bindings = {
   CLERK_SECRET_KEY: string;
   CLERK_PUBLISHABLE_KEY: string;
   CLERK_FAPI: string;
+  POSTS_API_KEY: string;   // قراءة كاملة للمنشورات
+  VIDEOS_API_KEY: string;  // قراءة كاملة للفيديوهات
 };
 export type Variables = {
   clerkId: string;
-  isAdmin: boolean;      // مفتاح المشرف الكامل pBYRAchf...
-  canSeeDeleted: boolean; // مفتاح الحذف أو المشرف — يرى المحذوف
+  isAdmin: boolean;        // مفتاح المشرف الكامل — وصول شامل
+  canSeeDeleted: boolean;  // مفتاح الحذف أو المشرف — يرى المحذوف
+  isPostsViewer: boolean;  // POSTS_API_KEY — قراءة كاملة للمنشورات
+  isVideosViewer: boolean; // VIDEOS_API_KEY — قراءة كاملة للفيديوهات
 };
 export type HonoEnv = { Bindings: Bindings; Variables: Variables; };

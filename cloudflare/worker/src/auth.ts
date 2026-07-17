@@ -19,6 +19,16 @@ export function canViewDeleted(key: string | null | undefined): boolean {
   return key === ADMIN_KEY || key === DELETE_KEY;
 }
 
+/** مفتاح قراءة المنشورات الكاملة — يُقارَن بقيمة env.POSTS_API_KEY */
+export function isPostsKey(key: string | null | undefined, envKey: string | undefined): boolean {
+  return !!envKey && key === envKey;
+}
+
+/** مفتاح قراءة الفيديوهات الكاملة — يُقارَن بقيمة env.VIDEOS_API_KEY */
+export function isVideosKey(key: string | null | undefined, envKey: string | undefined): boolean {
+  return !!envKey && key === envKey;
+}
+
 export async function getClerkIdFromHeader(authHeader: string | null | undefined, secretKey: string): Promise<string | null> {
   if (!authHeader?.startsWith("Bearer ")) return null;
   const token = authHeader.slice(7);

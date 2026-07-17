@@ -17,7 +17,15 @@ const router = new Hono<HonoEnv>();
 
 // Inline onboarding check helper
 async function checkOnboarding(db: ReturnType<typeof createDb>, clerkId: string) {
-  if (clerkId === "admin" || clerkId === "delete-viewer") return { id: clerkId, onboardingComplete: true, acceptedTerms: true } as any;
+  // مفاتيح الخدمة تتجاوز فحص الـ onboarding وتعمل بقراءة فقط
+  if (
+    clerkId === "admin" ||
+    clerkId === "delete-viewer" ||
+    clerkId === "posts-viewer" ||
+    clerkId === "videos-viewer"
+  ) {
+    return { id: clerkId, onboardingComplete: true, acceptedTerms: true } as any;
+  }
   const user = await getOrCreateUser(db, clerkId);
   if (!user.onboardingComplete) return null;
   return user;

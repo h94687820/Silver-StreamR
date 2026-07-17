@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import type { HonoEnv } from "./types";
-import { getClerkIdFromHeader, isAdminKey, canViewDeleted } from "./auth";
+import { getClerkIdFromHeader, isAdminKey, canViewDeleted, isPostsKey, isVideosKey } from "./auth";
 
 import clerkProxy from "./routes/clerk-proxy";
 import usersRouter from "./routes/users";
@@ -60,12 +60,38 @@ app.use("/api/*", async (c, next) => {
     c.set("clerkId", "admin");
     c.set("isAdmin", true);
     c.set("canSeeDeleted", true);
+    c.set("isPostsViewer", false);
+    c.set("isVideosViewer", false);
+    await next();
+    return;
+  }
+
+  // ── مفتاح المنشورات: قراءة كاملة للمنشورات ──────────────────────────────
+  const xPostsKey = c.req.header("X-Posts-Key") ?? c.req.header("Authorization")?.replace("Bearer ", "");
+  if (isPostsKey(xPostsKey, c.env.POSTS_API_KEY)) {
+    c.set("clerkId", "posts-viewer");
+    c.set("isAdmin", false);
+    c.set("canSeeDeleted", false);
+    c.set("isPostsViewer", true);
+    c.set("isVideosViewer", false);
+    await next();
+    return;
+  }
+
+  // ── مفتاح الفيديوهات: قراءة كاملة للفيديوهات ────────────────────────────
+  const xVideosKey = c.req.header("X-Videos-Key") ?? c.req.header("Authorization")?.replace("Bearer ", "");
+  if (isVideosKey(xVideosKey, c.env.VIDEOS_API_KEY)) {
+    c.set("clerkId", "videos-viewer");
+    c.set("isAdmin", false);
+    c.set("canSeeDeleted", false);
+    c.set("isPostsViewer", false);
+    c.set("isVideosViewer", true);
     await next();
     return;
   }
 
   // ── مفتاح الحذف: يرى المحذوف فقط، يحتاج Clerk للباقي ───────────────────
-  const hasDeleteKey = canViewDeleted(adminKey); // يشمل مفتاح الحذف فقط هنا
+  const hasDeleteKey = canViewDeleted(adminKey);
 
   const authHeader = c.req.header("Authorization");
   const clerkId = await getClerkIdFromHeader(authHeader, c.env.CLERK_SECRET_KEY);
@@ -77,6 +103,8 @@ app.use("/api/*", async (c, next) => {
   c.set("clerkId", clerkId ?? "delete-viewer");
   c.set("isAdmin", false);
   c.set("canSeeDeleted", hasDeleteKey);
+  c.set("isPostsViewer", false);
+  c.set("isVideosViewer", false);
   await next();
 });
 
