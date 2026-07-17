@@ -44,6 +44,27 @@ clerkProxy.all("/*", async (c) => {
   const reqUrl = new URL(c.req.url);
   const strippedPath =
     reqUrl.pathname.replace(CLERK_PROXY_PATH, "") || "/";
+
+  // ── npm CDN requests: /api/__clerk/npm/* → npm.clerk.dev/* ────────────────
+  // Clerk routes its JS bundle through the proxy URL prefix. Forward these to
+  // the npm CDN directly — they do NOT go to the FAPI.
+  if (strippedPath.startsWith("/npm/")) {
+    const cdnPath = strippedPath.slice("/npm".length); // "/npm/@clerk/..." → "/@clerk/..."
+    const cdnUrl = `https://npm.clerk.dev${cdnPath}${reqUrl.search}`;
+    const npmRes = await fetch(cdnUrl, {
+      method: "GET",
+      headers: { "user-agent": c.req.header("user-agent") || "" },
+    });
+    const resH = new Headers(npmRes.headers);
+    resH.delete("transfer-encoding");
+    resH.delete("connection");
+    resH.delete("keep-alive");
+    if (!resH.has("cache-control")) {
+      resH.set("cache-control", "public, max-age=31536000, immutable");
+    }
+    return new Response(npmRes.body, { status: npmRes.status, headers: resH });
+  }
+
   const targetUrl = `${fapiBase}${strippedPath}${reqUrl.search}`;
 
   // Build Clerk-Proxy-Url from the incoming request host

@@ -26,8 +26,10 @@ export const onRequest: PagesFunction<Env> = async (ctx) => {
   const stripped = url.pathname.replace(PROXY_PATH, "") || "/";
 
   // ── 1. npm CDN requests — /api/__clerk/npm/* → npm.clerk.dev/* ────────────
+  // stripped = "/npm/@clerk/clerk-js@5/..." → cdnPath = "/@clerk/clerk-js@5/..."
   if (stripped.startsWith("/npm/")) {
-    const cdnUrl = `${NPM_CDN}${stripped}${url.search}`;
+    const cdnPath = stripped.slice("/npm".length); // strip the leading /npm prefix
+    const cdnUrl = `${NPM_CDN}${cdnPath}${url.search}`;
 
     const upstream = await fetch(cdnUrl, {
       method: request.method,
