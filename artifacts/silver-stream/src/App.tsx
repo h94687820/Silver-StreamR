@@ -41,13 +41,10 @@ import EmojiLibrary from "@/pages/emoji-library";
 const clerkPubKey =
   import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
-// فارغ في بيئة التطوير (مقصود)، يُضبط تلقائياً في الإنتاج.
-// لا تضع شرطاً على القيمة — الفراغ في dev مقصود، والقيمة تُضبط في prod.
-// مفاتيح pk_test_ (Development instance) لا تدعم proxy مطلقاً —
-// Clerk يرفض أي طلب عبر proxy مخصص بخطأ host_invalid.
-// Dev instances تسمح بالاتصال المباشر من أي origin تلقائياً، لذا لا حاجة للـ proxy.
-// الـ proxy (proxyUrl) مخصص فقط لـ pk_live_ مع نطاق مُتحقَّق في Clerk Dashboard.
-const clerkProxyUrl = undefined;
+// على Cloudflare Pages يكون VITE_CLERK_PROXY_URL = "https://silver-stream.pages.dev/api/__clerk"
+// وهو ضروري لتهيئة dev-browser على النطاقات غير localhost.
+// على Replit dev لا تُضبط هذه القيمة فيعمل Clerk بالاتصال المباشر.
+const clerkProxyUrl = import.meta.env.VITE_CLERK_PROXY_URL || undefined;
 
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
 
