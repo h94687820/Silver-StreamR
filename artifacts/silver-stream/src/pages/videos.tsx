@@ -1,8 +1,7 @@
 import { useGetVideoFeed, getGetVideoFeedQueryKey, useReactToPost } from "@workspace/api-client-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Heart, MessageCircle, Share2, MoreHorizontal } from "lucide-react";
+import { Heart, MessageCircle, Share2 } from "lucide-react";
 import { Link } from "wouter";
-import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -15,14 +14,16 @@ export default function Videos() {
 
   if (isLoading) return <div className="w-full h-full bg-black animate-pulse" />;
 
+  const hasVideos = videoFeed?.items && videoFeed.items.length > 0;
+
   return (
-    <div className="w-full h-[calc(100dvh-56px)] bg-black overflow-y-auto snap-y snap-mandatory hide-scrollbar">
-      {videoFeed?.items.length === 0 ? (
+    <div className="w-full h-full bg-black overflow-y-auto snap-y snap-mandatory" style={{ scrollbarWidth: "none" }}>
+      {!hasVideos ? (
         <div className="flex items-center justify-center h-full text-white/50">
           No videos available yet.
         </div>
       ) : (
-        videoFeed?.items.map((post) => (
+        videoFeed!.items.map((post) => (
           <div key={post.id} className="relative w-full h-full snap-start bg-black flex items-center justify-center">
             {/* Video Player */}
             <video 

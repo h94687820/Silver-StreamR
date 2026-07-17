@@ -1,9 +1,8 @@
 import { Switch, Route, Redirect, useLocation, Router as WouterRouter } from "wouter";
-import { ClerkProvider, SignIn, SignUp, useClerk, useUser, useAuth } from "@clerk/react";
-import { publishableKeyFromHost } from "@clerk/react/internal";
+import { ClerkProvider, SignIn, SignUp, useUser, useAuth } from "@clerk/react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SplashScreen, useShouldShowSplash } from "@/components/splash-screen";
 import { useGetMe, getGetMeQueryKey, setAuthTokenGetter } from "@workspace/api-client-react";
@@ -38,15 +37,23 @@ import Following from "@/pages/following";
 import BlockedUsers from "@/pages/blocked-users";
 import EmojiLibrary from "@/pages/emoji-library";
 
-// REQUIRED — resolves the key from hostname so the same build serves multiple Clerk custom domains.
-const clerkPubKey = publishableKeyFromHost(
-  window.location.hostname,
-  import.meta.env.VITE_CLERK_PUBLISHABLE_KEY,
-);
+// استخدم المفتاح مباشرة من env — publishableKeyFromHost كانت لـ Replit-managed فقط
+const clerkPubKey =
+  import.meta.env.VITE_CLERK_PUBLISHABLE_KEY ||
+  "pk_test_Ym9zcy1jaGlwbXVuay0xOS5jbGVyay5hY2NvdW50cy5kZXYk";
 
 // فارغ في بيئة التطوير (مقصود)، يُضبط تلقائياً في الإنتاج.
 // لا تضع شرطاً على القيمة — الفراغ في dev مقصود، والقيمة تُضبط في prod.
-const clerkProxyUrl = import.meta.env.VITE_CLERK_PROXY_URL;
+// تحقق أن proxyUrl رابط حقيقي (http/https) أو مسار نسبي (يبدأ بـ /)
+// إذا لم تكن القيمة صحيحة (مثل نص placeholder)، تُتجاهل تلقائياً
+const _rawProxyUrl = import.meta.env.VITE_CLERK_PROXY_URL;
+const clerkProxyUrl =
+  typeof _rawProxyUrl === "string" &&
+  (_rawProxyUrl.startsWith("http://") ||
+    _rawProxyUrl.startsWith("https://") ||
+    _rawProxyUrl.startsWith("/"))
+    ? _rawProxyUrl
+    : undefined;
 
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -96,6 +103,36 @@ function ProtectedRoute({ component: Component }: { component: any }) {
         <Component />
       </PageTransition>
     </MainLayout>
+  );
+}
+
+/**
+ * Layout خاص بصفحة الفيديو — بدون overflow-y-auto ولا pb-20 على الـ main
+ * حتى يعمل snap scroll داخلياً بشكل صحيح (مثل TikTok)
+ */
+function VideoProtectedRoute() {
+  const { isLoaded, isSignedIn } = useUser();
+  const { data: me, isLoading: meLoading } = useGetMe({
+    query: { enabled: !!isSignedIn, retry: false, queryKey: getGetMeQueryKey() }
+  });
+
+  if (!isLoaded || (isSignedIn && meLoading)) return <div className="h-screen w-full bg-black" />;
+  if (!isSignedIn) return <Redirect to="/" />;
+  if (me && !me.onboardingComplete) return <Redirect to="/onboarding" />;
+
+  return (
+    <div className="min-h-[100dvh] w-full bg-black lg:flex lg:justify-center">
+      <div className="min-h-[100dvh] w-full max-w-md mx-auto lg:max-w-2xl bg-black relative flex flex-col">
+        {/* Top bar */}
+        <TopBar />
+        {/* منطقة الفيديو — flex-1 بدون overflow ولا padding حتى يعمل snap */}
+        <div className="flex-1 overflow-hidden relative">
+          <Videos />
+        </div>
+        {/* Bottom nav مثبت في الأسفل */}
+        <BottomNav username={me?.username} />
+      </div>
+    </div>
   );
 }
 
@@ -150,16 +187,20 @@ function ClerkProviderWithRoutes() {
     }
   };
 
+  // proxyUrl مطلوب فقط في الإنتاج (Cloudflare Pages) — في Dev يُتجاهل
+  const clerkProps: Record<string, any> = {
+    publishableKey: clerkPubKey,
+    appearance: clerkAppearance,
+    signInUrl: `${basePath}/sign-in`,
+    signUpUrl: `${basePath}/sign-up`,
+    routerPush: (to: string) => setLocation(stripBase(to)),
+    routerReplace: (to: string) => setLocation(stripBase(to), { replace: true }),
+  };
+  if (clerkProxyUrl) clerkProps.proxyUrl = clerkProxyUrl;
+
   return (
     <ClerkProvider
-      publishableKey={clerkPubKey}
-      proxyUrl={clerkProxyUrl}
-      clerkJSUrl="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5/dist/clerk.browser.js"
-      appearance={clerkAppearance}
-      signInUrl={`${basePath}/sign-in`}
-      signUpUrl={`${basePath}/sign-up`}
-      routerPush={(to) => setLocation(stripBase(to))}
-      routerReplace={(to) => setLocation(stripBase(to), { replace: true })}
+      {...clerkProps}
     >
       <ClerkAuthBridge />
       <QueryClientProvider client={queryClient}>
@@ -181,7 +222,7 @@ function ClerkProviderWithRoutes() {
             )} />
             
             <Route path="/feed" component={() => <ProtectedRoute component={Feed} />} />
-            <Route path="/videos" component={() => <ProtectedRoute component={Videos} />} />
+            <Route path="/videos" component={() => <VideoProtectedRoute />} />
             <Route path="/create" component={() => <ProtectedRoute component={Create} />} />
             <Route path="/settings" component={() => <ProtectedRoute component={Settings} />} />
             <Route path="/settings/account" component={() => <ProtectedRoute component={AccountSettings} />} />
