@@ -59,6 +59,21 @@ router.get("/posts", async (c) => {
       return c.json({ items, nextCursor: hasMore ? posts[limit - 1].createdAt.toISOString() : null });
     }
 
+    if (clerkId === "posts-viewer" || clerkId === "videos-viewer") {
+      // مفتاح المنشورات/الفيديوهات: يرى كل المنشورات النشطة (عامة وخاصة)
+      const conditions: any[] = [isNull(postsTable.deletedAt)];
+      if (cursor) conditions.push(lt(postsTable.createdAt, new Date(cursor)));
+      const posts = await db
+        .select()
+        .from(postsTable)
+        .where(and(...conditions))
+        .orderBy(desc(postsTable.createdAt))
+        .limit(limit + 1);
+      const hasMore = posts.length > limit;
+      const items = await Promise.all(posts.slice(0, limit).map((p) => enrichPost(db, p, userId)));
+      return c.json({ items, nextCursor: hasMore ? posts[limit - 1].createdAt.toISOString() : null });
+    }
+
     const following = await db
       .select({ followingId: followsTable.followingId })
       .from(followsTable)
@@ -159,7 +174,10 @@ router.get("/posts/videos", async (c) => {
 
     const limit = Math.min(Number(c.req.query("limit")) || 20, 50);
     const cursor = c.req.query("cursor");
-    const conditions: any[] = [eq(postsTable.mediaType, "video"), eq(postsTable.isPrivate, false)];
+    // مفتاح الفيديوهات يرى كل المقاطع (عامة وخاصة)، المستخدم العادي يرى العامة فقط
+    const conditions: any[] = clerkId === "videos-viewer"
+      ? [eq(postsTable.mediaType, "video")]
+      : [eq(postsTable.mediaType, "video"), eq(postsTable.isPrivate, false)];
     if (!canSeeDeleted) conditions.push(isNull(postsTable.deletedAt));
     if (cursor) conditions.push(lt(postsTable.createdAt, new Date(cursor)));
 

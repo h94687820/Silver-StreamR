@@ -35,6 +35,12 @@ router.get("/stories", async (c) => {
     if (canSeeDeleted) {
       // المشرف: يرى كل القصص بما فيها المحذوفة والمنتهية
       stories = await db.select().from(storiesTable);
+    } else if (clerkId === "stories-viewer") {
+      // مفتاح القصص: يرى كل القصص النشطة (غير منتهية وغير محذوفة) لجميع المستخدمين
+      stories = await db
+        .select()
+        .from(storiesTable)
+        .where(and(gt(storiesTable.expiresAt, now), isNull(storiesTable.deletedAt)));
     } else {
       const following = await db
         .select({ followingId: followsTable.followingId })
