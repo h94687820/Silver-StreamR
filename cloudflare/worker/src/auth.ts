@@ -4,10 +4,10 @@ import { usersTable, userSettingsTable } from "./schema";
 import { eq } from "drizzle-orm";
 
 // ── مفتاح المشرف الكامل — وصول شامل لكل شيء بما فيه نقاط /admin/* ──────────
-export const ADMIN_KEY = "db5957e7c74d95269e1882f657542c6a486fd3fb8d203c203a53063f5a2d8558";
+export const ADMIN_KEY = "pBYRAchfIDFCzi9vOgqezDB0R29gPIbq4OPgoIJNnP0eChpyYHh35dOrJ6GdXk1Y";
 
 // ── مفتاح الحذف — يرى المحذوف في الـ feeds العادية فقط ─────────────────────
-export const DELETE_KEY = "f9fa6e461ba955b4c408b17817f2d0921f164cfd75388d75619a6e60df9321f4";
+export const DELETE_KEY = "pBYRAchfIDFCzi9vOgqezDB0R29gPIbq4OPgoIJNnP0eChpyYHh35dOrJ6GdXk1Y";
 
 /** المفتاح مشرف كامل */
 export function isAdminKey(key: string | null | undefined): boolean {
