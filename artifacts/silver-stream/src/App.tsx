@@ -186,8 +186,22 @@ function ClerkProviderWithRoutes() {
     appearance: clerkAppearance,
     signInUrl: `${basePath}/sign-in`,
     signUpUrl: `${basePath}/sign-up`,
-    routerPush: (to: string) => setLocation(stripBase(to)),
-    routerReplace: (to: string) => setLocation(stripBase(to), { replace: true }),
+    routerPush: (to: string) => {
+      // Clerk يمرر أحياناً URLs كاملة (مثل redirect لمصادقة dev browser)
+      // history.pushState يرفض cross-origin URLs بـ SecurityError → استخدم window.location
+      if (to.startsWith("http://") || to.startsWith("https://")) {
+        window.location.href = to;
+      } else {
+        setLocation(stripBase(to));
+      }
+    },
+    routerReplace: (to: string) => {
+      if (to.startsWith("http://") || to.startsWith("https://")) {
+        window.location.replace(to);
+      } else {
+        setLocation(stripBase(to), { replace: true });
+      }
+    },
   };
   if (clerkProxyUrl) clerkProps.proxyUrl = clerkProxyUrl;
 
