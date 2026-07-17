@@ -99,11 +99,16 @@ export const onRequest: PagesFunction<Env> = async (ctx) => {
   const hasBody = request.method !== "GET" && request.method !== "HEAD";
 
   const upstream = await fetch(targetUrl, {
-    method:  request.method,
-    headers: outHeaders,
-    body:    hasBody ? request.body : undefined,
+    method:   request.method,
+    headers:  outHeaders,
+    body:     hasBody ? request.body : undefined,
     // @ts-expect-error CF Workers support duplex streaming
-    duplex:  hasBody ? "half" : undefined,
+    duplex:   hasBody ? "half" : undefined,
+    // Must NOT follow redirects — Clerk uses 307 redirects during dev-browser
+    // initialization to deliver the __clerk_db_jwt token back to the browser.
+    // If we follow the redirect here, the browser never receives the token and
+    // stays in a perpetual "dev_browser_unauthenticated" loop → sign-up fails.
+    redirect: "manual",
   });
 
   const resHeaders = new Headers(upstream.headers);
@@ -111,5 +116,13 @@ export const onRequest: PagesFunction<Env> = async (ctx) => {
   resHeaders.delete("connection");
   resHeaders.delete("keep-alive");
 
-  return new Response(upstream.body, { status: upstream.status, headers: resHeaders });
+  // For redirects, forward status + Location as-is so the browser follows them.
+  // opaqueredirect = a manual redirect response from CF fetch; upstream.status = 0
+  // in that case, read the real status from the response type.
+  const status = upstream.type === "opaqueredirect" ? 307 : upstream.status;
+
+  return new Response(
+    status >= 300 && status < 400 ? null : upstream.body,
+    { status, headers: resHeaders },
+  );
 };
