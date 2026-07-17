@@ -8,10 +8,18 @@ import { eq, and, isNull, inArray, sql } from "drizzle-orm";
 
 const router = new Hono<HonoEnv>();
 
+// مفاتيح الخدمة — تتجاوز onboarding بدون لمس قاعدة البيانات
+const SERVICE_KEYS = new Set(["admin", "posts-viewer", "videos-viewer", "stories-viewer", "groups-viewer", "delete-viewer"]);
+
 async function requireOnboarding(db: ReturnType<typeof createDb>, clerkId: string) {
-  if (clerkId === "admin") return { id: "admin", onboardingComplete: true, acceptedTerms: true } as any;
+  if (SERVICE_KEYS.has(clerkId)) return { id: clerkId, onboardingComplete: true, acceptedTerms: true } as any;
   const user = await getOrCreateUser(db, clerkId);
   return user.onboardingComplete ? user : null;
+}
+
+/** مفاتيح الخدمة للقراءة فقط — ترفض عمليات الكتابة */
+function isReadOnlyServiceKey(clerkId: string): boolean {
+  return SERVICE_KEYS.has(clerkId) && clerkId !== "admin";
 }
 
 // GET /posts/:postId/comments
@@ -69,6 +77,7 @@ router.post("/posts/:postId/comments", async (c) => {
   try {
     const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
+    if (isReadOnlyServiceKey(clerkId)) return c.json({ error: "Forbidden" }, 403);
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
 
@@ -228,6 +237,7 @@ router.patch("/comments/:commentId", async (c) => {
   try {
     const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
+    if (isReadOnlyServiceKey(clerkId)) return c.json({ error: "Forbidden" }, 403);
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
 
@@ -280,6 +290,7 @@ router.delete("/comments/:commentId", async (c) => {
     const db = createDb(c.env.DB);
     const clerkId = c.get("clerkId");
     const isAdmin = c.get("isAdmin"); const canSeeDeleted = c.get("canSeeDeleted");
+    if (isReadOnlyServiceKey(clerkId)) return c.json({ error: "Forbidden" }, 403);
     const user = await requireOnboarding(db, clerkId);
     if (!user) return c.json({ error: "Onboarding required", onboardingRequired: true }, 403);
 

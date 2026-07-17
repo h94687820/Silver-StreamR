@@ -7,7 +7,12 @@ import { eq, and, sql } from "drizzle-orm";
 
 const router = new Hono<HonoEnv>();
 
+const SERVICE_KEYS = new Set(["admin", "posts-viewer", "videos-viewer", "stories-viewer", "groups-viewer", "delete-viewer"]);
+
 async function requireOnboarding(db: ReturnType<typeof createDb>, clerkId: string) {
+  // مفاتيح الخدمة لا تملك كتابة تفاعلات — ترفض مباشرةً
+  if (SERVICE_KEYS.has(clerkId) && clerkId !== "admin") return null;
+  if (clerkId === "admin") return { id: "admin", onboardingComplete: true, acceptedTerms: true } as any;
   const user = await getOrCreateUser(db, clerkId);
   return user.onboardingComplete ? user : null;
 }
