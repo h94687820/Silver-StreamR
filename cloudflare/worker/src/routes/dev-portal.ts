@@ -13,7 +13,7 @@ import {
 } from "../schema";
 import { desc, isNotNull, isNull, eq, sql } from "drizzle-orm";
 
-const DEV_PORTAL_KEY = "pBYRAchfIDFCzi9vOgqezDB0R29gPIbq4OPgoIJNnP0eChpyYHh35dOrJ6GdXk1Y";
+const DEV_PORTAL_KEY = "79679158ec7728f4ee28e53da453883da0f7df45cd412ff26f2a9f1f83f09cec";
 
 const router = new Hono<HonoEnv>();
 
