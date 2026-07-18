@@ -13,11 +13,11 @@ database_id = "0ffc8340-f67f-426f-a187-21ed4522934f"
 [vars]
 FORGE_BASE_URL = "https://baas-server-model-a.mcfoxy.workers.dev"
 # Clerk FAPI — derived from VITE_CLERK_PUBLISHABLE_KEY (pk_test_dml0YWwtZm94...  → vital-fox-43)
-CLERK_FAPI = "https://immense-mosquito-71.clerk.accounts.dev"
+CLERK_FAPI = "https://new-squirrel-59.clerk.accounts.dev"
 
 # ─── أسرار — تُضاف عبر: wrangler secret put SECRET_NAME ──────────────────────
 # FORGE_API_KEY         = "..."   (مفتاح مشروع FORGE)
 # CLERK_SECRET_KEY      = "sk_..."
-# CLERK_PUBLISHABLE_KEY = "pk_..."
+# CLERK_PUBLISHABLE_KEY = "pk_test_bmV3LXNxdWlycmVsLTU5LmNsZXJrLmFjY291bnRzLmRldiQ"
 
 # أضف [[routes]] فقط عند ربط domain مخصص لاحقاً

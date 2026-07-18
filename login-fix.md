@@ -141,6 +141,43 @@ curl -s "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pa
 
 ---
 
+## لماذا تتكرر المشكلة (جذر التكرار)
+
+مفاتيح Clerk في Replit **تُضمَّن في الـ JS bundle وقت البناء** (VITE_* vars مخبوزة داخل الكود).
+لكن مفاتيح Cloudflare Pages والWorker تُحدَّث **يدوياً** ولا تتزامن تلقائياً مع Replit.
+
+كلما تغيّر Clerk instance في Replit (أو جُدِّدت المفاتيح)، يصبح الـ bundle يستخدم instance مختلف عمّا تتوقعه الـ Pages Function والWorker → شاشة بيضاء عند تسجيل الدخول.
+
+**الحل الدائم — عند أي تغيير في مفاتيح Clerk على Replit، شغّل هذا الأمر فوراً:**
+
+```bash
+# مزامنة كاملة: Pages + Worker
+CLERK_FAPI=$(node -e "
+  const key = process.env.VITE_CLERK_PUBLISHABLE_KEY || '';
+  const enc = key.replace(/^pk_(test|live)_/, '');
+  const pad = enc + '='.repeat((4 - enc.length % 4) % 4);
+  console.log('https://' + Buffer.from(pad,'base64').toString().replace(/\$+$/,''));
+")
+
+# 1. Cloudflare Pages
+curl -s -X PATCH \
+  "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/silver-stream" \
+  -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d "{\"deployment_configs\":{\"production\":{\"env_vars\":{\"VITE_CLERK_PUBLISHABLE_KEY\":{\"value\":\"$VITE_CLERK_PUBLISHABLE_KEY\"},\"CLERK_PUBLISHABLE_KEY\":{\"value\":\"$VITE_CLERK_PUBLISHABLE_KEY\"},\"CLERK_FAPI\":{\"value\":\"$CLERK_FAPI\"},\"CLERK_SECRET_KEY\":{\"value\":\"$CLERK_SECRET_KEY\",\"type\":\"secret_text\"}}},\"preview\":{\"env_vars\":{\"VITE_CLERK_PUBLISHABLE_KEY\":{\"value\":\"$VITE_CLERK_PUBLISHABLE_KEY\"},\"CLERK_PUBLISHABLE_KEY\":{\"value\":\"$VITE_CLERK_PUBLISHABLE_KEY\"},\"CLERK_FAPI\":{\"value\":\"$CLERK_FAPI\"},\"CLERK_SECRET_KEY\":{\"value\":\"$CLERK_SECRET_KEY\",\"type\":\"secret_text\"}}}}}" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>console.log(JSON.parse(d).success?'✓ Pages updated':'✗',JSON.parse(d).errors||''))"
+
+# 2. Worker
+echo "$CLERK_SECRET_KEY" | npx wrangler secret put CLERK_SECRET_KEY --name silver-stream-api
+# ثم عدّل cloudflare/worker/wrangler.toml: CLERK_FAPI = "$CLERK_FAPI" ونشر: cd cloudflare/worker && npx wrangler deploy
+
+# 3. أعد البناء والنشر
+PORT=3000 BASE_PATH="/" pnpm --filter @workspace/silver-stream run build
+cp -r artifacts/silver-stream/functions artifacts/silver-stream/dist/public/functions
+npx wrangler pages deploy artifacts/silver-stream/dist/public --project-name silver-stream --branch=main --commit-dirty=true
+```
+
+---
+
 ## الدرس المستفاد
 
 - **Clerk proxy** مناسب فقط لـ **production instances** (`pk_live_*`) مع domain مُتحقَّق

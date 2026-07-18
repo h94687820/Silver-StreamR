@@ -83,7 +83,15 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         // Clerk handshake redirects land on /__clerk_handshake and pass
         // __clerk_db_jwt as a URL param — must NOT be served from cache.
-        navigateFallbackDenylist: [/\/__clerk/, /\/api\/__clerk/],
+        navigateFallbackDenylist: [
+          /\/__clerk/,
+          /\/api\/__clerk/,
+          // Clerk handshake return URLs carry __clerk_db_jwt / __clerk_handshake
+          // as query params — must never be served from SW cache so Clerk can
+          // read the token from the URL and complete the dev-browser handshake.
+          /[?&]__clerk_db_jwt/,
+          /[?&]__clerk_handshake/,
+        ],
         // Clerk's FAPI proxy calls must always go to the network.
         // The /api/__clerk/* pattern is intentionally excluded from runtime
         // caching so stale auth errors are never served from cache.
