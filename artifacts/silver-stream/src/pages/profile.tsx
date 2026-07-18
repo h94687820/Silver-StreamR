@@ -140,7 +140,7 @@ export default function Profile() {
       <div className="px-4 pb-4">
         {/* Avatar & Actions Row */}
         <div className="flex justify-between items-end -mt-12 mb-4 relative z-10">
-          <Avatar className="w-24 h-24 border-4 border-background shadow-xl">
+          <Avatar key={profile.avatarUrl || "fallback"} className="w-24 h-24 border-4 border-background shadow-xl">
             <AvatarImage src={profile.avatarUrl || undefined} className="object-cover" />
             <AvatarFallback className="text-2xl">{profile.displayName?.[0] || profile.username[0]}</AvatarFallback>
           </Avatar>
