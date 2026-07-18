@@ -14,7 +14,7 @@ export interface TermsDoc {
 export const termsAr: TermsDoc = {
   heading: "شروط الاستخدام وسياسة الخصوصية",
   subtitle: "يُرجى قراءة هذه الشروط بعناية قبل استخدام المنصة.",
-  version: "الإصدار 0.8 — Laws Edition",
+  version: "الإصدار 0.9 — Laws Edition",
   sections: [
     {
       title: "١. البيانات التي نجمعها",
@@ -91,6 +91,55 @@ export const termsAr: TermsDoc = {
         "إن اكتشفت ثغرة، يُرجى الإبلاغ عنها للفريق بشكل مسؤول.",
       ],
     },
+    {
+      title: "٩. حقوق العلامة التجارية",
+      body: [
+        "نعتذر مسبقاً لأصحاب أي علامة تجارية قد تتشابه مع اسم المنصة أو شعارها أو أي عنصر فيها؛ إذ إن المنصة لا تزال في مراحلها الأولى وتحتاج إلى اسم مؤقت ريثما يُعتمد الاسم الرسمي.",
+        "سيُعاد النظر في الاسم والشعار وجميع عناصر الهوية البصرية فور التحقق من خلوّها من أي تعارض مع علامات تجارية مسجّلة.",
+        "إن كنت تعتقد أن عنصراً ما يمس علامتك التجارية، يُرجى مراسلة إدارة المنصة عبر البريد الرسمي وسنتعامل مع بلاغك بجدية تامة وفي أقرب وقت.",
+      ],
+    },
+    {
+      title: "١٠. إخلاء مسؤولية — عدم التعويض المالي",
+      body: [
+        "المنصة في مرحلة تأسيسية ولا تمتلك حالياً أي ميزانية للتعويضات.",
+        "لا تتعهد المنصة بتقديم أي تعويض مادي أو مالي بأي شكل من الأشكال وتحت أي ظرف في المرحلة الراهنة.",
+        "باستخدامك للمنصة فأنت تُقرّ علمك بذلك وتتنازل عن المطالبة بأي تعويض مادي.",
+      ],
+    },
+    {
+      title: "١١. المنصة مبنية بمساعدة الذكاء الاصطناعي",
+      body: [
+        "تم بناء هذه المنصة بالاستعانة بأدوات الذكاء الاصطناعي، مما يعني احتمالية وجود ثغرات أو أخطاء غير مقصودة.",
+        "نُشجّع المستخدمين على الإبلاغ عن أي خلل أو مشكلة يواجهونها عبر البريد الرسمي للإدارة، وسيُكافأ كل من يُسهم في رصد ثغرة حقيقية ويُبلّغ عنها بشكل مسؤول.",
+        "لا يُعدّ وجود أخطاء برمجية مسوّغاً لاستغلال المنصة أو إلحاق الضرر بها أو بمستخدميها.",
+      ],
+    },
+    {
+      title: "١٢. حماية خصوصيتك الشخصية",
+      body: [
+        "نحذّرك بشدة من نشر أي معلومة شخصية حساسة على المنصة، ومنها: بريدك الإلكتروني، اسمك الحقيقي، صورتك الحقيقية، كلمات مرورك، موقعك الجغرافي أو عنوانك، أو أي بيانات تُعرّض خصوصيتك للخطر.",
+        "المنصة لا تزال في طور التطوير ولا تمتلك حصانة أمنية كاملة في هذه المرحلة.",
+        "أنت تتحمل وحدك مسؤولية المعلومات التي تختار نشرها، وتبرأ المنصة من أي ضرر ناتج عن إفصاحك الطوعي عن بياناتك.",
+      ],
+    },
+    {
+      title: "١٣. الهوية البصرية — حقوق قانونية مؤجّلة",
+      body: [
+        "الاسم والشعار وجميع عناصر المنصة لا تزال تحت الاختبار ولم تُسجَّل بعد كعلامة تجارية رسمية.",
+        "مع ذلك، يُحظر صراحةً نسخ المنصة أو استنساخها أو استخدامها قاعدةً لمشروع آخر دون إذن خطي مسبق من الإدارة.",
+        "من يثبت تورطه في سرقة المنصة أو انتحال هويتها سيتم اتخاذ الإجراءات القانونية اللازمة بحقه.",
+      ],
+    },
+    {
+      title: "١٤. تحذير من الهندسة الاجتماعية",
+      body: [
+        "إياك ثم إياك أن تنصاع لأي شخص يطلب منك معلومات شخصية أو بيانات حسابك تحت أي ذريعة كانت، سواء ادّعى انتماءه لفريق المنصة أو لجهة رسمية.",
+        "هذا الأسلوب يُعرف بـ«الهندسة الاجتماعية» ويُستخدم للخداع والابتزاز والتهديد.",
+        "كل من يتعرض للابتزاز أو التهديد داخل المنصة عليه الإبلاغ فوراً ولا ينصاع للمبتز أبداً.",
+        "كل من ثبت قيامه بابتزاز أو تهديد مستخدم آخر سيُحذف حسابه نهائياً أو يُقيَّد دون إنذار مسبق.",
+      ],
+    },
   ],
   footer:
     "باستخدامك لمنصة Silver Stream فأنت تُقرّ بقراءة هذه الشروط وفهمها والموافقة عليها كاملةً.",
@@ -99,7 +148,7 @@ export const termsAr: TermsDoc = {
 export const termsEn: TermsDoc = {
   heading: "Terms of Service & Privacy Policy",
   subtitle: "Please read these terms carefully before using the platform.",
-  version: "Version 0.8 — Laws Edition",
+  version: "Version 0.9 — Laws Edition",
   sections: [
     {
       title: "1. Data We Collect",
@@ -174,6 +223,55 @@ export const termsEn: TermsDoc = {
         "Exploiting any vulnerability or security flaw in the platform is strictly prohibited.",
         "Anyone proven to have done so may face legal accountability.",
         "If you discover a vulnerability, please report it to the team responsibly.",
+      ],
+    },
+    {
+      title: "9. Trademark Rights",
+      body: [
+        "We sincerely apologize to any trademark owner whose registered mark may resemble the platform's name, logo, or any of its visual elements. The platform is still in its early stages and requires a temporary name until an official one is confirmed.",
+        "The name, logo, and all branding elements will be reviewed and changed as soon as we verify they do not conflict with any registered trademark.",
+        "If you believe any element of the platform infringes on your trademark, please contact our administration via the official email and we will address your report seriously and promptly.",
+      ],
+    },
+    {
+      title: "10. Disclaimer — No Financial Compensation",
+      body: [
+        "The platform is in its founding stage and currently has no budget allocated for compensation of any kind.",
+        "The platform makes no commitment to provide any material or financial compensation under any circumstance during this phase.",
+        "By using the platform, you acknowledge this and waive any claim to financial compensation.",
+      ],
+    },
+    {
+      title: "11. Platform Built with AI Assistance",
+      body: [
+        "This platform was built with the assistance of artificial intelligence tools, which means bugs or unintended errors may exist.",
+        "We encourage users to report any issue or malfunction they encounter via the official administration email. Users who responsibly disclose a genuine security vulnerability will be recognized.",
+        "The presence of software bugs does not justify exploiting the platform or causing harm to it or its users.",
+      ],
+    },
+    {
+      title: "12. Protecting Your Personal Privacy",
+      body: [
+        "We strongly advise against publishing any sensitive personal information on the platform, including: your email address, real name, real photo, passwords, geographic location or home address, or any data that could compromise your privacy.",
+        "The platform is still under development and does not yet have full security hardening.",
+        "You alone are responsible for the information you choose to share publicly. The platform disclaims any liability resulting from your voluntary disclosure of personal data.",
+      ],
+    },
+    {
+      title: "13. Visual Identity — Pending Legal Registration",
+      body: [
+        "The platform's name, logo, and all visual elements are still under testing and have not yet been registered as an official trademark.",
+        "Nevertheless, copying, cloning, or using the platform as a base for another project without prior written permission from the administration is strictly prohibited.",
+        "Anyone proven to have stolen or impersonated the platform will be subject to appropriate legal action.",
+      ],
+    },
+    {
+      title: "14. Social Engineering Warning",
+      body: [
+        "Never comply with any person who requests your personal information or account credentials under any pretext — including those claiming to be from our team or an official authority.",
+        "This tactic is known as 'social engineering' and is used to deceive, blackmail, and threaten victims.",
+        "Anyone who experiences blackmail or threats on the platform must report it immediately and must not comply with the aggressor.",
+        "Any user proven to have blackmailed or threatened another user will have their account permanently deleted or restricted without prior warning.",
       ],
     },
   ],
