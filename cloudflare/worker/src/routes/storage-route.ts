@@ -1,9 +1,9 @@
 /**
  * POST /storage/uploads
  *
- * رفع ملف إلى FORGE Storage.
+ * رفع ملف إلى FORGE Storage عبر Service Binding (اتصال مباشر بدون HTTP).
  * العميل يرسل الـ binary body مع Content-Type للملف.
- * يُعيد { objectPath } — الرابط العام للملف.
+ * يُعيد { objectPath } — المسار الذي يُستخدم لبناء رابط التحميل.
  */
 import { Hono } from "hono";
 import type { HonoEnv } from "../types";
@@ -26,11 +26,13 @@ router.post("/storage/uploads", async (c) => {
       c.env.FORGE_API_KEY,
       body,
       contentType,
+      c.env.FORGE_SERVICE,   // Service Binding — يتجاوز قيد 1042
     );
 
     return c.json({ objectPath });
   } catch (err) {
-    console.error("Storage upload error:", err);
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("Storage upload error:", msg);
     return c.json({ error: "Failed to upload file" }, 500);
   }
 });

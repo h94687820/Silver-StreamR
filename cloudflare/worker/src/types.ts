@@ -2,6 +2,7 @@ export type Bindings = {
   DB: D1Database;
   FORGE_BASE_URL: string;
   FORGE_API_KEY: string;
+  FORGE_SERVICE?: { fetch: (req: Request) => Promise<Response> }; // Service Binding
   CLERK_SECRET_KEY: string;
   CLERK_PUBLISHABLE_KEY: string;
   CLERK_FAPI: string;

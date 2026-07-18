@@ -1,17 +1,33 @@
 /**
  * FORGE Storage helpers (baas-server-model-a.mcfoxy.workers.dev)
  *
- * Flow:
- *  1. POST /api/v1/storage/upload  { name, size, contentType }
- *     → { uploadURL (relative), downloadUrl (absolute), fileId }
- *  2. PUT <forgeBase><uploadURL>  with raw binary
- *     → file is stored, downloadUrl is the public URL
+ * يستخدم Service Binding (env.FORGE_SERVICE) للاتصال المباشر بـ FORGE Worker
+ * بدون HTTP — يتجنّب قيد Cloudflare 1042 الذي يمنع Worker→Worker HTTP.
+ *
+ * إذا لم يتوفر Service Binding (بيئة محلية) يرجع إلى HTTP عادي.
  */
 
-interface ForgeUploadInit {
-  uploadURL: string;
-  downloadUrl: string;
+interface ForgeUploadResponse {
+  url: string;
   fileId: number;
+  objectPath: string;
+}
+
+type ForgeService = { fetch: (req: Request) => Promise<Response> } | undefined;
+
+async function forgePost(
+  forgeBase: string,
+  forgeService: ForgeService,
+  path: string,
+  init: RequestInit,
+): Promise<Response> {
+  const url = `${forgeBase}${path}`;
+  if (forgeService) {
+    // Service Binding — اتصال مباشر بدون HTTP (يتجاوز قيد 1042)
+    return forgeService.fetch(new Request(url, init));
+  }
+  // Fallback: HTTP عادي (يعمل من خارج Cloudflare مثل Replit dev)
+  return fetch(url, init);
 }
 
 export async function uploadFile(
@@ -19,56 +35,41 @@ export async function uploadFile(
   forgeApiKey: string,
   body: ArrayBuffer,
   contentType: string,
-  folder = "uploads",
+  forgeService?: ForgeService,
 ): Promise<string> {
   const ext = contentType.split("/")[1]?.split("+")[0] ?? "bin";
-  const name = `${folder}/${crypto.randomUUID()}.${ext}`;
+  const filename = `upload.${ext}`;
 
-  // 1 — طلب رابط الرفع
-  const initResp = await fetch(`${forgeBase}/api/v1/storage/upload`, {
+  const formData = new FormData();
+  const blob = new Blob([body], { type: contentType });
+  formData.append("file", blob, filename);
+
+  const resp = await forgePost(forgeBase, forgeService, "/api/storage/upload", {
     method: "POST",
-    headers: {
-      "X-API-Key": forgeApiKey,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ name, size: body.byteLength, contentType }),
+    headers: { "X-API-Key": forgeApiKey },
+    body: formData,
   });
 
-  if (!initResp.ok) {
-    const err = await initResp.text().catch(() => "");
-    throw new Error(`FORGE upload init failed ${initResp.status}: ${err}`);
+  if (!resp.ok) {
+    const err = await resp.text().catch(() => "");
+    throw new Error(`FORGE upload failed ${resp.status}: ${err}`);
   }
 
-  const { uploadURL, downloadUrl }: ForgeUploadInit = await initResp.json();
-
-  // 2 — رفع البيانات الثنائية
-  const putResp = await fetch(`${forgeBase}${uploadURL}`, {
-    method: "PUT",
-    headers: { "Content-Type": contentType },
-    body,
-  });
-
-  if (!putResp.ok) {
-    const err = await putResp.text().catch(() => "");
-    throw new Error(`FORGE upload PUT failed ${putResp.status}: ${err}`);
-  }
-
-  return downloadUrl;
+  const { objectPath, url }: ForgeUploadResponse = await resp.json();
+  return objectPath ?? url;
 }
 
 export async function deleteFile(
   forgeBase: string,
   forgeApiKey: string,
   fileUrl: string,
+  forgeService?: ForgeService,
 ): Promise<void> {
-  if (!fileUrl.startsWith(forgeBase)) return;
-
-  // استخراج UUID من الرابط: .../objects/{uuid}
   const uuid = fileUrl.split("/objects/")[1]?.split("?")[0];
   if (!uuid) return;
 
-  await fetch(`${forgeBase}/api/storage/objects/${uuid}`, {
+  await forgePost(forgeBase, forgeService, `/api/storage/objects/${uuid}`, {
     method: "DELETE",
     headers: { "X-API-Key": forgeApiKey },
-  }).catch(() => {}); // حذف غير حرج — تجاهل الأخطاء
+  }).catch(() => {});
 }

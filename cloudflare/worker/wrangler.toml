@@ -15,6 +15,11 @@ FORGE_BASE_URL = "https://baas-server-model-a.mcfoxy.workers.dev"
 # Clerk FAPI — derived from VITE_CLERK_PUBLISHABLE_KEY (pk_test_dml0YWwtZm94...  → vital-fox-43)
 CLERK_FAPI = "https://sensible-raccoon-46.clerk.accounts.dev"
 
+# ─── Service Binding — اتصال مباشر بـ FORGE Worker (يتجنّب قيود HTTP بين Workers) ─
+[[services]]
+binding = "FORGE_SERVICE"
+service = "baas-server-model-a"
+
 # ─── أسرار — تُضاف عبر: wrangler secret put SECRET_NAME ──────────────────────
 # FORGE_API_KEY         = "..."   (مفتاح مشروع FORGE)
 # CLERK_SECRET_KEY      = "sk_..."
