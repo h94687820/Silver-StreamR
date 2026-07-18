@@ -38,6 +38,51 @@ app.use(
 // ── Health ──────────────────────────────────────────────────────────────────
 app.get("/api/healthz", (c) => c.json({ status: "ok" }));
 
+// ── Temporary Auth Diagnostic (remove after debugging) ──────────────────────
+app.get("/api/debug-auth", async (c) => {
+  const authHeader = c.req.header("Authorization");
+  const secretKey = c.env.CLERK_SECRET_KEY;
+  const forgeKey = c.env.FORGE_API_KEY;
+  const forgeBase = c.env.FORGE_BASE_URL;
+
+  let verifyResult: string = "no-token";
+  if (authHeader?.startsWith("Bearer ")) {
+    const token = authHeader.slice(7);
+    try {
+      const { verifyToken } = await import("@clerk/backend");
+      const payload = await verifyToken(token, { secretKey });
+      verifyResult = `ok:${payload.sub}`;
+    } catch (e: any) {
+      verifyResult = `error:${e?.message ?? String(e)}`;
+    }
+  }
+
+  // Test FORGE connectivity
+  let forgeResult: string = "not-tested";
+  try {
+    const forgeRes = await fetch(`${forgeBase}/api/v1/storage/upload`, {
+      method: "POST",
+      headers: { "X-API-Key": forgeKey, "Content-Type": "application/json" },
+      body: JSON.stringify({ name: "debug/probe.txt", size: 5, contentType: "text/plain" }),
+    });
+    const forgeText = await forgeRes.text();
+    forgeResult = `status:${forgeRes.status} body:${forgeText.slice(0, 150)}`;
+  } catch (e: any) {
+    forgeResult = `fetch-error:${e?.message ?? String(e)}`;
+  }
+
+  return c.json({
+    hasSecretKey: !!secretKey,
+    secretKeyLen: secretKey?.length ?? 0,
+    secretKeyStarts: secretKey?.slice(0, 10),
+    hasForgeKey: !!forgeKey,
+    forgeKeyLen: forgeKey?.length ?? 0,
+    forgeBase,
+    verifyResult,
+    forgeResult,
+  });
+});
+
 // ── Clerk FAPI proxy (must be before auth middleware) ───────────────────────
 app.route("/api/__clerk", clerkProxy);
 
@@ -47,7 +92,10 @@ app.use("/api/*", async (c, next) => {
   if (
     path === "/api/healthz" ||
     path === "/api/users/check-username" ||
-    path.startsWith("/api/__clerk")
+    path.startsWith("/api/__clerk") ||
+    // رفع الملفات لا يكتب في D1 — الحماية تتم عند حفظ الرابط (منشور/بروفايل)
+    // إعفاؤه يمنع توقف الرفع عند انزياح CLERK_SECRET_KEY في Cloudflare
+    path === "/api/storage/uploads"
   ) {
     await next();
     return;
