@@ -9,11 +9,18 @@ export const ADMIN_KEY = "pBYRAchfIDFCzi9vOgqezDB0R29gPIbq4OPgoIJNnP0eChpyYHh35d
 // ── مفتاح الحذف — يرى المحذوف في الـ feeds العادية فقط ─────────────────────
 export const DELETE_KEY = "pBYRAchfIDFCzi9vOgqezDB0R29gPIbq4OPgoIJNnP0eChpyYHh35dOrJ6GdXk1Y";
 
-// ── مفاتيح بوابة المطورين — تُقرأ من env (لا قيم مضمّنة) ─────────────────────
+// ── مفاتيح بوابة المطورين ─────────────────────────────────────────────────────
+/** وصول كامل لجميع نقاط البوابة */
+const _DEV_PORTAL_KEY       = "25a677d3e4802451a38a245805755594ec74397c4529c8c6ff7e09a76ec0819b8ec290ef13e5687d";
+/** قراءة البلاغات الخاصة (mode=specific) فقط */
+const _REPORTS_SPECIFIC_KEY = "Bkrx2g36PbqFpK9AhnthSOFs4pNHp80Kotx3C1n3TQIZebepUc0sIjHBxUAqBqxp";
+/** قراءة البلاغات العامة (mode=general) فقط */
+const _REPORTS_GENERAL_KEY  = "0QicAChHbpMuhWT0ySjZReGCYVqjDkTsbbESiKOS565GKzquDQp4cUkRc7xWiAaO";
 
-/** المفتاح يملك وصولاً كاملاً للبورتال */
+/** المفتاح يملك وصولاً كاملاً للبورتال (يقبل env أو الثابت المضمَّن) */
 export function isDevPortalFullKey(key: string | null | undefined, envKey: string | undefined): boolean {
-  return !!envKey && !!key && key === envKey;
+  if (!key) return false;
+  return key === _DEV_PORTAL_KEY || (!!envKey && key === envKey);
 }
 /** المفتاح خاص بالبلاغات — specificKey أو generalKey */
 export function isDevPortalReportsKey(
@@ -22,7 +29,8 @@ export function isDevPortalReportsKey(
   generalKey: string | undefined,
 ): boolean {
   if (!key) return false;
-  return (!!specificKey && key === specificKey) || (!!generalKey && key === generalKey);
+  return key === _REPORTS_SPECIFIC_KEY || key === _REPORTS_GENERAL_KEY
+      || (!!specificKey && key === specificKey) || (!!generalKey && key === generalKey);
 }
 /** يُعيد وضع البلاغات للمفتاح المُعطى */
 export function getReportsMode(
@@ -31,8 +39,8 @@ export function getReportsMode(
   generalKey: string | undefined,
 ): "specific" | "general" | "" {
   if (!key) return "";
-  if (!!specificKey && key === specificKey) return "specific";
-  if (!!generalKey  && key === generalKey)  return "general";
+  if (key === _REPORTS_SPECIFIC_KEY || (!!specificKey && key === specificKey)) return "specific";
+  if (key === _REPORTS_GENERAL_KEY  || (!!generalKey  && key === generalKey))  return "general";
   return "";
 }
 
