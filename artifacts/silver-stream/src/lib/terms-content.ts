@@ -140,9 +140,65 @@ export const termsAr: TermsDoc = {
         "كل من ثبت قيامه بابتزاز أو تهديد مستخدم آخر سيُحذف حسابه نهائياً أو يُقيَّد دون إنذار مسبق.",
       ],
     },
+    {
+      title: "١٥. حق الفريق في تعديل الشروط",
+      body: [
+        "يحتفظ فريق Silver Stream بالحق الكامل في تعديل هذه الشروط أو تحديثها أو إعادة صياغتها في أي وقت يراه مناسباً، دون الحاجة إلى استئذان المستخدمين أو إخطارهم مسبقاً.",
+        "يُعدّ استمرارك في استخدام المنصة بعد نشر أي تعديل قبولاً صريحاً وتاماً منك للشروط المحدَّثة.",
+        "تقع على عاتقك مسؤولية مراجعة الشروط بصفة دورية للاطلاع على كل ما يستجد فيها.",
+      ],
+    },
+    {
+      title: "١٦. حق الفريق في إيقاف الخدمة أو تعليقها",
+      body: [
+        "تحتفظ المنصة بالحق المطلق في تعليق الخدمة كلياً أو جزئياً، مؤقتاً أو دائماً، في أي وقت ولأي سبب، سواء أعلنت عن ذلك مسبقاً أم لم تُعلن.",
+        "لا يترتب على هذا الإيقاف أي التزام بتعويض المستخدمين أو إخطارهم بمهلة زمنية محددة.",
+        "قد يشمل الإيقاف صيانة الخوادم، أو ترقية البنية التقنية، أو ظروفاً قاهرة خارجة عن إرادة الفريق. في جميع الأحوال، المنصة غير مسؤولة عن أي ضرر أو خسارة ناجمة عن توقف الخدمة.",
+      ],
+    },
+    {
+      title: "١٧. حق الفريق في إنهاء أي حساب",
+      body: [
+        "يملك فريق Silver Stream صلاحية تقييد أي حساب أو تعليقه أو حذفه نهائياً، في أي وقت وبمحض إرادته، دون اشتراط تقديم مبرر أو إشعار مسبق.",
+        "لا يحق للمستخدم المُوقَف حسابُه المطالبة بأي تعويض أو استرداد، ولا يحق له إنشاء حساب جديد إن كان الحذف بسبب مخالفة جسيمة.",
+        "هذه الصلاحية مطلقة غير مقيدة، وتُستخدم لصون سلامة المجتمع وحماية بيئة المنصة.",
+      ],
+    },
+    {
+      title: "١٨. المحتوى الخارجي والروابط الأجنبية",
+      body: [
+        "قد تحتوي المنصة على روابط لمواقع أو خدمات خارجية لا تقع تحت سيطرة فريق Silver Stream ولا تمت له بصلة.",
+        "لا تتحمل المنصة أي مسؤولية عن محتوى تلك المواقع أو سياساتها أو الأضرار التي قد تنجم عن التعامل معها.",
+        "إقدامك على زيارة أي رابط خارجي أو التعامل معه يجري على مسؤوليتك الشخصية الكاملة.",
+      ],
+    },
+    {
+      title: "١٩. تعهد المستخدم بتعويض الفريق",
+      body: [
+        "بقبولك هذه الشروط، تتعهد صراحةً بأن تُعفي فريق Silver Stream وجميع أعضائه ومطوريه من أي مطالبة أو دعوى قانونية أو خسارة أو مصروفات تنشأ عن استخدامك للمنصة، أو انتهاكك لهذه الشروط، أو إضرارك بأي طرف ثالث عبر المنصة.",
+        "هذا التعهد يشمل تغطية أي تكاليف قانونية أو قضائية قد يتكبدها الفريق جراء تصرفاتك.",
+        "بعبارة أوضح: إن جلبت مشكلة على نفسك أو على غيرك عبر المنصة، فأنت وحدك من يتحمل تبعاتها القانونية والمالية.",
+      ],
+    },
+    {
+      title: "٢٠. الخدمة مقدَّمة «كما هي» — دون ضمانات",
+      body: [
+        "تُقدَّم منصة Silver Stream بحالتها الراهنة «كما هي» و«كما هي متاحة»، دون أي ضمان صريح أو ضمني بشأن الجودة أو الاستمرارية أو الخلو من العيوب أو الملاءمة لغرض بعينه.",
+        "لا يضمن الفريق خلوّ المنصة من الأخطاء البرمجية، ولا يضمن عدم انقطاع الخدمة، ولا سلامة البيانات من أي تلف أو فقدان.",
+        "استخدامك للمنصة يعني قبولك الكامل لهذه المخاطر وتحملك لها بإرادتك الحرة.",
+      ],
+    },
+    {
+      title: "٢١. الاختصاص القانوني والجهة المختصة",
+      body: [
+        "تخضع هذه الشروط وتُفسَّر وفقاً للمبادئ القانونية العامة المعمول بها، نظراً لكون المنصة موجَّهة للمستخدمين من جميع أنحاء العالم.",
+        "في حال نشوء أي نزاع بين المستخدم والمنصة، يكون التواصل المباشر عبر البريد الإلكتروني الرسمي للإدارة هو المسار الأول والمفضّل لحل الخلاف بالطرق الودية.",
+        "تحتفظ المنصة بالحق في اتخاذ الإجراءات القانونية اللازمة أمام الجهات المختصة في البلد الذي ينتمي إليه المخالف أو في أي ولاية قضائية تراها الإدارة مناسبة.",
+      ],
+    },
   ],
   footer:
-    "باستخدامك لمنصة Silver Stream فأنت تُقرّ بقراءة هذه الشروط وفهمها والموافقة عليها كاملةً.",
+    "باستخدامك لمنصة Silver Stream فأنت تُقرّ بقراءة هذه الشروط وفهمها والموافقة الكاملة على جميع بنودها دون استثناء. جهلك بهذه الشروط لا يُعفيك من الالتزام بها.",
 };
 
 export const termsEn: TermsDoc = {
@@ -274,9 +330,64 @@ export const termsEn: TermsDoc = {
         "Any user proven to have blackmailed or threatened another user will have their account permanently deleted or restricted without prior warning.",
       ],
     },
+    {
+      title: "15. Our Right to Amend These Terms",
+      body: [
+        "Silver Stream reserves the absolute right to modify, update, or entirely rewrite these Terms of Service at any time, without prior notice or the need to seek user consent.",
+        "Your continued use of the platform following the publication of any amendment constitutes your full and explicit acceptance of the revised terms.",
+        "It is your responsibility to review these terms periodically to stay informed of any changes. Ignorance of an update does not exempt you from compliance.",
+      ],
+    },
+    {
+      title: "16. Our Right to Suspend or Terminate the Service",
+      body: [
+        "The platform reserves the unconditional right to suspend or terminate all or part of its services — temporarily or permanently — at any time and for any reason, with or without prior announcement.",
+        "Such suspension carries no obligation to compensate users or provide advance notice of any specific timeframe.",
+        "Reasons may include server maintenance, technical upgrades, or circumstances beyond the team's control. Under no condition shall the platform be held liable for any loss or damage arising from a service interruption.",
+      ],
+    },
+    {
+      title: "17. Our Right to Terminate Any Account",
+      body: [
+        "Silver Stream retains the full authority to restrict, suspend, or permanently delete any account at its sole discretion, at any time and without the obligation to provide justification or advance notice.",
+        "A user whose account has been terminated may not claim any form of compensation or refund, and may not create a new account if the deletion was the result of a serious violation.",
+        "This authority is exercised without limitation and exists solely to preserve the safety and integrity of the platform's community.",
+      ],
+    },
+    {
+      title: "18. External Content and Third-Party Links",
+      body: [
+        "The platform may contain links to external websites or services that are entirely independent of Silver Stream and beyond its control.",
+        "The platform bears no responsibility whatsoever for the content, policies, or any harm that may result from interacting with such external sites.",
+        "Visiting or engaging with any third-party link is done entirely at your own risk and under your own responsibility.",
+      ],
+    },
+    {
+      title: "19. User Indemnification",
+      body: [
+        "By accepting these terms, you expressly agree to indemnify, defend, and hold harmless Silver Stream, its team members, and developers from any claim, lawsuit, loss, or expense — including legal fees — arising from your use of the platform, your breach of these terms, or any harm you cause to a third party through the platform.",
+        "In plain terms: if your actions on this platform create a legal problem — for yourself or for others — you alone are responsible for the legal and financial consequences that follow.",
+      ],
+    },
+    {
+      title: "20. Service Provided \"As Is\" — No Warranties",
+      body: [
+        "Silver Stream is provided in its current state, on an \"as is\" and \"as available\" basis, without any express or implied warranty regarding quality, continuity, fitness for a particular purpose, or freedom from defects.",
+        "The team makes no guarantee that the platform will be error-free, uninterrupted, or that your data will be free from loss or corruption.",
+        "By using the platform, you fully and voluntarily accept these inherent risks.",
+      ],
+    },
+    {
+      title: "21. Governing Law and Jurisdiction",
+      body: [
+        "These terms are governed by and interpreted in accordance with general internationally recognized legal principles, given that the platform serves users from all parts of the world.",
+        "In the event of any dispute between a user and the platform, direct communication through the official administration email is the preferred and primary channel for reaching an amicable resolution.",
+        "The platform reserves the right to pursue legal action through the appropriate authorities in the jurisdiction where the offending user resides, or in any other jurisdiction the administration deems suitable.",
+      ],
+    },
   ],
   footer:
-    "By using Silver Stream, you confirm that you have read, understood, and agreed to these terms in full.",
+    "By using Silver Stream, you confirm that you have read, understood, and agreed to all terms set forth herein without exception. Your lack of awareness of any provision does not exempt you from your obligation to abide by it.",
 };
 
 /** Detect whether to show Arabic or English terms based on the browser language. */
