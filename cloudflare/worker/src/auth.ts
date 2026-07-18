@@ -9,6 +9,23 @@ export const ADMIN_KEY = "pBYRAchfIDFCzi9vOgqezDB0R29gPIbq4OPgoIJNnP0eChpyYHh35d
 // ── مفتاح الحذف — يرى المحذوف في الـ feeds العادية فقط ─────────────────────
 export const DELETE_KEY = "pBYRAchfIDFCzi9vOgqezDB0R29gPIbq4OPgoIJNnP0eChpyYHh35dOrJ6GdXk1Y";
 
+// ── مفاتيح بوابة المطورين ─────────────────────────────────────────────────────
+/** وصول كامل لجميع نقاط البوابة */
+export const DEV_PORTAL_KEY      = "79679158ec7728f4ee28e53da453883da0f7df45cd412ff26f2a9f1f83f09cec";
+/** قراءة البلاغات الخاصة (mode=specific) فقط */
+export const PRIVATE_REPORTS_KEY = "Bkrx2g36PbqFpK9AhnthSOFs4pNHp80Kotx3C1n3TQIZebepUc0sIjHBxUAqBqxp";
+/** قراءة البلاغات العامة (mode=general) فقط */
+export const PUBLIC_REPORTS_KEY  = "0QicAChHbpMuhWT0ySjZReGCYVqjDkTsbbESiKOS565GKzquDQp4cUkRc7xWiAaO";
+
+/** المفتاح يملك وصولاً كاملاً للبورتال */
+export function isDevPortalFullKey(key: string | null | undefined): boolean {
+  return key === DEV_PORTAL_KEY;
+}
+/** المفتاح خاص بالبلاغات فقط */
+export function isDevPortalReportsKey(key: string | null | undefined): boolean {
+  return key === PRIVATE_REPORTS_KEY || key === PUBLIC_REPORTS_KEY;
+}
+
 /** المفتاح مشرف كامل */
 export function isAdminKey(key: string | null | undefined): boolean {
   return key === ADMIN_KEY;

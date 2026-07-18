@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import type { HonoEnv } from "./types";
-import { getClerkIdFromHeader, isAdminKey, canViewDeleted, isPostsKey, isVideosKey, isStoriesKey, isGroupsKey } from "./auth";
+import { getClerkIdFromHeader, isAdminKey, canViewDeleted, isPostsKey, isVideosKey, isStoriesKey, isGroupsKey, isDevPortalFullKey, isDevPortalReportsKey } from "./auth";
 
 import clerkProxy from "./routes/clerk-proxy";
 import usersRouter from "./routes/users";
@@ -53,7 +53,35 @@ app.use("/api/*", async (c, next) => {
     return;
   }
 
-  const adminKey = c.req.header("X-Admin-Key");
+  const adminKey   = c.req.header("X-Admin-Key");
+  const bearerKey  = c.req.header("Authorization")?.replace("Bearer ", "");
+  const portalKey  = c.req.header("X-Dev-Portal-Key") ?? bearerKey;
+
+  // ── مفتاح بوابة المطورين الكامل: وصول شامل للبوابة ─────────────────────
+  if (isDevPortalFullKey(portalKey)) {
+    c.set("clerkId", "admin");
+    c.set("isAdmin", true);
+    c.set("canSeeDeleted", true);
+    c.set("isPostsViewer", false);
+    c.set("isVideosViewer", false);
+    c.set("isStoriesViewer", false);
+    c.set("isGroupsViewer", false);
+    await next();
+    return;
+  }
+
+  // ── مفاتيح البلاغات: وصول مقيّد للبوابة ────────────────────────────────
+  if (isDevPortalReportsKey(portalKey)) {
+    c.set("clerkId", "reports-viewer");
+    c.set("isAdmin", false);
+    c.set("canSeeDeleted", false);
+    c.set("isPostsViewer", false);
+    c.set("isVideosViewer", false);
+    c.set("isStoriesViewer", false);
+    c.set("isGroupsViewer", false);
+    await next();
+    return;
+  }
 
   // ── مفتاح المشرف الكامل: وصول شامل ─────────────────────────────────────
   if (isAdminKey(adminKey)) {
@@ -164,8 +192,9 @@ app.route("/api", reportsRouter);
 // ── Admin routes (مفتاح المشرف الكامل فقط) ──────────────────────────────────
 app.route("/api", adminRouter);
 
-// ── Dev Portal ───────────────────────────────────────────────────────────────
+// ── Dev Portal — مثبّت على الجذر وعلى /api (يدعم كلا المسارين) ──────────────
 app.route("/", devPortalRouter);
+app.route("/api", devPortalRouter);
 
 // ── 404 ──────────────────────────────────────────────────────────────────────
 app.notFound((c) => c.json({ error: "Not found" }, 404));
