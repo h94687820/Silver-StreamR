@@ -7,8 +7,8 @@ import { randomUUID } from "crypto";
 
 const router = Router();
 
-// POST /api/reports
-router.post("/api/reports", requireAuth, async (req, res) => {
+// POST /reports
+router.post("/reports", requireAuth, async (req, res) => {
   try {
     const clerkId: string = (req as any).clerkId;
     const {
@@ -62,8 +62,8 @@ router.post("/api/reports", requireAuth, async (req, res) => {
   }
 });
 
-// GET /api/reports/forge — developer read-only access to all reports (requires FORGE_API_KEY)
-router.get("/api/reports/forge", requireForgeKey, async (req, res) => {
+// GET /reports/forge — developer read-only access to all reports (requires FORGE_API_KEY)
+router.get("/reports/forge", requireForgeKey, async (req, res) => {
   try {
     const limit = Math.min(parseInt((req.query as any).limit as string) || 50, 200);
     const offset = parseInt((req.query as any).offset as string) || 0;

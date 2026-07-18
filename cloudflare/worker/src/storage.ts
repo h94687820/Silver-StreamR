@@ -1,5 +1,5 @@
 /**
- * FORGE Storage helpers (baas-platform.mcfoxy.workers.dev)
+ * FORGE Storage helpers (baas-server-model-a.mcfoxy.workers.dev)
  *
  * Flow:
  *  1. POST /api/v1/storage/upload  { name, size, contentType }

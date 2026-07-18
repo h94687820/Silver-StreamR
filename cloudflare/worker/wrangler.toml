@@ -11,7 +11,7 @@ database_id = "0ffc8340-f67f-426f-a187-21ed4522934f"
 
 # ─── متغيرات عادية ────────────────────────────────────────────────────────────
 [vars]
-FORGE_BASE_URL = "https://baas-platform.mcfoxy.workers.dev"
+FORGE_BASE_URL = "https://baas-server-model-a.mcfoxy.workers.dev"
 # Clerk FAPI — derived from VITE_CLERK_PUBLISHABLE_KEY (pk_test_dml0YWwtZm94...  → vital-fox-43)
 CLERK_FAPI = "https://immense-mosquito-71.clerk.accounts.dev"
 

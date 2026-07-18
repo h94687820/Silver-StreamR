@@ -1,6 +1,6 @@
 import { db } from "@workspace/db";
 import { userInteractionsTable } from "@workspace/db";
-import { eq, gt } from "drizzle-orm";
+import { eq, gt, and } from "drizzle-orm";
 import type { Post } from "@workspace/db";
 
 // ─── Weights per action ────────────────────────────────────────────────────
@@ -31,8 +31,10 @@ export async function buildInterestProfile(userId: string): Promise<InterestProf
     .select()
     .from(userInteractionsTable)
     .where(
-      eq(userInteractionsTable.userId, userId) &&
-      gt(userInteractionsTable.createdAt, since) as any
+      and(
+        eq(userInteractionsTable.userId, userId),
+        gt(userInteractionsTable.createdAt, since)
+      )
     )
     .limit(2000);
 

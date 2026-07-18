@@ -15,7 +15,7 @@ export const storyViewsTable = pgTable("story_views", {
   storyId: text("story_id").notNull().references(() => storiesTable.id, { onDelete: "cascade" }),
   viewerId: text("viewer_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
   viewedAt: timestamp("viewed_at").notNull().defaultNow(),
-});
+}, (t) => [primaryKey({ columns: [t.storyId, t.viewerId] })]);
 
 export const storyReactionsTable = pgTable("story_reactions", {
   storyId: text("story_id").notNull().references(() => storiesTable.id, { onDelete: "cascade" }),

@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
 import { customEmojisTable, usersTable } from "@workspace/db";
-import { eq, and, inArray } from "drizzle-orm";
+import { eq, and, inArray, sql } from "drizzle-orm";
 import { requireAuth, requireOnboarding } from "../lib/auth";
 import { randomUUID } from "crypto";
 
@@ -92,24 +92,9 @@ router.delete("/emojis/:emojiId", requireAuth, requireOnboarding, async (req, re
 
     await db.delete(customEmojisTable).where(eq(customEmojisTable.id, emojiId));
 
-    // Clear any active references to this emoji
-    const clearFields: Partial<typeof usersTable.$inferSelect> = {};
-    if (existing[0].id === (await db.select({ v: usersTable.profileBadgeEmojiId }).from(usersTable).where(eq(usersTable.id, userId)).limit(1))[0]?.v) clearFields.profileBadgeEmojiId = null;
-
-    await db.update(usersTable).set({
-      profileBadgeEmojiId: undefined,
-      postStampEmojiId: undefined,
-      nameDisplayEmojiId: undefined,
-    }).where(
-      and(
-        eq(usersTable.id, userId),
-      )
-    );
-
-    // Precisely null out only the matching fields
+    // Precisely null out only the fields that reference this emoji
     await db.execute(
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require("drizzle-orm").sql`
+      sql`
         UPDATE users SET
           profile_badge_emoji_id = CASE WHEN profile_badge_emoji_id = ${emojiId} THEN NULL ELSE profile_badge_emoji_id END,
           post_stamp_emoji_id    = CASE WHEN post_stamp_emoji_id    = ${emojiId} THEN NULL ELSE post_stamp_emoji_id    END,
