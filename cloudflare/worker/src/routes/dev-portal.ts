@@ -12,23 +12,25 @@ import {
   groupsTable,
 } from "../schema";
 import { desc, isNotNull, isNull, eq, sql, and } from "drizzle-orm";
-import { DEV_PORTAL_KEY, PRIVATE_REPORTS_KEY, PUBLIC_REPORTS_KEY } from "../auth";
 
 const router = new Hono<HonoEnv>();
 
 // ── Auth middleware ──────────────────────────────────────────────────────────
-// يقبل: X-Dev-Portal-Key أو Authorization: Bearer <key>
-// DEV_PORTAL_KEY      → وصول كامل
-// PRIVATE_REPORTS_KEY → /reports/private فقط
-// PUBLIC_REPORTS_KEY  → /reports/public  فقط
+// يعتمد على الـ context الذي عيَّنه main middleware في index.ts:
+//   isAdmin=true          → وصول كامل لكل نقاط البوابة
+//   isReportsViewer=true  → /reports فقط (مفلتر تلقائياً بـ reportsMode)
+//   isVideosViewer=true   → /videos فقط
 router.use("*", async (c, next) => {
-  const key  = c.req.header("X-Dev-Portal-Key")
-             ?? c.req.header("Authorization")?.replace("Bearer ", "");
   const path = new URL(c.req.url).pathname.replace(/^\/api/, ""); // normalize /api/x → /x
 
-  if (key === DEV_PORTAL_KEY)                                                     { await next(); return; }
-  if (key === PRIVATE_REPORTS_KEY && path.endsWith("/reports/private"))           { await next(); return; }
-  if (key === PUBLIC_REPORTS_KEY  && path.endsWith("/reports/public"))            { await next(); return; }
+  // مشرف كامل — DEV_PORTAL_KEY أو X-Admin-Key
+  if (c.get("isAdmin")) { await next(); return; }
+
+  // مفتاح الفيديوهات — /videos فقط
+  if (c.get("isVideosViewer") && path === "/videos") { await next(); return; }
+
+  // مفتاح البلاغات — /reports فقط (المفلتر سيُطبَّق داخل الـ route)
+  if (c.get("isReportsViewer") && path === "/reports") { await next(); return; }
 
   return c.json({ error: "Forbidden" }, 403);
 });
@@ -172,11 +174,17 @@ router.get("/stories", async (c) => {
   return c.json(paginated(rows, Number(countRow[0]?.count ?? 0), page, limit));
 });
 
-// ── GET /reports — جميع البلاغات مع دعم ?mode=general|specific ──────────────
+// ── GET /reports — البلاغات مع دعم ?mode=general|specific ──────────────────
+// - isAdmin=true          → يرى الكل ويمكنه فلترة بـ ?mode=
+// - isReportsViewer=true  → مقيَّد تلقائياً بـ reportsMode من context (لا يمكنه تجاوزه)
 router.get("/reports", async (c) => {
   const db = createDb(c.env.DB);
   const { page, limit, offset } = getPagination(c.req.query());
-  const mode = c.req.query("mode"); // 'general' | 'specific' | undefined
+
+  // إذا كان مشاهد بلاغات → mode مقيَّد من المفتاح، لا من query param
+  const mode = c.get("isReportsViewer")
+    ? c.get("reportsMode")          // 'specific' | 'general'
+    : (c.req.query("mode") ?? "");  // admin: يختار
 
   const condition = mode ? eq(reportsTable.mode, mode) : undefined;
 
@@ -194,49 +202,6 @@ router.get("/reports", async (c) => {
   return c.json(paginated(rows, Number(countRow[0]?.count ?? 0), page, limit));
 });
 
-// ── GET /reports/private — البلاغات الخاصة (PRIVATE_REPORTS_KEY أو DEV_PORTAL_KEY) ──
-router.get("/reports/private", async (c) => {
-  const db = createDb(c.env.DB);
-  const { page, limit, offset } = getPagination(c.req.query());
-
-  const [rows, countRow] = await Promise.all([
-    db
-      .select()
-      .from(reportsTable)
-      .where(eq(reportsTable.mode, "specific"))
-      .orderBy(desc(reportsTable.createdAt))
-      .limit(limit)
-      .offset(offset),
-    db
-      .select({ count: sql<number>`count(*)` })
-      .from(reportsTable)
-      .where(eq(reportsTable.mode, "specific")),
-  ]);
-
-  return c.json(paginated(rows, Number(countRow[0]?.count ?? 0), page, limit));
-});
-
-// ── GET /reports/public — البلاغات العامة (PUBLIC_REPORTS_KEY أو DEV_PORTAL_KEY) ──
-router.get("/reports/public", async (c) => {
-  const db = createDb(c.env.DB);
-  const { page, limit, offset } = getPagination(c.req.query());
-
-  const [rows, countRow] = await Promise.all([
-    db
-      .select()
-      .from(reportsTable)
-      .where(eq(reportsTable.mode, "general"))
-      .orderBy(desc(reportsTable.createdAt))
-      .limit(limit)
-      .offset(offset),
-    db
-      .select({ count: sql<number>`count(*)` })
-      .from(reportsTable)
-      .where(eq(reportsTable.mode, "general")),
-  ]);
-
-  return c.json(paginated(rows, Number(countRow[0]?.count ?? 0), page, limit));
-});
 
 // ── GET /deleted/posts ───────────────────────────────────────────────────────
 router.get("/deleted/posts", async (c) => {

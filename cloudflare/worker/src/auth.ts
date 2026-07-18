@@ -9,21 +9,31 @@ export const ADMIN_KEY = "pBYRAchfIDFCzi9vOgqezDB0R29gPIbq4OPgoIJNnP0eChpyYHh35d
 // ── مفتاح الحذف — يرى المحذوف في الـ feeds العادية فقط ─────────────────────
 export const DELETE_KEY = "pBYRAchfIDFCzi9vOgqezDB0R29gPIbq4OPgoIJNnP0eChpyYHh35dOrJ6GdXk1Y";
 
-// ── مفاتيح بوابة المطورين ─────────────────────────────────────────────────────
-/** وصول كامل لجميع نقاط البوابة */
-export const DEV_PORTAL_KEY      = "79679158ec7728f4ee28e53da453883da0f7df45cd412ff26f2a9f1f83f09cec";
-/** قراءة البلاغات الخاصة (mode=specific) فقط */
-export const PRIVATE_REPORTS_KEY = "Bkrx2g36PbqFpK9AhnthSOFs4pNHp80Kotx3C1n3TQIZebepUc0sIjHBxUAqBqxp";
-/** قراءة البلاغات العامة (mode=general) فقط */
-export const PUBLIC_REPORTS_KEY  = "0QicAChHbpMuhWT0ySjZReGCYVqjDkTsbbESiKOS565GKzquDQp4cUkRc7xWiAaO";
+// ── مفاتيح بوابة المطورين — تُقرأ من env (لا قيم مضمّنة) ─────────────────────
 
 /** المفتاح يملك وصولاً كاملاً للبورتال */
-export function isDevPortalFullKey(key: string | null | undefined): boolean {
-  return key === DEV_PORTAL_KEY;
+export function isDevPortalFullKey(key: string | null | undefined, envKey: string | undefined): boolean {
+  return !!envKey && !!key && key === envKey;
 }
-/** المفتاح خاص بالبلاغات فقط */
-export function isDevPortalReportsKey(key: string | null | undefined): boolean {
-  return key === PRIVATE_REPORTS_KEY || key === PUBLIC_REPORTS_KEY;
+/** المفتاح خاص بالبلاغات — specificKey أو generalKey */
+export function isDevPortalReportsKey(
+  key: string | null | undefined,
+  specificKey: string | undefined,
+  generalKey: string | undefined,
+): boolean {
+  if (!key) return false;
+  return (!!specificKey && key === specificKey) || (!!generalKey && key === generalKey);
+}
+/** يُعيد وضع البلاغات للمفتاح المُعطى */
+export function getReportsMode(
+  key: string | null | undefined,
+  specificKey: string | undefined,
+  generalKey: string | undefined,
+): "specific" | "general" | "" {
+  if (!key) return "";
+  if (!!specificKey && key === specificKey) return "specific";
+  if (!!generalKey  && key === generalKey)  return "general";
+  return "";
 }
 
 /** المفتاح مشرف كامل */

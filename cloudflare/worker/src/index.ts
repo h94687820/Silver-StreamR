@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import type { HonoEnv } from "./types";
-import { getClerkIdFromHeader, isAdminKey, canViewDeleted, isPostsKey, isVideosKey, isStoriesKey, isGroupsKey, isDevPortalFullKey, isDevPortalReportsKey } from "./auth";
+import { getClerkIdFromHeader, isAdminKey, canViewDeleted, isPostsKey, isVideosKey, isStoriesKey, isGroupsKey, isDevPortalFullKey, isDevPortalReportsKey, getReportsMode } from "./auth";
 
 import clerkProxy from "./routes/clerk-proxy";
 import usersRouter from "./routes/users";
@@ -58,7 +58,7 @@ app.use("/api/*", async (c, next) => {
   const portalKey  = c.req.header("X-Dev-Portal-Key") ?? bearerKey;
 
   // ── مفتاح بوابة المطورين الكامل: وصول شامل للبوابة ─────────────────────
-  if (isDevPortalFullKey(portalKey)) {
+  if (isDevPortalFullKey(portalKey, c.env.DEV_PORTAL_KEY)) {
     c.set("clerkId", "admin");
     c.set("isAdmin", true);
     c.set("canSeeDeleted", true);
@@ -66,12 +66,14 @@ app.use("/api/*", async (c, next) => {
     c.set("isVideosViewer", false);
     c.set("isStoriesViewer", false);
     c.set("isGroupsViewer", false);
+    c.set("isReportsViewer", false);
+    c.set("reportsMode", "");
     await next();
     return;
   }
 
   // ── مفاتيح البلاغات: وصول مقيّد للبوابة ────────────────────────────────
-  if (isDevPortalReportsKey(portalKey)) {
+  if (isDevPortalReportsKey(portalKey, c.env.REPORTS_SPECIFIC_API_KEY, c.env.REPORTS_GENERAL_API_KEY)) {
     c.set("clerkId", "reports-viewer");
     c.set("isAdmin", false);
     c.set("canSeeDeleted", false);
@@ -79,6 +81,8 @@ app.use("/api/*", async (c, next) => {
     c.set("isVideosViewer", false);
     c.set("isStoriesViewer", false);
     c.set("isGroupsViewer", false);
+    c.set("isReportsViewer", true);
+    c.set("reportsMode", getReportsMode(portalKey, c.env.REPORTS_SPECIFIC_API_KEY, c.env.REPORTS_GENERAL_API_KEY));
     await next();
     return;
   }
@@ -92,6 +96,8 @@ app.use("/api/*", async (c, next) => {
     c.set("isVideosViewer", false);
     c.set("isStoriesViewer", false);
     c.set("isGroupsViewer", false);
+    c.set("isReportsViewer", false);
+    c.set("reportsMode", "");
     await next();
     return;
   }
@@ -106,6 +112,8 @@ app.use("/api/*", async (c, next) => {
     c.set("isVideosViewer", false);
     c.set("isStoriesViewer", false);
     c.set("isGroupsViewer", false);
+    c.set("isReportsViewer", false);
+    c.set("reportsMode", "");
     await next();
     return;
   }
@@ -120,6 +128,8 @@ app.use("/api/*", async (c, next) => {
     c.set("isVideosViewer", true);
     c.set("isStoriesViewer", false);
     c.set("isGroupsViewer", false);
+    c.set("isReportsViewer", false);
+    c.set("reportsMode", "");
     await next();
     return;
   }
@@ -134,6 +144,8 @@ app.use("/api/*", async (c, next) => {
     c.set("isVideosViewer", false);
     c.set("isStoriesViewer", true);
     c.set("isGroupsViewer", false);
+    c.set("isReportsViewer", false);
+    c.set("reportsMode", "");
     await next();
     return;
   }
@@ -148,6 +160,8 @@ app.use("/api/*", async (c, next) => {
     c.set("isVideosViewer", false);
     c.set("isStoriesViewer", false);
     c.set("isGroupsViewer", true);
+    c.set("isReportsViewer", false);
+    c.set("reportsMode", "");
     await next();
     return;
   }
@@ -169,6 +183,8 @@ app.use("/api/*", async (c, next) => {
   c.set("isVideosViewer", false);
   c.set("isStoriesViewer", false);
   c.set("isGroupsViewer", false);
+  c.set("isReportsViewer", false);
+  c.set("reportsMode", "");
   await next();
 });
 
