@@ -56,7 +56,9 @@ export async function uploadFile(
   }
 
   const { objectPath, url }: ForgeUploadResponse = await resp.json();
-  return objectPath ?? url;
+  // نُرجع الـ URL الكامل حتى يتمكن المتصفح من تحميل الصورة مباشرةً من FORGE
+  // (المتصفح → FORGE مسموح، لكن Worker → FORGE عبر HTTP محظور بـ 1042)
+  return url ?? `${forgeBase}/api/storage${objectPath}`;
 }
 
 export async function deleteFile(
