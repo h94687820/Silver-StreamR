@@ -13,17 +13,27 @@ import {
 } from "../schema";
 import { desc, isNotNull, isNull, eq, sql } from "drizzle-orm";
 
-const DEV_PORTAL_KEY = "79679158ec7728f4ee28e53da453883da0f7df45cd412ff26f2a9f1f83f09cec";
+const DEV_PORTAL_KEY        = "79679158ec7728f4ee28e53da453883da0f7df45cd412ff26f2a9f1f83f09cec";
+// KEY_1 — بلاغات خاصة (mode = 'specific') فقط
+const PRIVATE_REPORTS_KEY   = "Bkrx2g36PbqFpK9AhnthSOFs4pNHp80Kotx3C1n3TQIZebepUc0sIjHBxUAqBqxp";
+// KEY_2 — بلاغات عامة (mode = 'general') فقط
+const PUBLIC_REPORTS_KEY    = "0QicAChHbpMuhWT0ySjZReGCYVqjDkTsbbESiKOS565GKzquDQp4cUkRc7xWiAaO";
 
 const router = new Hono<HonoEnv>();
 
 // ── Auth middleware لجميع مسارات البوابة ────────────────────────────────────
+// DEV_PORTAL_KEY      → وصول كامل لجميع المسارات
+// PRIVATE_REPORTS_KEY → /reports/private فقط
+// PUBLIC_REPORTS_KEY  → /reports/public  فقط
 router.use("*", async (c, next) => {
-  const key = c.req.header("X-Dev-Portal-Key");
-  if (key !== DEV_PORTAL_KEY) {
-    return c.json({ error: "Forbidden" }, 403);
-  }
-  await next();
+  const key  = c.req.header("X-Dev-Portal-Key");
+  const path = new URL(c.req.url).pathname;
+
+  if (key === DEV_PORTAL_KEY)                                                         { await next(); return; }
+  if (key === PRIVATE_REPORTS_KEY && path.endsWith("/reports/private"))               { await next(); return; }
+  if (key === PUBLIC_REPORTS_KEY  && path.endsWith("/reports/public"))                { await next(); return; }
+
+  return c.json({ error: "Forbidden" }, 403);
 });
 
 // ── Helper للـ pagination ────────────────────────────────────────────────────
@@ -165,7 +175,7 @@ router.get("/stories", async (c) => {
   return c.json(paginated(rows, Number(countRow[0]?.count ?? 0), page, limit));
 });
 
-// ── GET /reports ─────────────────────────────────────────────────────────────
+// ── GET /reports — جميع البلاغات (DEV_PORTAL_KEY فقط) ───────────────────────
 router.get("/reports", async (c) => {
   const db = createDb(c.env.DB);
   const { page, limit, offset } = getPagination(c.req.query());
@@ -178,6 +188,50 @@ router.get("/reports", async (c) => {
       .limit(limit)
       .offset(offset),
     db.select({ count: sql<number>`count(*)` }).from(reportsTable),
+  ]);
+
+  return c.json(paginated(rows, Number(countRow[0]?.count ?? 0), page, limit));
+});
+
+// ── GET /reports/private — البلاغات الخاصة (PRIVATE_REPORTS_KEY أو DEV_PORTAL_KEY) ──
+router.get("/reports/private", async (c) => {
+  const db = createDb(c.env.DB);
+  const { page, limit, offset } = getPagination(c.req.query());
+
+  const [rows, countRow] = await Promise.all([
+    db
+      .select()
+      .from(reportsTable)
+      .where(eq(reportsTable.mode, "specific"))
+      .orderBy(desc(reportsTable.createdAt))
+      .limit(limit)
+      .offset(offset),
+    db
+      .select({ count: sql<number>`count(*)` })
+      .from(reportsTable)
+      .where(eq(reportsTable.mode, "specific")),
+  ]);
+
+  return c.json(paginated(rows, Number(countRow[0]?.count ?? 0), page, limit));
+});
+
+// ── GET /reports/public — البلاغات العامة (PUBLIC_REPORTS_KEY أو DEV_PORTAL_KEY) ──
+router.get("/reports/public", async (c) => {
+  const db = createDb(c.env.DB);
+  const { page, limit, offset } = getPagination(c.req.query());
+
+  const [rows, countRow] = await Promise.all([
+    db
+      .select()
+      .from(reportsTable)
+      .where(eq(reportsTable.mode, "general"))
+      .orderBy(desc(reportsTable.createdAt))
+      .limit(limit)
+      .offset(offset),
+    db
+      .select({ count: sql<number>`count(*)` })
+      .from(reportsTable)
+      .where(eq(reportsTable.mode, "general")),
   ]);
 
   return c.json(paginated(rows, Number(countRow[0]?.count ?? 0), page, limit));

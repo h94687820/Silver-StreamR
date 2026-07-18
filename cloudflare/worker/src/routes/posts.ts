@@ -265,7 +265,8 @@ router.get("/posts/:postId", async (c) => {
     if (!post[0]) return c.json({ error: "Not found" }, 404);
     // المشرف يرى المحذوف، غيره لا
     if (!canSeeDeleted && post[0].deletedAt) return c.json({ error: "Not found" }, 404);
-    if (post[0].isPrivate && post[0].authorId !== clerkId && !isAdmin)
+    // videos-viewer يرى كل الفيديوهات النشطة بما فيها الخاصة
+    if (post[0].isPrivate && post[0].authorId !== clerkId && !isAdmin && clerkId !== "videos-viewer")
       return c.json({ error: "Forbidden" }, 403);
     return c.json(await enrichPost(db, post[0], clerkId));
   } catch {
