@@ -13,7 +13,7 @@ database_id = "0ffc8340-f67f-426f-a187-21ed4522934f"
 [vars]
 FORGE_BASE_URL = "https://baas-server-model-a.mcfoxy.workers.dev"
 # Clerk FAPI — derived from VITE_CLERK_PUBLISHABLE_KEY (pk_test_dml0YWwtZm94...  → vital-fox-43)
-CLERK_FAPI = "https://sensible-raccoon-46.clerk.accounts.dev"
+CLERK_FAPI = "https://new-squirrel-59.clerk.accounts.dev"
 
 # ─── Service Binding — اتصال مباشر بـ FORGE Worker (يتجنّب قيود HTTP بين Workers) ─
 [[services]]
