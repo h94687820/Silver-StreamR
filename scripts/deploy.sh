@@ -27,7 +27,6 @@ echo "── التحقق من المتغيرات ──────────
 : "${CLOUDFLARE_API_TOKEN:?خطأ: CLOUDFLARE_API_TOKEN غير موجود في Secrets}"
 : "${VITE_CLERK_PUBLISHABLE_KEY:?خطأ: VITE_CLERK_PUBLISHABLE_KEY غير موجود في Secrets}"
 : "${CLERK_SECRET_KEY:?خطأ: CLERK_SECRET_KEY غير موجود في Secrets}"
-: "${FORGE_API_KEY:?خطأ: FORGE_API_KEY غير موجود في Secrets}"
 ok "جميع المتغيرات موجودة"
 
 # ── 1. حساب CLERK_FAPI من المفتاح الحالي ────────────────────────────────────
