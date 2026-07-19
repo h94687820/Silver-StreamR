@@ -80,12 +80,15 @@ export default defineConfig({
         prefer_related_applications: false,
       },
       workbox: {
+        // Exclude _worker.js (Cloudflare Pages internal) from precaching
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        globIgnores: ['_worker.js', 'functions/**'],
         // Clerk handshake redirects land on /__clerk_handshake and pass
         // __clerk_db_jwt as a URL param — must NOT be served from cache.
+        // Also exclude /api/* so auth tokens are never stale.
         navigateFallbackDenylist: [
           /\/__clerk/,
-          /\/api\/__clerk/,
+          /\/api\//,
           // Clerk handshake return URLs carry __clerk_db_jwt / __clerk_handshake
           // as query params — must never be served from SW cache so Clerk can
           // read the token from the URL and complete the dev-browser handshake.
