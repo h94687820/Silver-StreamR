@@ -37,6 +37,17 @@ export function TermsModal({ onClose }: TermsModalProps) {
 
         {/* Scrollable body */}
         <div className="overflow-y-auto flex-1 px-6 py-5 space-y-6">
+
+          {/* Apology notice */}
+          {doc.notice && (
+            <div className="bg-blue-500/10 border border-blue-500/25 rounded-2xl px-4 py-3.5 flex gap-3 items-start">
+              <span className="text-lg mt-0.5 shrink-0">🤝</span>
+              <p className="text-sm text-blue-600 dark:text-blue-400 leading-relaxed">
+                {doc.notice}
+              </p>
+            </div>
+          )}
+
           {doc.sections.map((section, i) => (
             <div key={i}>
               <h3 className="text-sm font-semibold text-foreground mb-2 leading-snug">

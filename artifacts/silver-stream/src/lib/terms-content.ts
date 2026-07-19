@@ -7,6 +7,7 @@ export interface TermsDoc {
   heading: string;
   subtitle: string;
   version: string;
+  notice: string;
   sections: TermsSection[];
   footer: string;
 }
@@ -15,6 +16,7 @@ export const termsAr: TermsDoc = {
   heading: "شروط الاستخدام وسياسة الخصوصية",
   subtitle: "يُرجى قراءة هذه الشروط بعناية قبل استخدام المنصة.",
   version: "الإصدار 0.9 — Staff Edition",
+  notice: "نعتذر إن بدت شروطنا مبالغاً فيها، لكن المنصة جديدة وتحتاج لذلك لضمان أمانك وأمان بقية المستخدمين. وقد تتغير هذه الشروط وتخف بتحسّن وضع المنصة.",
   sections: [
     {
       title: "١. البيانات التي نجمعها",
@@ -205,6 +207,7 @@ export const termsEn: TermsDoc = {
   heading: "Terms of Service & Privacy Policy",
   subtitle: "Please read these terms carefully before using the platform.",
   version: "Version 0.9 — Staff Edition",
+  notice: "We apologize if our terms seem excessive. However, as a new platform, we need them to ensure your safety and the safety of all users. These terms may be relaxed as the platform matures.",
   sections: [
     {
       title: "1. Data We Collect",
