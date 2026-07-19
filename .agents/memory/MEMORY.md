@@ -10,3 +10,4 @@
 - [Clerk routerPush cross-origin redirect](clerk-routerpush-external-url.md) — With proxyUrl set, Clerk passes full http URLs to routerPush; wouter's setLocation throws SecurityError → sign-in blanks out. Fix: detect http/https and use window.location instead.
 - [Clerk v6 + Cloudflare Pages login fix](clerk-v6-cloudflare-login.md) — Three-layer bug: routerPush reload + SW, stale Clerk keys, proxy breaks Clerk v6 dev browser. Full diagnosis in login-fix.md.
 - [Clerk instance drift → uploads/posts fail](clerk-instance-drift.md) — When Clerk instance changes, Worker CLERK_SECRET_KEY + CLERK_FAPI must be updated or all mutating API calls return 401.
+- [Cloudflare deploy permanent fixes](cloudflare-deploy-permanent-fixes.md) — Two recurring bugs (login blank screen + photo upload fail); fixed via scripts/deploy.sh (`pnpm run deploy`). Never deploy manually.
