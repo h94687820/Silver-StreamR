@@ -249,12 +249,12 @@ function ClerkProviderWithRoutes() {
         <ThemeProvider>
           <Switch>
             <Route path="/" component={HomeRedirect} />
-            <Route path="/sign-in/*?">
+            <Route path="/sign-in/:path*">
               <div className="flex min-h-[100dvh] items-center justify-center bg-background px-4">
                 <SignIn routing="path" path={`${basePath}/sign-in`} signUpUrl={`${basePath}/sign-up`} />
               </div>
             </Route>
-            <Route path="/sign-up/*?">
+            <Route path="/sign-up/:path*">
               <div className="flex min-h-[100dvh] items-center justify-center bg-background px-4">
                 <SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in`} />
               </div>
