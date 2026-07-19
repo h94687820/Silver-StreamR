@@ -269,6 +269,13 @@ export default function Settings() {
                     </div>
                   ))}
                 </div>
+
+                {/* Warning */}
+                <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4">
+                  <p className="text-xs text-amber-600 dark:text-amber-400 leading-relaxed">
+                    {t("settings_contact_warning")}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
