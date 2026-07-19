@@ -80,28 +80,32 @@ export default defineConfig({
         prefer_related_applications: false,
       },
       workbox: {
-        // Exclude _worker.js (Cloudflare Pages internal) from precaching
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-        globIgnores: ['_worker.js', 'functions/**'],
-        // Clerk handshake redirects land on /__clerk_handshake and pass
-        // __clerk_db_jwt as a URL param — must NOT be served from cache.
-        // Also exclude /api/* so auth tokens are never stale.
-        navigateFallbackDenylist: [
-          /\/__clerk/,
-          /\/api\//,
-          // Clerk handshake return URLs carry __clerk_db_jwt / __clerk_handshake
-          // as query params — must never be served from SW cache so Clerk can
-          // read the token from the URL and complete the dev-browser handshake.
-          /[?&]__clerk_db_jwt/,
-          /[?&]__clerk_handshake/,
-        ],
-        // Clerk's FAPI proxy calls must always go to the network.
-        // The /api/__clerk/* pattern is intentionally excluded from runtime
-        // caching so stale auth errors are never served from cache.
+        // Only cache static assets (JS, CSS, images) — NOT HTML.
+        // HTML (index.html) is always fetched from the network via NetworkFirst
+        // so that baked-in Clerk publishable keys are always fresh.
+        // Serving stale HTML with old Clerk keys causes blank screens on login.
+        globPatterns: ['**/*.{js,css,ico,png,svg,woff2}'],
+        globIgnores: ['_worker.js', 'functions/**', '**/*.html'],
+        // Disable navigateFallback — Cloudflare Pages itself handles SPA
+        // routing (serves index.html for any unknown path). The SW must NOT
+        // intercept navigations and serve a potentially stale cached shell.
+        navigateFallback: undefined,
         runtimeCaching: [
+          // HTML pages — always network-first so Clerk keys are never stale.
+          {
+            urlPattern: ({ request }: { request: Request }) =>
+              request.destination === 'document',
+            handler: 'NetworkFirst' as const,
+            options: {
+              cacheName: 'html-cache',
+              networkTimeoutSeconds: 5,
+              expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-            handler: 'CacheFirst',
+            handler: 'CacheFirst' as const,
             options: {
               cacheName: 'google-fonts-cache',
               expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
@@ -110,7 +114,7 @@ export default defineConfig({
           },
           {
             urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
-            handler: 'CacheFirst',
+            handler: 'CacheFirst' as const,
             options: {
               cacheName: 'gstatic-fonts-cache',
               expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
@@ -119,7 +123,7 @@ export default defineConfig({
           },
           {
             urlPattern: /\/api\/.*/i,
-            handler: 'NetworkFirst',
+            handler: 'NetworkFirst' as const,
             options: {
               cacheName: 'api-cache',
               networkTimeoutSeconds: 10,
